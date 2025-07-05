@@ -9,6 +9,7 @@ import { fileURLToPath } from 'url';
 import bookRoute from "./route/book.route.js";
 import userRoute from "./route/user.route.js";
 import categoryRoute from "./route/category.route.js";
+import courseRoute from "./route/course.route.js";
 
 // Initialize express app
 const app = express();
@@ -86,6 +87,7 @@ mongoose.connection.on('error', err => {
 app.use("/api/books", bookRoute);
 app.use("/api/users", userRoute);
 app.use("/api/categories", categoryRoute);
+app.use("/api/courses", courseRoute);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
