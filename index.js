@@ -54,13 +54,23 @@ const URI = process.env.MongoDBURI;
 
 const connectDB = async () => {
     try {
+        console.log('Attempting to connect to MongoDB...');
+        console.log('Connection string:', URI ? 'Provided' : 'Missing');
+        
         await mongoose.connect(URI, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
+            serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
         });
-        console.log("Connected to MongoDB");
+        
+        console.log("✅ Successfully connected to MongoDB");
     } catch (error) {
-        console.error("MongoDB connection error:", error);
+        console.error("❌ MongoDB connection error:", error);
+        if (error.name === 'MongoServerError') {
+            console.error('MongoDB Server Error:', error.message);
+        } else if (error.name === 'MongooseServerSelectionError') {
+            console.error('Could not connect to MongoDB. Is it running?');
+        }
         process.exit(1);
     }
 };
