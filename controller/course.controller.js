@@ -4,22 +4,70 @@ import { validationResult } from 'express-validator';
 // Create a new course
 export const createCourse = async (req, res) => {
     try {
+        console.log('Received create course request with data:', req.body);
+        
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
+            console.error('Validation errors:', errors.array());
+            return res.status(400).json({ 
+                success: false,
+                message: 'Validation failed',
+                errors: errors.array() 
+            });
         }
 
-        const { title, description, category, instructor, price, image, duration, level } = req.body;
-        
+        // Extract all possible fields with defaults
+        const {
+            title,
+            description = '',
+            category,
+            instructor = 'Unknown Instructor',
+            price = 0,
+            image = '',
+            duration = 0,
+            level = 'Beginner',
+            benefits = [],
+            skills = '',
+            mentors = [],
+            curriculum = [],
+            faqs = [],
+            language = 'English',
+            whatYouWillLearn = [],
+            requirements = [],
+            whoIsThisFor = [],
+            previewVideo = '',
+            thumbnail = '',
+            metaTitle = '',
+            metaDescription = '',
+            slug = '',
+            tags = []
+        } = req.body;
+
+        // Create course with all fields
         const course = new Course({
             title,
             description,
             category,
             instructor,
             price,
-            image: image || '',
+            image,
             duration,
-            level: level || 'Beginner'
+            level,
+            benefits,
+            skills,
+            mentors,
+            curriculum,
+            faqs,
+            language,
+            whatYouWillLearn,
+            requirements,
+            whoIsThisFor,
+            previewVideo,
+            thumbnail,
+            metaTitle: metaTitle || title,
+            metaDescription: metaDescription || description.substring(0, 160),
+            slug: slug || title.toLowerCase().replace(/\s+/g, '-'),
+            tags
         });
 
         await course.save();
@@ -27,7 +75,11 @@ export const createCourse = async (req, res) => {
         // Populate category details in the response
         await course.populate('category', 'name');
         
-        res.status(201).json(course);
+        console.log('Course created successfully:', course._id);
+        res.status(201).json({
+            success: true,
+            data: course
+        });
     } catch (error) {
         console.error('Error creating course:', error);
         res.status(500).json({ message: 'Server error' });
