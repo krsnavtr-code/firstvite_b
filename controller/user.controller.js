@@ -1,4 +1,4 @@
-import User from "../model/user.model.js";
+import User from "../model/User.js";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 export const signup = async(req, res) => {
