@@ -76,11 +76,18 @@ const courseSchema = new mongoose.Schema({
     price: {
         type: Number,
         required: true,
-        min: 0
+        min: 0,
+        default: 0
     },
     originalPrice: {
         type: Number,
-        min: 0
+        min: 0,
+        default: 0
+    },
+    totalHours: {
+        type: Number,
+        min: 0,
+        default: 0
     },
     image: {
         type: String,
@@ -92,7 +99,7 @@ const courseSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    totalHours: Number,
+
     level: {
         type: String,
         enum: ['Beginner', 'Intermediate', 'Advanced'],
@@ -104,6 +111,10 @@ const courseSchema = new mongoose.Schema({
         trim: true
     }],
     prerequisites: [{
+        type: String,
+        trim: true
+    }],
+    whatYouWillLearn: [{
         type: String,
         trim: true
     }],

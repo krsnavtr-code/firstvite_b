@@ -131,21 +131,70 @@ export const updateCourse = async (req, res) => {
             return res.status(400).json({ errors: errors.array() });
         }
 
-        const { title, description, category, instructor, price, image, duration, level, isPublished } = req.body;
+        // Extract all possible fields
+        const {
+            title,
+            shortDescription = '',
+            description = '',
+            category,
+            instructor,
+            price = 0,
+            originalPrice = 0,
+            totalHours = 0,
+            duration = 0,
+            level = 'Beginner',
+            benefits = [],
+            skills = [],
+            curriculum = [],
+            language = 'English',
+            whatYouWillLearn = [],
+            prerequisites = [],
+            certificateIncluded = false,
+            isFeatured = false,
+            isPublished = false,
+            status = 'draft',
+            image = '',
+            thumbnail = '',
+            previewVideo = '',
+            metaTitle = '',
+            metaDescription = '',
+            slug = '',
+            tags = []
+        } = req.body;
+        
+        const updateData = {
+            title,
+            shortDescription,
+            description,
+            category,
+            instructor,
+            price: Number(price) || 0,
+            originalPrice: Number(originalPrice) || 0,
+            totalHours: Number(totalHours) || 0,
+            duration: Number(duration) || 0,
+            level,
+            benefits: Array.isArray(benefits) ? benefits : [],
+            skills: Array.isArray(skills) ? skills : [],
+            curriculum: Array.isArray(curriculum) ? curriculum : [],
+            language,
+            whatYouWillLearn: Array.isArray(whatYouWillLearn) ? whatYouWillLearn : [],
+            prerequisites: Array.isArray(prerequisites) ? prerequisites : [],
+            certificateIncluded: Boolean(certificateIncluded),
+            isFeatured: Boolean(isFeatured),
+            isPublished: Boolean(isPublished),
+            status,
+            image,
+            thumbnail,
+            previewVideo,
+            metaTitle,
+            metaDescription,
+            slug,
+            tags: Array.isArray(tags) ? tags : []
+        };
         
         const course = await Course.findByIdAndUpdate(
             req.params.id,
-            { 
-                title, 
-                description, 
-                category, 
-                instructor, 
-                price, 
-                image, 
-                duration, 
-                level,
-                isPublished
-            },
+            { $set: updateData },
             { new: true, runValidators: true }
         ).populate('category', 'name');
         
@@ -153,7 +202,11 @@ export const updateCourse = async (req, res) => {
             return res.status(404).json({ message: 'Course not found' });
         }
         
-        res.json(course);
+        res.json({
+            success: true,
+            message: 'Course updated successfully',
+            data: course
+        });
     } catch (error) {
         console.error('Error updating course:', error);
         res.status(500).json({ message: 'Server error' });
