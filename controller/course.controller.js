@@ -89,7 +89,8 @@ export const createCourse = async (req, res) => {
 // Get all courses with optional filters
 export const getAllCourses = async (req, res) => {
     try {
-        const { category, status, fields } = req.query;
+        const { category, status, fields, all } = req.query;
+        console.log('Getting all courses with params:', { category, status, fields, all, user: req.user });
         const query = {};
         
         // Add category filter if provided
@@ -97,8 +98,19 @@ export const getAllCourses = async (req, res) => {
             query.category = category;
         }
         
-        // Add status filter if provided (default to published if not specified)
-        query.status = status || 'published';
+        // Handle published status filtering
+        const isAdmin = req.user && req.user.role === 'admin';
+        
+        // Only apply isPublished filter if not requesting all courses (for admin)
+        if (all !== 'true') {
+            if (!isAdmin) {
+                // For non-admin users, only show published courses
+                query.isPublished = true;
+            } else if (status) {
+                // For admin users, respect the status filter if provided
+                query.isPublished = status === 'published';
+            }
+        }
         
         // Build the selection fields
         let selection = '';
