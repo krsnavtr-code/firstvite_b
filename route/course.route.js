@@ -5,9 +5,11 @@ import {
     getAllCourses, 
     getCourseById, 
     updateCourse, 
-    deleteCourse 
+    deleteCourse,
+    uploadCourseImage
 } from '../controller/course.controller.js';
 import { isAdmin } from '../middleware/admin.js';
+import { handleFileUpload } from '../utils/fileUpload.js';
 
 const router = express.Router();
 
@@ -45,6 +47,9 @@ const validateCourse = [
 router.post('/', isAdmin, validateCourse, createCourse);
 router.put('/:id', isAdmin, validateCourse, updateCourse);
 router.delete('/:id', isAdmin, deleteCourse);
+
+// Image upload route - Must come before the ID parameter routes
+router.post('/upload-image', isAdmin, handleFileUpload, uploadCourseImage);
 
 // Public routes
 router.get('/', getAllCourses);

@@ -47,8 +47,33 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, 'public/uploads');
+import fs from 'fs';
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+    console.log('Created uploads directory:', uploadsDir);
+}
+
+// Serve static files with proper MIME types and headers
+app.use('/uploads', express.static(uploadsDir, {
+  setHeaders: (res, path) => {
+    const ext = path.split('.').pop().toLowerCase();
+    const mimeTypes = {
+      'jpg': 'image/jpeg',
+      'jpeg': 'image/jpeg',
+      'png': 'image/png',
+      'gif': 'image/gif',
+      'webp': 'image/webp'
+    };
+    
+    if (mimeTypes[ext]) {
+      res.set('Content-Type', mimeTypes[ext]);
+      res.set('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+    }
+  }
+}));
+console.log('Serving static files from:', uploadsDir);
 
 // Database connection
 const PORT = process.env.PORT || 4002;

@@ -214,6 +214,42 @@ export const updateCourse = async (req, res) => {
 };
 
 // Delete a course
+// Upload course image
+export const uploadCourseImage = async (req, res) => {
+    try {
+        if (!req.file) {
+            console.error('No file in request');
+            return res.status(400).json({
+                success: false,
+                message: 'No file was uploaded'
+            });
+        }
+
+        console.log('Processing uploaded file:', req.file);
+
+        // Construct the URL to the uploaded file
+        const fileUrl = `/uploads/${req.file.filename}`;
+        const fullUrl = `${req.protocol}://${req.get('host')}${fileUrl}`;
+        
+        console.log('File uploaded successfully. URL:', fullUrl);
+        
+        res.status(200).json({
+            success: true,
+            message: 'Image uploaded successfully',
+            location: fileUrl,
+            fullUrl: fullUrl
+        });
+    } catch (error) {
+        console.error('Error processing image upload:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error processing image upload',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+};
+
+// Delete a course
 export const deleteCourse = async (req, res) => {
     try {
         const course = await Course.findByIdAndDelete(req.params.id);
