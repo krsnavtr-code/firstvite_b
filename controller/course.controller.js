@@ -86,20 +86,38 @@ export const createCourse = async (req, res) => {
     }
 };
 
-// Get all courses with optional category filter
+// Get all courses with optional filters
 export const getAllCourses = async (req, res) => {
     try {
-        const { category } = req.query;
+        const { category, status, fields } = req.query;
         const query = {};
         
+        // Add category filter if provided
         if (category) {
             query.category = category;
         }
         
-        const courses = await Course.find(query)
+        // Add status filter if provided (default to published if not specified)
+        query.status = status || 'published';
+        
+        // Build the selection fields
+        let selection = '';
+        if (fields) {
+            // Convert comma-separated fields to space-separated for Mongoose
+            selection = fields.split(',').join(' ');
+        }
+        
+        // Execute the query with filters and selection
+        let coursesQuery = Course.find(query)
             .populate('category', 'name')
             .sort({ createdAt: -1 });
             
+        // Apply field selection if specified
+        if (selection) {
+            coursesQuery = coursesQuery.select(selection);
+        }
+        
+        const courses = await coursesQuery.exec();
         res.json(courses);
     } catch (error) {
         console.error('Error fetching courses:', error);
