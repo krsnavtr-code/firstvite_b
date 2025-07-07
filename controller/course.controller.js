@@ -137,19 +137,49 @@ export const getAllCourses = async (req, res) => {
     }
 };
 
-// Get single course by ID
+// Get single course by ID or slug
 export const getCourseById = async (req, res) => {
     try {
-        const course = await Course.findById(req.params.id).populate('category', 'name');
+        const { id } = req.params;
+        const { fields } = req.query;
         
-        if (!course) {
-            return res.status(404).json({ message: 'Course not found' });
+        // Build the query condition
+        const condition = /^[0-9a-fA-F]{24}$/.test(id) 
+            ? { $or: [{ _id: id }, { slug: id }] } 
+            : { slug: id };
+        
+        // Build the query
+        const query = Course.findOne(condition);
+        
+        // Select fields if specified
+        if (fields) {
+            const fieldsArray = fields.split(',').map(field => field.trim());
+            query.select(fieldsArray.join(' '));
         }
         
-        res.json(course);
+        // Populate category
+        query.populate('category', 'name');
+        
+        const course = await query.exec();
+        
+        if (!course) {
+            return res.status(404).json({ 
+                success: false,
+                message: 'Course not found' 
+            });
+        }
+        
+        res.json({
+            success: true,
+            data: course
+        });
     } catch (error) {
         console.error('Error fetching course:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ 
+            success: false,
+            message: 'Server error',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
     }
 };
 
