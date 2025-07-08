@@ -11,6 +11,7 @@ import authRoute from "./route/auth.route.js";
 import userRoute from "./route/user.route.js";
 import categoryRoute from "./route/category.route.js";
 import courseRoute from "./route/course.route.js";
+import contactRoute from "./route/contactRoutes.js";
 
 // Initialize express app
 const app = express();
@@ -115,6 +116,7 @@ app.use("/api/users", userRoute); // User management routes (admin only)
 app.use("/api/books", bookRoute);
 app.use("/api/categories", categoryRoute);
 app.use("/api/courses", courseRoute);
+app.use("/api/contacts", contactRoute);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
