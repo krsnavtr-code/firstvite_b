@@ -72,26 +72,72 @@ export const signup = async(req, res) => {
 export const login = async(req, res) => {
     try {
         const { email, password } = req.body;
-        const user = await User.findOne({ email });
         
-        // First check if user exists
-        if (!user) {
-            return res.status(400).json({ message: "Invalid email or password" });
+        // Input validation
+        if (!email || !password) {
+            console.log('Login attempt with missing credentials');
+            return res.status(400).json({ 
+                success: false,
+                message: 'Please provide both email and password' 
+            });
         }
 
-        // Then check password
+        console.log(`Login attempt for email: ${email}`);
+        
+        // Find user by email and include password field
+        const user = await User.findOne({ email }).select('+password');
+        
+        if (!user) {
+            console.log('No user found with email:', email);
+            return res.status(400).json({ 
+                success: false,
+                message: 'Invalid email or password' 
+            });
+        }
+
+        console.log('User found, checking password...');
+        
+        // Debug: Log the stored password hash and input password
+        console.log('Stored password hash:', user.password);
+        console.log('Input password:', password);
+        
+        // Check password
         const isMatch = await bcryptjs.compare(password, user.password);
+        console.log('Password match result:', isMatch);
+        
         if (!isMatch) {
-            return res.status(400).json({ message: "Invalid email or password" });
+            // Try direct comparison in case password is stored in plain text (temporary for debugging)
+            if (password === user.password) {
+                console.log('Direct password match - password was stored in plain text!');
+                // Update the password to be hashed
+                const salt = await bcrypt.genSalt(10);
+                user.password = await bcrypt.hash(password, salt);
+                await user.save();
+                console.log('Password has been updated to use bcrypt');
+            } else {
+                console.log('Invalid password for user:', email);
+                return res.status(400).json({ 
+                    success: false,
+                    message: 'Invalid email or password' 
+                });
+            }
         }
 
         // Generate JWT token
         const token = jwt.sign(
-            { userId: user._id, email: user.email, role: user.role || 'user' },
-            process.env.JWT_SECRET,
-            { expiresIn: process.env.JWT_EXPIRES_IN || '1d' }
+            { 
+                userId: user._id, 
+                email: user.email, 
+                role: user.role || 'student' // Changed default role to match our schema
+            },
+            process.env.JWT_SECRET || 'your_jwt_secret', // Fallback secret for development
+            { 
+                expiresIn: process.env.JWT_EXPIRES_IN || '1d' 
+            }
         );
 
+        console.log('Login successful for user:', user.email);
+        
         // Set cookie with token
         res.cookie('jwt', token, {
             httpOnly: true,
@@ -100,16 +146,20 @@ export const login = async(req, res) => {
             maxAge: 24 * 60 * 60 * 1000 // 1 day
         });
 
+        // Prepare user data for response (exclude password)
+        const userData = {
+            _id: user._id,
+            fullname: user.fullname,
+            email: user.email,
+            role: user.role || 'student',
+            department: user.department
+        };
+
         res.status(200).json({
             success: true,
+            message: 'Login successful',
             token: token,
-            user: {
-                _id: user._id,
-                fullname: user.fullname,
-                email: user.email,
-                role: user.role || 'user'
-            },
-            message: "Login successful"
+            user: userData
         });
     } catch (error) {
         console.log("Error: " + error.message);

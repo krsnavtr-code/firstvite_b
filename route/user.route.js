@@ -40,6 +40,47 @@ router.post('/signup', signup);
 // @access  Public
 router.post('/login', login);
 
+// @route   POST /api/users/reset-password
+// @desc    Reset password (temporary route for development)
+// @access  Public
+router.post('/reset-password', async (req, res) => {
+    try {
+        const { email, newPassword } = req.body;
+        
+        if (!email || !newPassword) {
+            return res.status(400).json({
+                success: false,
+                message: 'Email and new password are required'
+            });
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        // Hash the new password
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(newPassword, salt);
+        
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Password updated successfully'
+        });
+    } catch (error) {
+        console.error('Password reset error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error during password reset'
+        });
+    }
+});
+
 // @route   GET /api/users
 // @desc    Get all users (Admin only)
 // @access  Private/Admin
