@@ -1,5 +1,5 @@
 {
-    "name": "bookstore",
+    "name": "FirstVite",
     "version": "1.0.0",
     "description": "mern project with admin dashboard",
     "main": "index.js",
@@ -12,19 +12,19 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/akhil2k-lc/bookStoreApp.git"
+        "url": "git+https://github.com/akhil2k-lc/FirstViteApp.git"
     },
     "keywords": [
         "mern",
-        "bookstore",
+        "FirstVite",
         "admin-dashboard"
     ],
     "author": "Akhil",
     "license": "ISC",
     "bugs": {
-        "url": "https://github.com/akhil2k-lc/bookStoreApp/issues"
+        "url": "https://github.com/akhil2k-lc/FirstViteApp/issues"
     },
-    "homepage": "https://github.com/akhil2k-lc/bookStoreApp#readme",
+    "homepage": "https://github.com/akhil2k-lc/FirstViteApp#readme",
     "dependencies": {
         "bcryptjs": "^2.4.3",
         "cors": "^2.8.5",
