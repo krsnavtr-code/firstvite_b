@@ -19,6 +19,8 @@ const cleanArrayField = (field, defaultVal = []) => {
 
 // Helper function to clean and format course data
 const prepareCourseData = (data) => {
+    console.log('Raw data received in prepareCourseData:', JSON.stringify(data, null, 2));
+    
     // Clean array fields
     const arrayFields = [
         'benefits', 'skills', 'mentors', 'curriculum', 'faqs',
@@ -30,23 +32,43 @@ const prepareCourseData = (data) => {
 
     // Process array fields
     arrayFields.forEach(field => {
+        if (data[field] === undefined || data[field] === null) {
+            // Set default empty array if field is not provided or null
+            cleanData[field] = [];
+            return;
+        }
+
         if (field === 'benefits') {
             cleanData[field] = cleanArrayField(data[field], ['No benefits specified']);
+        } else if (field === 'skills' || field === 'prerequisites' || field === 'whatYouWillLearn' || 
+                 field === 'requirements' || field === 'whoIsThisFor' || field === 'tags') {
+            // Handle string arrays
+            if (Array.isArray(data[field])) {
+                cleanData[field] = data[field]
+                    .filter(item => item !== null && item !== undefined)
+                    .map(item => item.toString().trim())
+                    .filter(item => item !== '');
+            } else if (typeof data[field] === 'string') {
+                cleanData[field] = data[field]
+                    .split('\n')
+                    .map(item => item.trim())
+                    .filter(item => item !== '');
+            } else {
+                cleanData[field] = [];
+            }
         } else if (Array.isArray(data[field])) {
             cleanData[field] = data[field].filter(item => 
                 item !== null && item !== undefined && item.toString().trim() !== ''
             );
-        } else if (data[field] === undefined || data[field] === null) {
-            cleanData[field] = [];
-        } else if (typeof data[field] === 'string') {
-            cleanData[field] = data[field]
-                .split('\n')
-                .map(item => item.trim())
-                .filter(item => item !== '');
         } else {
             cleanData[field] = [];
         }
     });
+    
+    // Handle totalHours specifically
+    cleanData.totalHours = Math.max(0, Number(data.totalHours) || 0);
+    
+    console.log('Cleaned data before return:', JSON.stringify(cleanData, null, 2));
 
     // Process curriculum
     if (Array.isArray(data.curriculum)) {
@@ -70,7 +92,7 @@ const prepareCourseData = (data) => {
     }
 
     // Process other fields with defaults
-    return {
+    const result = {
         title: data.title?.toString().trim() || 'Untitled Course',
         shortDescription: data.shortDescription?.toString().trim() || '',
         description: data.description?.toString().trim() || '',
@@ -78,7 +100,7 @@ const prepareCourseData = (data) => {
         instructor: data.instructor?.toString().trim() || 'Unknown Instructor',
         price: Math.max(0, Number(data.price) || 0),
         originalPrice: Math.max(0, Number(data.originalPrice) || 0),
-        totalHours: Math.max(0, Number(data.totalHours) || 0),
+        totalHours: cleanData.totalHours,  // Already processed above
         image: data.image?.toString().trim() || '',
         thumbnail: data.thumbnail?.toString().trim() || data.image?.toString().trim() || '',
         previewVideo: data.previewVideo?.toString().trim() || '',
@@ -96,18 +118,21 @@ const prepareCourseData = (data) => {
         status: ['draft', 'published', 'archived'].includes(data.status) 
             ? data.status 
             : 'draft',
-        // Add array fields
-        benefits: cleanData.benefits,
-        skills: cleanData.skills,
-        mentors: cleanData.mentors,
-        curriculum: cleanData.curriculum,
-        faqs: cleanData.faqs,
-        whatYouWillLearn: cleanData.whatYouWillLearn,
-        requirements: cleanData.requirements,
-        whoIsThisFor: cleanData.whoIsThisFor,
-        tags: cleanData.tags,
-        prerequisites: cleanData.prerequisites
+        // Add all array fields
+        benefits: cleanData.benefits || [],
+        skills: cleanData.skills || [],
+        mentors: cleanData.mentors || [],
+        curriculum: cleanData.curriculum || [],
+        faqs: cleanData.faqs || [],
+        whatYouWillLearn: cleanData.whatYouWillLearn || [],
+        requirements: cleanData.requirements || [],
+        whoIsThisFor: cleanData.whoIsThisFor || [],
+        tags: cleanData.tags || [],
+        prerequisites: cleanData.prerequisites || []
     };
+    
+    console.log('Final prepared course data:', JSON.stringify(result, null, 2));
+    return result;
 };
 
 // Create a new course
