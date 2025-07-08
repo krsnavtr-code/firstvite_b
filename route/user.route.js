@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import User from '../model/User.js';
 import { isAdmin } from '../middleware/admin.js';
 import jwt from 'jsonwebtoken';
+import { signup, login } from '../controller/user.controller.js';
 
 // Auth middleware
 const auth = async (req, res, next) => {
@@ -28,6 +29,16 @@ const auth = async (req, res, next) => {
 };
 
 const router = express.Router();
+
+// @route   POST /api/users/signup
+// @desc    Register a new user
+// @access  Public
+router.post('/signup', signup);
+
+// @route   POST /api/users/login
+// @desc    Authenticate user & get token
+// @access  Public
+router.post('/login', login);
 
 // @route   GET /api/users
 // @desc    Get all users (Admin only)

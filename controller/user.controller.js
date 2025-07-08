@@ -3,7 +3,15 @@ import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 export const signup = async(req, res) => {
     try {
-        const { fullname, email, password } = req.body;
+        const { fullname, email, password, department } = req.body;
+        
+        // Validate required fields for student role
+        if (!department) {
+            return res.status(400).json({
+                success: false,
+                message: 'Department is required for student registration'
+            });
+        }
         
         // Check if user already exists
         const existingUser = await User.findOne({ email });
@@ -22,7 +30,8 @@ export const signup = async(req, res) => {
             fullname,
             email,
             password: hashPassword,
-            role: 'user' // Default role
+            role: 'student', // Default role
+            department
         });
 
         await newUser.save();
