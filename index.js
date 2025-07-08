@@ -9,6 +9,7 @@ import { fileURLToPath } from 'url';
 import bookRoute from "./route/book.route.js";
 import authRoute from "./route/auth.route.js";
 import userRoute from "./route/user.route.js";
+import profileRoute from "./route/profile.route.js";
 import categoryRoute from "./route/category.route.js";
 import courseRoute from "./route/course.route.js";
 import contactRoute from "./route/contactRoutes.js";
@@ -113,6 +114,7 @@ mongoose.connection.on('error', err => {
 // Routes
 app.use("/api/auth", authRoute); // Authentication routes (login, signup)
 app.use("/api/users", userRoute); // User management routes (admin only)
+app.use("/api/profile", profileRoute); // User profile routes (any authenticated user)
 app.use("/api/books", bookRoute);
 app.use("/api/categories", categoryRoute);
 app.use("/api/courses", courseRoute);

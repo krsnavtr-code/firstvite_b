@@ -38,6 +38,15 @@ const userSchema = new mongoose.Schema({
       return this.role === 'teacher' || this.role === 'student';
     }
   },
+  phone: {
+    type: String,
+    trim: true,
+    match: [/^[0-9\-\+\s]*$/, 'Please enter a valid phone number']
+  },
+  address: {
+    type: String,
+    trim: true
+  },
   studentId: {
     type: String,
     sparse: true,
