@@ -14,6 +14,7 @@ import cartRoute from "./route/cart.route.js";
 import categoryRoute from "./route/category.route.js";
 import courseRoute from "./route/course.route.js";
 import contactRoute from "./route/contactRoutes.js";
+import enrollmentRoute from "./routes/enrollmentRoutes.js";
 
 // Initialize express app
 const app = express();
@@ -45,7 +46,7 @@ app.use(cors({
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token']
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -116,11 +117,12 @@ mongoose.connection.on('error', err => {
 app.use("/api/auth", authRoute); // Authentication routes (login, signup)
 app.use("/api/users", userRoute); // User management routes (admin only)
 app.use("/api/profile", profileRoute); // User profile routes (any authenticated user)
-app.use("/api/cart", cartRoute); // Cart routes (any authenticated user)
 app.use("/api/books", bookRoute);
+app.use("/api/cart", cartRoute);
 app.use("/api/categories", categoryRoute);
 app.use("/api/courses", courseRoute);
 app.use("/api/contacts", contactRoute);
+app.use("/api/enrollments", enrollmentRoute);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
