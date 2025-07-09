@@ -22,14 +22,11 @@ export const signup = async(req, res) => {
             });
         }
 
-        // Hash password
-        const hashPassword = await bcryptjs.hash(password, 10);
-        
-        // Create new user
+        // Create new user - the pre-save hook will hash the password
         const newUser = new User({
             fullname,
             email,
-            password: hashPassword,
+            password: password, // The pre-save hook will hash this
             role: 'student', // Default role
             department
         });
@@ -95,32 +92,15 @@ export const login = async(req, res) => {
             });
         }
 
-        console.log('User found, checking password...');
-        
-        // Debug: Log the stored password hash and input password
-        console.log('Stored password hash:', user.password);
-        console.log('Input password:', password);
-        
-        // Check password
+        // Check password using bcrypt
         const isMatch = await bcryptjs.compare(password, user.password);
-        console.log('Password match result:', isMatch);
         
         if (!isMatch) {
-            // Try direct comparison in case password is stored in plain text (temporary for debugging)
-            if (password === user.password) {
-                console.log('Direct password match - password was stored in plain text!');
-                // Update the password to be hashed
-                const salt = await bcrypt.genSalt(10);
-                user.password = await bcrypt.hash(password, salt);
-                await user.save();
-                console.log('Password has been updated to use bcrypt');
-            } else {
-                console.log('Invalid password for user:', email);
-                return res.status(400).json({ 
-                    success: false,
-                    message: 'Invalid email or password' 
-                });
-            }
+            console.log('Invalid password for user:', email);
+            return res.status(400).json({ 
+                success: false,
+                message: 'Invalid email or password' 
+            });
         }
 
         // Generate JWT token
