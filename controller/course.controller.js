@@ -212,13 +212,24 @@ export const createCourse = async (req, res) => {
 // Get all courses with optional filters
 export const getAllCourses = async (req, res) => {
     try {
-        const { category, status, fields, all } = req.query;
-        console.log('Getting all courses with params:', { category, status, fields, all, user: req.user });
+        const { category, status, fields, all, search } = req.query;
+        console.log('Getting all courses with params:', { category, status, fields, all, search, user: req.user });
         const query = {};
         
         // Add category filter if provided
         if (category) {
             query.category = category;
+        }
+        
+        // Handle search query
+        if (search && search.trim()) {
+            const searchRegex = new RegExp(search, 'i');
+            query.$or = [
+                { title: { $regex: searchRegex } },
+                { description: { $regex: searchRegex } },
+                { instructor: { $regex: searchRegex } },
+                { 'category.name': { $regex: searchRegex } }
+            ];
         }
         
         // Handle published status filtering
