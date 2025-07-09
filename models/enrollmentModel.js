@@ -9,7 +9,15 @@ const enrollmentSchema = new mongoose.Schema({
   course: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Course',
-    required: true
+    index: true
+  },
+  courseId: {
+    type: String,
+    index: true
+  },
+  courseTitle: {
+    type: String,
+    trim: true
   },
   status: {
     type: String,

@@ -6,11 +6,12 @@ import {
 } from '../controller/contactController.js';
 import { protect } from '../middleware/auth.js';
 import { isAdmin } from '../middleware/admin.js';
+import { contactValidationRules, validate } from '../middleware/validation.js';
 
 const router = Router();
 
-// Public route for submitting contact form
-router.post('/', submitContactForm);
+// Public route for submitting contact form with validation
+router.post('/', contactValidationRules, validate, submitContactForm);
 
 // Protected admin routes
 router.get('/', 
