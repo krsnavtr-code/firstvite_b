@@ -15,6 +15,7 @@ import categoryRoute from "./route/category.route.js";
 import courseRoute from "./route/course.route.js";
 import contactRoute from "./route/contactRoutes.js";
 import enrollmentRoute from "./routes/enrollmentRoutes.js";
+import faqRoute from "./route/faq.route.js";
 
 // Initialize express app
 const app = express();
@@ -140,6 +141,7 @@ app.use("/api/categories", categoryRoute);
 app.use("/api/courses", courseRoute);
 app.use("/api/contacts", contactRoute);
 app.use("/api/enrollments", enrollmentRoute);
+app.use("/api", faqRoute); // FAQ routes
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

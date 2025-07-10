@@ -69,6 +69,13 @@ export const protect = async (req, res, next) => {
 // Grant access to specific roles
 export const authorize = (...roles) => {
   return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Not authorized to access this route. No user in request.'
+      });
+    }
+    
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
@@ -78,3 +85,6 @@ export const authorize = (...roles) => {
     next();
   };
 };
+
+// Admin middleware (shortcut for authorize('admin'))
+export const admin = authorize('admin');
