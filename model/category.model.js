@@ -15,10 +15,7 @@ const categorySchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
-    image: {
-        type: String,
-        default: ''
-    },
+
     slug: {
         type: String,
         unique: true,

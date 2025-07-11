@@ -8,23 +8,6 @@ import {
     getCategoryById 
 } from "../controller/category.controller.js";
 import { isAdmin } from "../middleware/admin.js";
-import multer from 'multer';
-
-// Configure multer for file uploads
-const upload = multer({
-    storage: multer.memoryStorage(), // Store file in memory as buffer
-    limits: {
-        fileSize: 5 * 1024 * 1024, // 5MB limit
-    },
-    fileFilter: (req, file, cb) => {
-        // Accept images only
-        if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-            return cb(new Error('Only image files are allowed!'), false);
-        }
-        cb(null, true);
-    }
-});
-
 const router = express.Router();
 
 // Validation middleware
@@ -40,10 +23,7 @@ const validateCategory = [
         .optional()
         .isLength({ max: 500 })
         .withMessage('Description must be less than 500 characters'),
-    body('image')
-        .optional()
-        .isURL()
-        .withMessage('Invalid image URL')
+
 ];
 
 // Admin routes
