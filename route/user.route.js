@@ -40,10 +40,32 @@ const router = express.Router();
 // @access  Public
 router.post('/signup', signup);
 
+// @route   GET /api/users/signup
+// @desc    Prevent signup page from being treated as an ID
+// @access  Public
+router.get('/signup', (req, res) => {
+  res.status(405).json({ 
+    success: false,
+    message: 'Method not allowed. Use POST /api/users/signup to register a new user.',
+    error: 'METHOD_NOT_ALLOWED'
+  });
+});
+
 // @route   POST /api/users/login
 // @desc    Authenticate user & get token
 // @access  Public
 router.post('/login', login);
+
+// @route   GET /api/users/login
+// @desc    Prevent login page from being treated as an ID
+// @access  Public
+router.get('/login', (req, res) => {
+  res.status(405).json({ 
+    success: false,
+    message: 'Method not allowed. Use POST /api/users/login to authenticate.',
+    error: 'METHOD_NOT_ALLOWED'
+  });
+});
 
 // @route   POST /api/users/reset-password
 // @desc    Reset password (temporary route for development)
