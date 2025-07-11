@@ -31,6 +31,10 @@ const auth = async (req, res, next) => {
 
 const router = express.Router();
 
+// ====================================
+// Public Routes (No Authentication)
+// ====================================
+
 // @route   POST /api/users/signup
 // @desc    Register a new user
 // @access  Public
@@ -82,6 +86,10 @@ router.post('/reset-password', async (req, res) => {
     }
 });
 
+// ====================================
+// Protected Routes (Require Authentication)
+// ====================================
+
 // @route   GET /api/users
 // @desc    Get all users (Admin only)
 // @access  Private/Admin
@@ -94,6 +102,10 @@ router.get('/', [auth, isAdmin], async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+// ====================================
+// Parameterized Routes (Must come after specific routes)
+// ====================================
 
 // @route   GET /api/users/:id
 // @desc    Get user by ID (Admin only)
