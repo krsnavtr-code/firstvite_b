@@ -156,6 +156,10 @@ const courseSchema = new mongoose.Schema({
     totalReviews: {
         type: Number,
         default: 0
+    },
+    showOnHome: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true });
 

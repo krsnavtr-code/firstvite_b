@@ -40,7 +40,11 @@ const validateCourse = [
     body('level')
         .optional()
         .isIn(['Beginner', 'Intermediate', 'Advanced'])
-        .withMessage('Invalid level')
+        .withMessage('Invalid level'),
+    body('showOnHome')
+        .optional()
+        .isBoolean()
+        .withMessage('Show on Home must be a boolean value')
 ];
 
 // Admin routes

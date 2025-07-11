@@ -212,7 +212,7 @@ export const createCourse = async (req, res) => {
 // Get all courses with optional filters
 export const getAllCourses = async (req, res) => {
     try {
-        const { category, status, fields, all, search } = req.query;
+        const { category, status, fields, all, search, showOnHome } = req.query;
         console.log('Getting all courses with params:', { category, status, fields, all, search, user: req.user });
         const query = {};
         
@@ -245,6 +245,16 @@ export const getAllCourses = async (req, res) => {
                 query.isPublished = status === 'published';
             }
         }
+
+        // Handle showOnHome filter
+        console.log('showOnHome filter value:', showOnHome);
+        if (showOnHome === 'true') {
+            query.showOnHome = true;
+            console.log('Filtering for showOnHome: true');
+        } else if (showOnHome === 'false') {
+            query.showOnHome = false;
+            console.log('Filtering for showOnHome: false');
+        }
         
         // Build the selection fields
         let selection = '';
@@ -264,6 +274,10 @@ export const getAllCourses = async (req, res) => {
         }
         
         const courses = await coursesQuery.exec();
+        console.log(`Found ${courses.length} courses matching query`);
+        if (courses.length > 0) {
+            console.log('First course showOnHome value:', courses[0].showOnHome);
+        }
         res.json(courses);
     } catch (error) {
         console.error('Error fetching courses:', error);
@@ -414,6 +428,7 @@ export const updateCourse = async (req, res) => {
             certificateIncluded = true,
             isFeatured = false,
             isPublished = false,
+            showOnHome = false,
             status = 'draft',
             image = '',
             thumbnail = '',
@@ -445,6 +460,7 @@ export const updateCourse = async (req, res) => {
             certificateIncluded: certificateIncluded !== false, // default to true
             isFeatured: Boolean(isFeatured),
             isPublished: Boolean(isPublished),
+            showOnHome: Boolean(showOnHome),
             status: ['draft', 'published', 'archived'].includes(status) ? status : 'draft',
             image: image?.toString()?.trim() || '',
             thumbnail: thumbnail?.toString()?.trim() || '',

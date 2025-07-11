@@ -23,6 +23,10 @@ const categorySchema = new mongoose.Schema({
         type: String,
         unique: true,
         lowercase: true
+    },
+    showOnHome: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true });
 
