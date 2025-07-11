@@ -33,17 +33,20 @@ export const updateCategory = async (req, res) => {
         const { id } = req.params;
         const { name, description, isActive, showOnHome } = req.body;
         
-        const updateData = { 
-            name, 
-            description, 
-            isActive,
-            showOnHome: showOnHome || false
-        };
+        // Build update object with only provided fields
+        const updateData = {};
+        
+        if (name !== undefined) updateData.name = name;
+        if (description !== undefined) updateData.description = description;
+        if (isActive !== undefined) updateData.isActive = isActive;
+        if (showOnHome !== undefined) updateData.showOnHome = showOnHome;
+        
+        console.log('Updating category with data:', updateData);
         
         const updatedCategory = await Category.findByIdAndUpdate(
             id,
             { $set: updateData },
-            { new: true, runValidators: true }
+            { new: true, runValidators: true, context: 'query' }
         );
 
         if (!updatedCategory) {
@@ -53,6 +56,17 @@ export const updateCategory = async (req, res) => {
         res.json(updatedCategory);
     } catch (error) {
         console.error('Error updating category:', error);
+        if (error.name === 'ValidationError') {
+            // Handle validation errors
+            const errors = Object.values(error.errors).map(err => ({
+                field: err.path,
+                message: err.message
+            }));
+            return res.status(400).json({ 
+                message: 'Validation failed',
+                errors 
+            });
+        }
         res.status(500).json({ message: 'Server error' });
     }
 };
