@@ -64,47 +64,50 @@ export const createCategory = async (req, res) => {
 export const updateCategory = async (req, res) => {
     try {
         const { id } = req.params;
-        console.log('Received update request for category ID:', id);
-        console.log('Request body:', req.body);
+        console.log('=== UPDATE CATEGORY REQUEST ===');
+        console.log('Category ID:', id);
+        console.log('Request body:', JSON.stringify(req.body, null, 2));
         
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            console.log('Validation errors:', errors.array());
-            return res.status(400).json({ 
+        // Check if ID is valid (should be caught by middleware, but just in case)
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            console.error('Invalid category ID format:', id);
+            return res.status(400).json({
                 success: false,
-                message: 'Validation failed',
-                errors: errors.array() 
+                message: 'Invalid category ID format',
+                error: 'INVALID_ID_FORMAT'
             });
         }
-
-        const { name, description, isActive, showOnHome } = req.body;
         
         // Verify the category exists first
         const existingCategory = await Category.findById(id);
         if (!existingCategory) {
-            console.log('Category not found with ID:', id);
+            console.error('Category not found with ID:', id);
             return res.status(404).json({ 
                 success: false,
-                message: 'Category not found' 
+                message: 'Category not found',
+                error: 'CATEGORY_NOT_FOUND'
             });
         }
         
-        // Check if another category with the same name exists
+        const { name, description, isActive, showOnHome } = req.body;
+        
+        // Check if another category with the same name exists (if name is being updated)
         if (name && name !== existingCategory.name) {
             const duplicateCategory = await Category.findOne({ name });
             if (duplicateCategory) {
-                console.log('Another category with this name already exists:', duplicateCategory);
-                return res.status(400).json({
+                console.error('Category name already exists:', name);
+                return res.status(409).json({
                     success: false,
-                    message: 'Another category with this name already exists'
+                    message: 'A category with this name already exists',
+                    error: 'DUPLICATE_CATEGORY_NAME',
+                    field: 'name'
                 });
             }
         }
         
-        console.log('Existing category before update:', {
+        console.log('Existing category data:', {
             _id: existingCategory._id,
             name: existingCategory.name,
-            description: existingCategory.description,
             isActive: existingCategory.isActive,
             showOnHome: existingCategory.showOnHome,
             updatedAt: existingCategory.updatedAt
@@ -112,58 +115,52 @@ export const updateCategory = async (req, res) => {
         
         // Build update object with only provided fields
         const updateData = {};
-        
         if (name !== undefined) updateData.name = name;
         if (description !== undefined) updateData.description = description;
         if (isActive !== undefined) updateData.isActive = isActive;
         if (showOnHome !== undefined) updateData.showOnHome = showOnHome;
         
-        console.log('Preparing update with data:', updateData);
+        console.log('Updating with data:', updateData);
         
-        try {
-            // Perform the update
-            const updatedCategory = await Category.findByIdAndUpdate(
-                id,
-                { $set: updateData },
-                { 
-                    new: true, 
-                    runValidators: true, 
-                    context: 'query',
-                    useFindAndModify: false // Ensure we're using the new MongoDB driver
-                }
-            );
-
-            if (!updatedCategory) {
-                console.error('Failed to update category - no document was returned');
-                return res.status(500).json({ 
-                    success: false,
-                    message: 'Failed to update category - document not found after update' 
-                });
+        // Perform the update
+        const updatedCategory = await Category.findByIdAndUpdate(
+            id,
+            { $set: updateData },
+            { 
+                new: true, 
+                runValidators: true,
+                context: 'query'
             }
-            
-            console.log('Category updated successfully:', {
-                _id: updatedCategory._id,
-                name: updatedCategory.name,
-                isActive: updatedCategory.isActive,
-                showOnHome: updatedCategory.showOnHome,
-                updatedAt: updatedCategory.updatedAt
-            });
+        ).lean();
 
-            return res.json({
-                success: true,
-                message: 'Category updated successfully',
-                data: updatedCategory
+        if (!updatedCategory) {
+            console.error('Failed to update category - no document was returned');
+            return res.status(500).json({ 
+                success: false,
+                message: 'Failed to update category',
+                error: 'UPDATE_FAILED'
             });
-            
-        } catch (dbError) {
-            console.error('Database error during update:', dbError);
-            throw dbError;
         }
+        
+        console.log('Category updated successfully:', {
+            _id: updatedCategory._id,
+            name: updatedCategory.name,
+            isActive: updatedCategory.isActive,
+            showOnHome: updatedCategory.showOnHome,
+            updatedAt: updatedCategory.updatedAt
+        });
+
+        return res.json({
+            success: true,
+            message: 'Category updated successfully',
+            data: updatedCategory
+        });
+        
     } catch (error) {
         console.error('Error updating category:', error);
         
+        // Handle validation errors
         if (error.name === 'ValidationError') {
-            // Handle validation errors
             const errors = Object.values(error.errors).map(err => ({
                 field: err.path,
                 message: err.message
@@ -171,23 +168,37 @@ export const updateCategory = async (req, res) => {
             return res.status(400).json({ 
                 success: false,
                 message: 'Validation failed',
+                error: 'VALIDATION_ERROR',
                 errors 
             });
         }
         
-        // Handle duplicate key error (unique index violation)
+        // Handle duplicate key error
         if (error.code === 11000) {
             const field = Object.keys(error.keyPattern)[0];
-            return res.status(400).json({
+            return res.status(409).json({
                 success: false,
-                message: `A category with this ${field} already exists`
+                message: `A category with this ${field} already exists`,
+                error: 'DUPLICATE_KEY',
+                field
             });
         }
         
+        // Handle cast errors (invalid ObjectId)
+        if (error.name === 'CastError') {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid category ID format',
+                error: 'INVALID_ID_FORMAT'
+            });
+        }
+        
+        // Generic server error
         res.status(500).json({ 
             success: false,
-            message: 'Server error',
-            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+            message: 'An error occurred while updating the category',
+            error: 'SERVER_ERROR',
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
     }
 };
@@ -351,26 +362,10 @@ export const getAllCategories = async (req, res) => {
             queryBuilder = queryBuilder.limit(parseInt(req.query.limit));
         }
         
-        const categories = await queryBuilder.exec();
+        const categories = await queryBuilder.lean().exec();
         
-        // Ensure all categories have proper image URLs
-        const categoriesWithImages = categories.map(category => {
-            const categoryObj = category.toObject();
-            
-            // If image is already a full URL, use it as is
-            // If it's a relative path, make it absolute
-            if (categoryObj.image) {
-                if (!categoryObj.image.startsWith('http')) {
-                    // If it starts with /uploads, it's already a path
-                    categoryObj.image = `http://localhost:5000${categoryObj.image}`;
-                }
-            }
-            
-            return categoryObj;
-        });
-        
-        console.log('Successfully fetched categories:', categoriesWithImages.length);
-        res.json(categoriesWithImages);
+        console.log('Successfully fetched categories:', categories.length);
+        res.json(categories);
     } catch (error) {
         console.error('Error fetching categories:', error);
         if (error.name === 'MongoServerError') {
@@ -408,21 +403,12 @@ export const getCategoryById = async (req, res) => {
             });
         }
         
-        // Ensure the category has a proper image URL
-        const categoryObj = category.toObject();
-        
-        // If image is already a full URL, use it as is
-        // If it's a relative path, make it absolute
-        if (categoryObj.image) {
-            if (!categoryObj.image.startsWith('http')) {
-                // If it starts with /uploads, it's already a path
-                categoryObj.image = `http://localhost:5000${categoryObj.image}`;
-            }
-        }
+        // Convert to plain JavaScript object
+        const categoryData = category.toObject();
         
         res.json({
             success: true,
-            data: categoryObj
+            data: categoryData
         });
     } catch (error) {
         console.error('Error fetching category:', error);

@@ -69,14 +69,22 @@ router.post('/',
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             console.log('Validation errors:', errors.array());
-            return res.status(400).json({ errors: errors.array() });
+            return res.status(400).json({ 
+                success: false,
+                message: 'Validation failed',
+                errors: errors.array() 
+            });
         }
         
-        // Parse isActive if it's a string
-        if (typeof req.body.isActive === 'string') {
-            req.body.isActive = req.body.isActive === 'true';
+        // Ensure boolean values are properly converted
+        if (req.body.isActive !== undefined) {
+            req.body.isActive = String(req.body.isActive).toLowerCase() === 'true';
+        }
+        if (req.body.showOnHome !== undefined) {
+            req.body.showOnHome = String(req.body.showOnHome).toLowerCase() === 'true';
         }
         
+        console.log('Processed create data:', req.body);
         next();
     },
     createCategory
@@ -90,14 +98,22 @@ router.put('/:id',
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             console.log('Validation errors:', errors.array());
-            return res.status(400).json({ errors: errors.array() });
+            return res.status(400).json({ 
+                success: false,
+                message: 'Validation failed',
+                errors: errors.array() 
+            });
         }
         
-        // Parse isActive if it's a string
-        if (typeof req.body.isActive === 'string') {
-            req.body.isActive = req.body.isActive === 'true';
+        // Ensure boolean values are properly converted
+        if (req.body.isActive !== undefined) {
+            req.body.isActive = String(req.body.isActive).toLowerCase() === 'true';
+        }
+        if (req.body.showOnHome !== undefined) {
+            req.body.showOnHome = String(req.body.showOnHome).toLowerCase() === 'true';
         }
         
+        console.log('Processed update data:', req.body);
         next();
     },
     updateCategory
