@@ -12,16 +12,36 @@ import { isAdmin } from "../middleware/admin.js";
 
 const router = express.Router();
 
-// Middleware to validate MongoDB ObjectId
+// Middleware to validate MongoDB ObjectId more strictly
 const validateObjectId = [
     param('id')
-        .custom((value) => mongoose.Types.ObjectId.isValid(value))
-        .withMessage('Invalid category ID format'),
+        .trim()
+        .notEmpty()
+        .withMessage('Category ID is required')
+        .bail()
+        .isLength({ min: 24, max: 24 })
+        .withMessage('Category ID must be 24 characters long')
+        .bail()
+        .matches(/^[0-9a-fA-F]+$/)
+        .withMessage('Category ID must be a valid hexadecimal string')
+        .bail()
+        .custom((value) => {
+            if (!mongoose.Types.ObjectId.isValid(value)) {
+                throw new Error('Invalid category ID format');
+            }
+            return true;
+        }),
     (req, res, next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
+            return res.status(400).json({ 
+                success: false,
+                message: 'Validation failed',
+                errors: errors.array()
+            });
         }
+        // Convert to ObjectId and attach to request for later use
+        req.params.id = new mongoose.Types.ObjectId(req.params.id);
         next();
     }
 ];
