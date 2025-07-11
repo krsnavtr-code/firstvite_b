@@ -81,13 +81,13 @@ if (!fs.existsSync(uploadsDir)) {
 } else {
     console.log('Uploads directory exists at:', uploadsDir);
     // List files in the uploads directory for debugging
-    fs.readdir(uploadsDir, (err, files) => {
-        if (err) {
-            console.error('Error reading uploads directory:', err);
-        } else {
-            console.log('Files in uploads directory:', files);
-        }
-    });
+    // fs.readdir(uploadsDir, (err, files) => {
+    //     if (err) {
+    //         console.error('Error reading uploads directory:', err);
+    //     } else {
+    //         console.log('Files in uploads directory:', files);
+    //     }
+    // });
 }
 
 // Serve all static files from the public directory

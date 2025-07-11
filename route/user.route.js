@@ -4,6 +4,7 @@ import User from '../model/User.js';
 import { isAdmin } from '../middleware/admin.js';
 import jwt from 'jsonwebtoken';
 import { signup, login } from '../controller/user.controller.js';
+import validateObjectId from '../middleware/validateObjectId.js';
 
 // Auth middleware
 const auth = async (req, res, next) => {
@@ -97,19 +98,38 @@ router.get('/', [auth, isAdmin], async (req, res) => {
 // @route   GET /api/users/:id
 // @desc    Get user by ID (Admin only)
 // @access  Private/Admin
-router.get('/:id', [auth, isAdmin], async (req, res) => {
+router.get('/:id', [auth, isAdmin, validateObjectId], async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select('-password');
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ 
+        success: false,
+        message: 'User not found',
+        error: 'USER_NOT_FOUND'
+      });
     }
-    res.json(user);
+    
+    res.json({
+      success: true,
+      data: user
+    });
   } catch (error) {
     console.error('Error fetching user:', error);
-    if (error.kind === 'ObjectId') {
-      return res.status(404).json({ message: 'User not found' });
+    
+    // Handle specific MongoDB errors
+    if (error.name === 'CastError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid user ID',
+        error: 'INVALID_USER_ID'
+      });
     }
-    res.status(500).json({ message: 'Server error' });
+    
+    res.status(500).json({ 
+      success: false,
+      message: 'Server error while fetching user',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
@@ -156,52 +176,114 @@ router.post('/', [auth, isAdmin], async (req, res) => {
 // @route   PUT /api/users/:id
 // @desc    Update user (Admin only)
 // @access  Private/Admin
-router.put('/:id', [auth, isAdmin], async (req, res) => {
+router.put('/:id', [auth, isAdmin, validateObjectId], async (req, res) => {
   try {
-    const { password, ...updateData } = req.body;
-    const update = { ...updateData };
+    const { name, email, role, isActive } = req.body;
 
-    if (password) {
-      const salt = await bcrypt.genSalt(10);
-      update.password = await bcrypt.hash(password, salt);
-    }
-
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      { $set: update },
-      { new: true, runValidators: true }
-    ).select('-password');
-
+    const user = await User.findById(req.params.id);
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    res.json(user);
-  } catch (error) {
-    console.error('Error updating user:', error);
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({ 
-        message: 'Validation error',
-        errors: Object.values(error.errors).map(err => err.message)
+      return res.status(404).json({ 
+        success: false,
+        message: 'User not found',
+        error: 'USER_NOT_FOUND'
       });
     }
-    res.status(500).json({ message: 'Server error' });
+
+    // Check if email is being updated and if it's already taken
+    if (email && email !== user.email) {
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: 'Email already in use',
+          error: 'EMAIL_IN_USE'
+        });
+      }
+      user.email = email;
+    }
+
+    // Update user fields
+    if (name) user.name = name;
+    if (role) user.role = role;
+    if (isActive !== undefined) user.isActive = isActive;
+
+    await user.save();
+    
+    // Remove sensitive data before sending response
+    const userObj = user.toObject();
+    delete userObj.password;
+    delete userObj.__v;
+
+    res.json({
+      success: true,
+      data: userObj,
+      message: 'User updated successfully'
+    });
+  } catch (error) {
+    console.error('Error updating user:', error);
+    
+    // Handle duplicate key error (e.g., duplicate email)
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email already in use',
+        error: 'DUPLICATE_EMAIL'
+      });
+    }
+    
+    res.status(500).json({ 
+      success: false,
+      message: 'Server error while updating user',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
 // @route   DELETE /api/users/:id
 // @desc    Delete user (Admin only)
 // @access  Private/Admin
-router.delete('/:id', [auth, isAdmin], async (req, res) => {
+router.delete('/:id', [auth, isAdmin, validateObjectId], async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.id);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+    // Prevent deleting own account
+    if (req.user.id === req.params.id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot delete your own account',
+        error: 'SELF_DELETE_NOT_ALLOWED'
+      });
     }
-    res.json({ message: 'User removed successfully' });
+
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'User not found',
+        error: 'USER_NOT_FOUND'
+      });
+    }
+
+    await user.remove();
+    
+    res.json({ 
+      success: true,
+      message: 'User deleted successfully'
+    });
   } catch (error) {
     console.error('Error deleting user:', error);
-    res.status(500).json({ message: 'Server error' });
+    
+    if (error.name === 'CastError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid user ID',
+        error: 'INVALID_USER_ID'
+      });
+    }
+    
+    res.status(500).json({ 
+      success: false,
+      message: 'Server error while deleting user',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
@@ -260,12 +342,14 @@ router.put('/profile',
           errors: Object.values(error.errors).map(err => err.message)
         });
       }
-    res.status(500).json({ 
-      success: false,
-      message: 'Server error' 
-    });
+      res.status(500).json({ 
+        success: false,
+        message: 'Server error' 
+      });
+    }
   }
-});
+);
+
 
 // @route   PUT /api/users/:id/status
 // @desc    Update user status (Admin only)
