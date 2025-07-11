@@ -69,9 +69,12 @@ app.options('*', cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Ensure uploads directory exists
-const uploadsDir = path.join(process.cwd(), 'public/uploads');
+// Set up public directory for static files
+const publicDir = path.join(process.cwd(), 'public');
+const uploadsDir = path.join(publicDir, 'uploads');
 import fs from 'fs';
+
+// Ensure uploads directory exists
 if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
     console.log('Created uploads directory:', uploadsDir);
@@ -87,11 +90,14 @@ if (!fs.existsSync(uploadsDir)) {
     });
 }
 
-// Serve static files with proper MIME types and headers
+// Serve all static files from the public directory
+app.use(express.static(publicDir));
+
+// Serve uploads with specific headers
 app.use('/uploads', express.static(uploadsDir, {
-  setHeaders: (res, path) => {
-    console.log('Serving file:', path); // Debug log
-    const ext = path.split('.').pop().toLowerCase();
+  setHeaders: (res, filePath) => {
+    console.log('Serving file:', filePath);
+    const ext = path.extname(filePath).toLowerCase().substring(1);
     const mimeTypes = {
       'jpg': 'image/jpeg',
       'jpeg': 'image/jpeg',
@@ -102,12 +108,12 @@ app.use('/uploads', express.static(uploadsDir, {
     
     if (mimeTypes[ext]) {
       res.set('Content-Type', mimeTypes[ext]);
-      res.set('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+      res.set('Cache-Control', 'public, max-age=31536000');
     }
   }
 }));
 
-// Add a test route to check file serving
+// Test route to check file serving
 app.get('/test-upload/:filename', (req, res) => {
   const { filename } = req.params;
   const filePath = path.join(uploadsDir, filename);
@@ -117,11 +123,17 @@ app.get('/test-upload/:filename', (req, res) => {
     res.sendFile(filePath);
   } else {
     console.error(`File not found: ${filePath}`);
-    res.status(404).send('File not found');
+    res.status(404).json({
+      success: false,
+      message: 'File not found',
+      path: filePath,
+      files: fs.readdirSync(uploadsDir)
+    });
   }
 });
 
-console.log('Serving static files from:', uploadsDir);
+console.log('Serving static files from:', publicDir);
+console.log('Uploads directory at:', uploadsDir);
 
 // Database connection
 const PORT = process.env.PORT || 4002;
