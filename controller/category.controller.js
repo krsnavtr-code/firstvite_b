@@ -388,9 +388,24 @@ export const getAllCategories = async (req, res) => {
 
 export const getCategoryById = async (req, res) => {
     try {
-        const category = await Category.findById(req.params.id);
+        const { id } = req.params;
+        
+        // Double-check the ID format for extra safety
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ 
+                success: false,
+                message: 'Invalid category ID format',
+                error: 'INVALID_ID_FORMAT'
+            });
+        }
+        
+        const category = await Category.findById(id);
         if (!category) {
-            return res.status(404).json({ message: 'Category not found' });
+            return res.status(404).json({ 
+                success: false,
+                message: 'Category not found',
+                error: 'CATEGORY_NOT_FOUND'
+            });
         }
         
         // Ensure the category has a proper image URL
@@ -405,9 +420,26 @@ export const getCategoryById = async (req, res) => {
             }
         }
         
-        res.json(categoryObj);
+        res.json({
+            success: true,
+            data: categoryObj
+        });
     } catch (error) {
         console.error('Error fetching category:', error);
-        res.status(500).json({ message: 'Server error' });
+        
+        // Handle specific MongoDB errors
+        if (error.name === 'CastError') {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid category ID',
+                error: 'INVALID_CATEGORY_ID'
+            });
+        }
+        
+        res.status(500).json({ 
+            success: false,
+            message: 'Server error while fetching category',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
     }
 };
