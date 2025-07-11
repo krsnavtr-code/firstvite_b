@@ -1,5 +1,6 @@
 import express from "express";
-import { body, validationResult } from 'express-validator';
+import { body, param, validationResult } from 'express-validator';
+import mongoose from 'mongoose';
 import { 
     createCategory, 
     updateCategory, 
@@ -10,6 +11,20 @@ import {
 import { isAdmin } from "../middleware/admin.js";
 
 const router = express.Router();
+
+// Middleware to validate MongoDB ObjectId
+const validateObjectId = [
+    param('id')
+        .custom((value) => mongoose.Types.ObjectId.isValid(value))
+        .withMessage('Invalid category ID format'),
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+        next();
+    }
+];
 
 // Validation middleware
 const validateCategory = [
@@ -49,6 +64,7 @@ router.post('/',
 
 router.put('/:id', 
     isAdmin, 
+    validateObjectId,
     validateCategory,
     (req, res, next) => {
         const errors = validationResult(req);
@@ -66,10 +82,18 @@ router.put('/:id',
     },
     updateCategory
 );
-router.delete('/:id', isAdmin, deleteCategory);
+
+router.delete('/:id', 
+    isAdmin, 
+    validateObjectId, 
+    deleteCategory
+);
 
 // Public routes
 router.get('/', getAllCategories);
-router.get('/:id', getCategoryById);
+router.get('/:id', 
+    validateObjectId,
+    getCategoryById
+);
 
 export default router;
