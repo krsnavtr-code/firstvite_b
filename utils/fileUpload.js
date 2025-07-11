@@ -12,15 +12,41 @@ if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
 
+// Function to generate a unique filename
+const getUniqueFilename = (dir, originalName) => {
+    console.log('Original filename:', originalName);
+    const ext = path.extname(originalName).toLowerCase();
+    const baseName = path.basename(originalName, ext)
+        .replace(/[^\w\d-]/g, '-')
+        .replace(/-+/g, '-')  // Replace multiple hyphens with single
+        .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+    
+    let filename = baseName + ext;
+    let counter = 1;
+    let fullPath = path.join(dir, filename);
+
+    console.log('Checking file:', fullPath);
+    
+    // Check if file exists, if yes, append a number
+    while (fs.existsSync(fullPath)) {
+        filename = `${baseName}-${counter}${ext}`;
+        fullPath = path.join(dir, filename);
+        console.log('File exists, trying:', fullPath);
+        counter++;
+    }
+    
+    console.log('Final filename:', filename);
+    return filename;
+};
+
 // Configure storage
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, uploadDir);
     },
     filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        const ext = path.extname(file.originalname).toLowerCase();
-        cb(null, 'img-' + uniqueSuffix + ext);
+        const uniqueFilename = getUniqueFilename(uploadDir, file.originalname);
+        cb(null, uniqueFilename);
     }
 });
 
@@ -52,7 +78,7 @@ const upload = multer({
 });
 
 // Middleware for handling single file upload
-const uploadImage = upload.single('image');
+const uploadImage = upload.single('file'); // Changed from 'image' to 'file' to match frontend
 
 // Handle file upload
 const handleFileUpload = (req, res, next) => {
