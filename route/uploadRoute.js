@@ -5,11 +5,44 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs/promises';
 import fsSync from 'fs';
+import multer from 'multer';
 
 const router = express.Router();
 
 // Debug: Log when the router is being used
 console.log('Upload router initialized');
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+        // Create uploads directory if it doesn't exist
+        if (!fsSync.existsSync(uploadsDir)) {
+            fsSync.mkdirSync(uploadsDir, { recursive: true });
+        }
+        cb(null, uploadsDir);
+    },
+    filename: function (req, file, cb) {
+        // Create a unique filename with timestamp and original name
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, 'img-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 10 * 1024 * 1024, // 10MB limit
+    },
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        if (allowedTypes.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error('Invalid file type. Only images are allowed.'));
+        }
+    }
+});
 
 // Test endpoint to check if upload route is working
 router.get('/test', (req, res) => {
@@ -39,14 +72,17 @@ router.get('/test', (req, res) => {
                 publicExists,
                 uploadsExists
             },
-            filesInUploads: files
+            filesInUploads: files,
+            nodeEnv: process.env.NODE_ENV,
+            allowedOrigins: process.env.ALLOWED_ORIGINS
         });
     } catch (error) {
         console.error('Error in test endpoint:', error);
         res.status(500).json({
             success: false,
             message: 'Error checking directories',
-            error: error.message
+            error: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
     }
 });
@@ -198,26 +234,28 @@ router.post('/', protect, handleFileUpload, (req, res) => {
             });
         }
 
-        // Construct the URL to access the uploaded file
+        // Construct URLs
+        const filePath = path.join('uploads', req.file.filename);
         const fileUrl = `/api/upload/file/${encodeURIComponent(req.file.filename)}`;
         const fullUrl = `${req.protocol}://${req.get('host')}${fileUrl}`;
 
         console.log('File uploaded successfully:', {
-            originalName: req.file.originalname,
             filename: req.file.filename,
             size: req.file.size,
+            mimetype: req.file.mimetype,
+            path: filePath,
             url: fullUrl
         });
 
         res.status(201).json({
             success: true,
-            message: 'File uploaded successfully',
             data: {
                 name: req.file.filename,
-                url: fullUrl,
                 path: fileUrl,
+                url: fullUrl,
                 size: req.file.size,
-                mimetype: req.file.mimetype
+                mimetype: req.file.mimetype,
+                uploadedAt: new Date().toISOString()
             }
         });
     } catch (error) {
@@ -225,7 +263,8 @@ router.post('/', protect, handleFileUpload, (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error uploading file',
-            error: error.message
+            error: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
     }
 });
