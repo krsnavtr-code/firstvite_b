@@ -33,6 +33,23 @@ export const updateCategory = async (req, res) => {
         const { id } = req.params;
         const { name, description, isActive, showOnHome } = req.body;
         
+        console.log('Received update request for category ID:', id);
+        console.log('Request body:', req.body);
+        
+        // Verify the category exists first
+        const existingCategory = await Category.findById(id);
+        if (!existingCategory) {
+            console.log('Category not found with ID:', id);
+            return res.status(404).json({ message: 'Category not found' });
+        }
+        
+        console.log('Existing category before update:', {
+            name: existingCategory.name,
+            description: existingCategory.description,
+            isActive: existingCategory.isActive,
+            showOnHome: existingCategory.showOnHome
+        });
+        
         // Build update object with only provided fields
         const updateData = {};
         
@@ -41,17 +58,31 @@ export const updateCategory = async (req, res) => {
         if (isActive !== undefined) updateData.isActive = isActive;
         if (showOnHome !== undefined) updateData.showOnHome = showOnHome;
         
-        console.log('Updating category with data:', updateData);
+        console.log('Preparing update with data:', updateData);
         
+        // Perform the update
         const updatedCategory = await Category.findByIdAndUpdate(
             id,
             { $set: updateData },
-            { new: true, runValidators: true, context: 'query' }
+            { 
+                new: true, 
+                runValidators: true, 
+                context: 'query',
+                useFindAndModify: false // Ensure we're using the new MongoDB driver
+            }
         );
 
         if (!updatedCategory) {
-            return res.status(404).json({ message: 'Category not found' });
+            console.error('Failed to update category - no document was returned');
+            return res.status(500).json({ message: 'Failed to update category' });
         }
+        
+        console.log('Category updated successfully:', {
+            _id: updatedCategory._id,
+            name: updatedCategory.name,
+            isActive: updatedCategory.isActive,
+            showOnHome: updatedCategory.showOnHome
+        });
 
         res.json(updatedCategory);
     } catch (error) {
