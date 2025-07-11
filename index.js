@@ -70,16 +70,27 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Ensure uploads directory exists
-const uploadsDir = path.join(__dirname, 'public/uploads');
+const uploadsDir = path.join(process.cwd(), 'public/uploads');
 import fs from 'fs';
 if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
     console.log('Created uploads directory:', uploadsDir);
+} else {
+    console.log('Uploads directory exists at:', uploadsDir);
+    // List files in the uploads directory for debugging
+    fs.readdir(uploadsDir, (err, files) => {
+        if (err) {
+            console.error('Error reading uploads directory:', err);
+        } else {
+            console.log('Files in uploads directory:', files);
+        }
+    });
 }
 
 // Serve static files with proper MIME types and headers
 app.use('/uploads', express.static(uploadsDir, {
   setHeaders: (res, path) => {
+    console.log('Serving file:', path); // Debug log
     const ext = path.split('.').pop().toLowerCase();
     const mimeTypes = {
       'jpg': 'image/jpeg',
@@ -95,6 +106,21 @@ app.use('/uploads', express.static(uploadsDir, {
     }
   }
 }));
+
+// Add a test route to check file serving
+app.get('/test-upload/:filename', (req, res) => {
+  const { filename } = req.params;
+  const filePath = path.join(uploadsDir, filename);
+  
+  if (fs.existsSync(filePath)) {
+    console.log(`Serving test file: ${filePath}`);
+    res.sendFile(filePath);
+  } else {
+    console.error(`File not found: ${filePath}`);
+    res.status(404).send('File not found');
+  }
+});
+
 console.log('Serving static files from:', uploadsDir);
 
 // Database connection
