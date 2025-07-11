@@ -16,6 +16,7 @@ import courseRoute from "./route/course.route.js";
 import contactRoute from "./route/contactRoutes.js";
 import enrollmentRoute from "./routes/enrollmentRoutes.js";
 import faqRoute from "./route/faq.route.js";
+import uploadRoute from "./route/uploadRoute.js";
 
 // Initialize express app
 const app = express();
@@ -70,7 +71,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Set up public directory for static files
-const publicDir = path.join(process.cwd(), 'public');
+const publicDir = path.join(__dirname, 'public');
 const uploadsDir = path.join(publicDir, 'uploads');
 import fs from 'fs';
 
@@ -90,11 +91,39 @@ if (!fs.existsSync(uploadsDir)) {
     // });
 }
 
-// Serve all static files from the public directory
-app.use(express.static(publicDir));
+// Debug: Log the current working directory and paths
+console.log('Current working directory:', process.cwd());
+console.log('__dirname:', __dirname);
+console.log('Public directory path:', path.join(__dirname, 'public'));
+console.log('Uploads directory path:', uploadsDir);
+
+// List all files in the public directory
+const listPublicFiles = (dir) => {
+    try {
+        const files = fs.readdirSync(dir);
+        console.log(`Files in ${dir}:`, files);
+        return files;
+    } catch (err) {
+        console.error(`Error reading directory ${dir}:`, err);
+        return [];
+    }
+};
+
+listPublicFiles(publicDir);
+listPublicFiles(uploadsDir);
+
+// Serve static files from the public directory
+app.use(express.static(publicDir, {
+    setHeaders: (res, path) => {
+        console.log('Serving static file:', path);
+    }
+}));
 
 // Serve uploads with specific headers
-app.use('/uploads', express.static(uploadsDir, {
+app.use('/uploads', (req, res, next) => {
+    console.log('Request for upload file:', req.path);
+    next();
+}, express.static(uploadsDir, {
   setHeaders: (res, filePath) => {
     console.log('Serving file:', filePath);
     const ext = path.extname(filePath).toLowerCase().substring(1);
@@ -169,17 +198,61 @@ connectDB();
 mongoose.connection.on('error', err => {
     console.error('MongoDB connection error:', err);});
 
-// Routes
-app.use("/api/auth", authRoute); // Authentication routes (login, signup)
-app.use("/api/users", userRoute); // User management routes (admin only)
-app.use("/api/profile", profileRoute); // User profile routes (any authenticated user)
+// Routes - Specific routes first
+console.log('Mounting upload route at /api/upload');
+app.use('/api/upload', uploadRoute); // File upload routes
+
+// Debug route to test if the server is running
+app.get('/api/ping', (req, res) => {
+    res.json({
+        success: true,
+        message: 'Server is running',
+        timestamp: new Date().toISOString(),
+        nodeVersion: process.version,
+        environment: process.env.NODE_ENV || 'development',
+        paths: {
+            currentWorkingDir: process.cwd(),
+            publicDir: publicDir,
+            uploadsDir: uploadsDir
+        }
+    });
+});
+
+// API Routes
+app.use("/api/auth", authRoute);
+app.use("/api/users", userRoute);
+app.use("/api/profile", profileRoute);
 app.use("/api/books", bookRoute);
 app.use("/api/cart", cartRoute);
 app.use("/api/categories", categoryRoute);
 app.use("/api/courses", courseRoute);
-app.use("/api/contacts", contactRoute);
+app.use("/api/contact", contactRoute);
 app.use("/api/enrollments", enrollmentRoute);
-app.use("/api", faqRoute); // FAQ routes
+app.use("/api/faqs", faqRoute);
+app.use("/api/upload", uploadRoute);
+
+// Log all routes for debugging
+const printRoutes = (routes, parentPath = '') => {
+  routes.forEach(route => {
+    if (route.route) {
+      const methods = Object.keys(route.route.methods).join(',').toUpperCase();
+      console.log(`${methods.padEnd(6)} ${parentPath}${route.route.path}`);
+    } else if (route.name === 'router') {
+      // This is a router instance
+      const routerPath = route.regexp?.toString().replace(/^\/\^|\$\//g, '').replace('\/?', '') || '';
+      if (route.handle?.stack) {
+        printRoutes(route.handle.stack, `${parentPath}${routerPath}/`);
+      }
+    }
+  });
+};
+
+console.log('\nRegistered Routes:');
+printRoutes(app._router.stack);
+app.use("/api/books", bookRoute);
+app.use("/api/cart", cartRoute);
+app.use("/api/categories", categoryRoute);
+app.use("/api/courses", courseRoute);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
