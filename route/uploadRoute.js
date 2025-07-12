@@ -5,11 +5,138 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs/promises';
 import fsSync from 'fs';
+import multer from 'multer';
 
 const router = express.Router();
 
-// Debug: Log when the router is being used
-console.log('Upload router initialized');
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+        // Create uploads directory if it doesn't exist
+        if (!fsSync.existsSync(uploadsDir)) {
+            fsSync.mkdirSync(uploadsDir, { recursive: true });
+        }
+        cb(null, uploadsDir);
+    },
+    filename: function (req, file, cb) {
+        // Create a unique filename with timestamp and original name
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, 'img-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+// Configure multer for image uploads
+const imageUpload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 10 * 1024 * 1024, // 10MB limit for images
+    },
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        if (allowedTypes.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error('Invalid file type. Only images are allowed.'));
+        }
+    }
+});
+
+// Configure multer for video uploads
+const videoUpload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 500 * 1024 * 1024, // 500MB limit for videos
+    },
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-m4v', 'video/x-matroska'];
+        if (allowedTypes.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error('Invalid file type. Only videos are allowed (MP4, WebM, QuickTime, MKV).'));
+        }
+    }
+});
+
+// Video upload endpoint
+router.post('/video', protect, (req, res, next) => {
+    videoUpload.single('file')(req, res, async (err) => {
+        try {
+            // Handle multer errors (e.g., file size, file type)
+            if (err) {
+                console.error('Multer error:', err);
+                if (err.code === 'LIMIT_FILE_SIZE') {
+                    return res.status(413).json({
+                        success: false,
+                        message: 'File too large. Maximum size is 500MB.'
+                    });
+                }
+                if (err.message.includes('Invalid file type')) {
+                    return res.status(415).json({
+                        success: false,
+                        message: 'Invalid file type. Only MP4, WebM, and QuickTime videos are allowed.'
+                    });
+                }
+                throw err;
+            }
+
+            if (!req.file) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'No video file received' 
+                });
+            }
+
+            // Verify file exists
+            try {
+                await fs.access(req.file.path);
+            } catch (err) {
+                console.error('Uploaded file not found:', req.file.path);
+                return res.status(500).json({
+                    success: false,
+                    message: 'Failed to process uploaded file'
+                });
+            }
+
+            const fileSizeInMB = (req.file.size / (1024 * 1024)).toFixed(2);
+            console.log(`Video uploaded: ${req.file.filename} (${fileSizeInMB}MB)`);
+            
+            // Return success response with file details
+            res.status(200).json({
+                success: true,
+                message: 'Video uploaded successfully',
+                data: {
+                    name: req.file.filename,
+                    originalName: req.file.originalname,
+                    path: `/uploads/${req.file.filename}`,
+                    url: `/api/upload/file/${encodeURIComponent(req.file.filename)}`,
+                    size: req.file.size,
+                    sizeMB: fileSizeInMB,
+                    mimetype: req.file.mimetype,
+                    type: 'video',
+                    uploadedAt: new Date().toISOString()
+                }
+            });
+        } catch (error) {
+            console.error('Error uploading video:', error);
+            
+            // Clean up the uploaded file if there was an error
+            if (req.file && req.file.path) {
+                try {
+                    await fs.unlink(req.file.path);
+                } catch (unlinkErr) {
+                    console.error('Failed to clean up uploaded file:', unlinkErr);
+                }
+            }
+            
+            res.status(500).json({
+                success: false,
+                message: 'Failed to upload video',
+                error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+            });
+        }
+    });
+});
 
 // Test endpoint to check if upload route is working
 router.get('/test', (req, res) => {
@@ -39,14 +166,17 @@ router.get('/test', (req, res) => {
                 publicExists,
                 uploadsExists
             },
-            filesInUploads: files
+            filesInUploads: files,
+            nodeEnv: process.env.NODE_ENV,
+            allowedOrigins: process.env.ALLOWED_ORIGINS
         });
     } catch (error) {
         console.error('Error in test endpoint:', error);
         res.status(500).json({
             success: false,
             message: 'Error checking directories',
-            error: error.message
+            error: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
     }
 });
@@ -133,16 +263,121 @@ router.get('/file/:filename', async (req, res) => {
     }
 });
 
-// @desc    Get all uploaded images
-// @route   GET /images
+// @desc    Get all uploaded media files (images and videos)
+// @route   GET /files
 // @access  Private
-router.get('/images', protect, async (req, res) => {
+router.get('/files', protect, async (req, res) => {
     try {
-        console.log('Fetching list of uploaded images');
+        console.log('Fetching list of uploaded media files');
         const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
         const files = await fs.readdir(uploadsDir);
         
-        const images = await Promise.all(files.map(async (file) => {
+        const mediaFiles = await Promise.all(files.map(async (file) => {
+            try {
+                if (file === '.gitkeep') return null;
+                
+                const filePath = path.join(uploadsDir, file);
+                const stats = await fs.stat(filePath);
+                const fileUrl = `/api/upload/file/${encodeURIComponent(file)}`;
+                const fullUrl = `${req.protocol}://${req.get('host')}${fileUrl}`;
+                
+                // Determine file type
+                const isVideo = ['.mp4', '.webm', '.mov', '.mkv'].some(ext => 
+                    file.toLowerCase().endsWith(ext)
+                );
+                
+                return {
+                    name: file,
+                    url: fullUrl,
+                    path: fileUrl,
+                    size: stats.size,
+                    uploadedAt: stats.birthtime,
+                    mimetype: getMimeType(file),
+                    type: isVideo ? 'video' : 'image'
+                };
+            } catch (err) {
+                console.error(`Error processing file ${file}:`, err);
+                return null;
+            }
+        }));
+        
+        // Filter out any null values from failed file processing
+        const validFiles = mediaFiles.filter(file => file !== null);
+        
+        // Sort by upload date (newest first)
+        validFiles.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
+        
+        console.log(`Found ${validFiles.length} valid media files`);
+        
+        res.json({
+            success: true,
+            count: validFiles.length,
+            data: validFiles
+        });
+    } catch (error) {
+        console.error('Error getting images:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error getting images',
+            error: error.message
+        });
+    }
+});
+
+// Upload video file
+router.post('/video', protect, videoUpload.single('file'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: 'No video file uploaded or invalid file type'
+            });
+        }
+
+        // Construct URLs
+        const filePath = path.join('uploads', req.file.filename);
+        const fileUrl = `/api/upload/file/${encodeURIComponent(req.file.filename)}`;
+        const fullUrl = `${req.protocol}://${req.get('host')}${fileUrl}`;
+
+        console.log('Video uploaded successfully:', {
+            filename: req.file.filename,
+            size: req.file.size,
+            mimetype: req.file.mimetype,
+            path: filePath,
+            url: fullUrl
+        });
+
+        res.status(201).json({
+            success: true,
+            data: {
+                name: req.file.filename,
+                path: fileUrl,
+                url: fullUrl,
+                size: req.file.size,
+                mimetype: req.file.mimetype,
+                type: 'video',
+                uploadedAt: new Date().toISOString()
+            }
+        });
+    } catch (error) {
+        console.error('Video upload error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error uploading video',
+            error: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
+    }
+});
+
+// Get all uploaded files (images and videos)
+router.get('/files', protect, async (req, res) => {
+    try {
+        console.log('Fetching list of uploaded files');
+        const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+        const files = await fs.readdir(uploadsDir);
+        
+        const filesList = await Promise.all(files.map(async (file) => {
             try {
                 const filePath = path.join(uploadsDir, file);
                 const stats = await fs.stat(filePath);
@@ -164,20 +399,20 @@ router.get('/images', protect, async (req, res) => {
         }));
         
         // Filter out any null values from failed file processing
-        const validImages = images.filter(img => img !== null);
+        const validFiles = filesList.filter(file => file !== null);
         
-        console.log(`Found ${validImages.length} valid images`);
+        console.log(`Found ${validFiles.length} valid files`);
         
         res.json({
             success: true,
-            count: validImages.length,
-            data: validImages
+            count: validFiles.length,
+            data: validFiles
         });
     } catch (error) {
-        console.error('Error getting images:', error);
+        console.error('Error getting files:', error);
         res.status(500).json({
             success: false,
-            message: 'Error getting images',
+            message: 'Error getting files',
             error: error.message
         });
     }
@@ -186,7 +421,7 @@ router.get('/images', protect, async (req, res) => {
 // @desc    Upload a file
 // @route   POST /
 // @access  Private
-router.post('/', protect, handleFileUpload, (req, res) => {
+router.post('/image', protect, imageUpload.single('file'), async (req, res) => {
     try {
         console.log('Upload request received:', req.file);
         
@@ -198,26 +433,28 @@ router.post('/', protect, handleFileUpload, (req, res) => {
             });
         }
 
-        // Construct the URL to access the uploaded file
+        // Construct URLs
+        const filePath = path.join('uploads', req.file.filename);
         const fileUrl = `/api/upload/file/${encodeURIComponent(req.file.filename)}`;
         const fullUrl = `${req.protocol}://${req.get('host')}${fileUrl}`;
 
         console.log('File uploaded successfully:', {
-            originalName: req.file.originalname,
             filename: req.file.filename,
             size: req.file.size,
+            mimetype: req.file.mimetype,
+            path: filePath,
             url: fullUrl
         });
 
         res.status(201).json({
             success: true,
-            message: 'File uploaded successfully',
             data: {
                 name: req.file.filename,
-                url: fullUrl,
                 path: fileUrl,
+                url: fullUrl,
                 size: req.file.size,
-                mimetype: req.file.mimetype
+                mimetype: req.file.mimetype,
+                uploadedAt: new Date().toISOString()
             }
         });
     } catch (error) {
@@ -225,18 +462,52 @@ router.post('/', protect, handleFileUpload, (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error uploading file',
-            error: error.message
+            error: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
     }
 });
 
 // Add OPTIONS handler for CORS preflight
+// Delete a file
+router.delete('/file/:filename', protect, async (req, res) => {
+    try {
+        const { filename } = req.params;
+        const filePath = path.join(process.cwd(), 'public', 'uploads', filename);
+        
+        // Check if file exists
+        try {
+            await fs.access(filePath);
+        } catch (err) {
+            return res.status(404).json({
+                success: false,
+                message: 'File not found'
+            });
+        }
+
+        // Delete the file
+        await fs.unlink(filePath);
+        
+        res.json({
+            success: true,
+            message: 'File deleted successfully'
+        });
+    } catch (error) {
+        console.error('Error deleting file:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to delete file',
+            error: error.message
+        });
+    }
+});
+
 router.options('*', (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'http://localhost:5173');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.status(200).send();
+    res.status(200).end();
 });
 
 // Helper function to get MIME type from filename

@@ -5,6 +5,7 @@ import cors from "cors";
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+
 // Import routes
 import bookRoute from "./route/book.route.js";
 import authRoute from "./route/auth.route.js";
@@ -31,27 +32,43 @@ dotenv.config();
 // Middleware
 const allowedOrigins = [
   'http://localhost:5173',
-  'http://localhost:5174'
+  'http://localhost:5174',
+  'https://firstvite.com',
+  'https://www.firstvite.com'
 ];
 
 // CORS configuration
 const corsOptions = {
     origin: function (origin, callback) {
-        // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) return callback(null, true);
+        // In development or if no origin, allow all
+        if (process.env.NODE_ENV !== 'production' || !origin) {
+            return callback(null, true);
+        }
         
         // Check if the origin is in the allowed list
-        if (allowedOrigins.indexOf(origin) === -1) {
-            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-            return callback(new Error(msg), false);
+        const allowedOrigins = [
+            'http://localhost:5173',
+            'http://localhost:5174',
+            'https://firstvite.com',
+            'https://www.firstvite.com',
+            'https://firstvite.vercel.app',
+            'https://www.firstvite.vercel.app'
+        ];
+        
+        if (allowedOrigins.includes(origin) || 
+            origin.endsWith('.firstvite.com') || 
+            origin.endsWith('.vercel.app')) {
+            return callback(null, true);
         }
-        return callback(null, true);
+        
+        console.warn('CORS blocked request from origin:', origin);
+        return callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: [
         'Content-Type', 
-        'Authorization', 
+        'Authorization',
         'x-auth-token', 
         'x-user-agent', 
         'x-client-ip'
