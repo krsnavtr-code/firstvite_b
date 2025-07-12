@@ -24,6 +24,10 @@ const categorySchema = new mongoose.Schema({
     showOnHome: {
         type: Boolean,
         default: false
+    },
+    image: {
+        type: String,
+        trim: true
     }
 }, { timestamps: true });
 

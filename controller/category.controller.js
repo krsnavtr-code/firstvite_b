@@ -90,7 +90,7 @@ export const updateCategory = async (req, res) => {
             });
         }
         
-        const { name, description, isActive, showOnHome } = req.body;
+        const { name, description, isActive, showOnHome, image } = req.body;
         
         // Check if another category with the same name exists (if name is being updated)
         if (name && name !== existingCategory.name) {
@@ -120,6 +120,7 @@ export const updateCategory = async (req, res) => {
         if (description !== undefined) updateData.description = description;
         if (isActive !== undefined) updateData.isActive = isActive;
         if (showOnHome !== undefined) updateData.showOnHome = showOnHome;
+        if (image !== undefined) updateData.image = image;
         
         console.log('Updating with data:', updateData);
         
