@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import Category from "../model/category.model.js";
+import Book from "../model/book.model.js";
 import { validationResult } from 'express-validator';
 
 
@@ -205,104 +206,213 @@ export const updateCategory = async (req, res) => {
 
 export const deleteCategory = async (req, res) => {
     const { id } = req.params;
-    console.log(`Received delete request for category ID: ${id}`);
+    console.log(`[Category] Delete request received for category ID: ${id}`);
     
-    // Start a MongoDB session for transactions
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        console.error(`[Category] Invalid category ID format: ${id}`);
+        return res.status(400).json({
+            success: false,
+            message: 'Invalid category ID format',
+            error: 'INVALID_ID_FORMAT'
+        });
+    }
+    
     const session = await mongoose.startSession();
     session.startTransaction();
     
     try {
+        console.log(`[Category] Starting transaction for category ID: ${id}`);
+        
         // 1. Check if category exists
-        const category = await Category.findById(id).session(session);
+        const category = await Category.findById(id).session(session).lean();
         if (!category) {
-            console.log(`Category not found with ID: ${id}`);
+            console.error(`[Category] Category not found with ID: ${id}`);
             await session.abortTransaction();
             session.endSession();
             return res.status(404).json({ 
                 success: false,
-                message: 'Category not found' 
+                message: 'Category not found',
+                error: 'CATEGORY_NOT_FOUND'
             });
         }
         
-        console.log('Found category to delete:', {
+        console.log('[Category] Found category to delete:', {
             _id: category._id,
             name: category.name,
             bookCount: category.bookCount
         });
         
         // 2. Check if any books are using this category
-        const Book = mongoose.model('Book');
-        const booksCount = await Book.countDocuments({ category: id }).session(session);
-        
-        if (booksCount > 0) {
-            console.log(`Cannot delete category - found ${booksCount} associated books`);
+        try {
+            const booksCount = await Book.countDocuments({ category: id }).session(session);
+            console.log(`[Category] Found ${booksCount} books associated with category ${id}`);
+            
+            if (booksCount > 0) {
+                console.error(`[Category] Cannot delete - ${booksCount} books are associated with this category`);
+                await session.abortTransaction();
+                session.endSession();
+                return res.status(400).json({ 
+                    success: false,
+                    message: `Cannot delete category - it has ${booksCount} associated book(s)`,
+                    error: 'CATEGORY_IN_USE',
+                    bookCount: booksCount
+                });
+            }
+        } catch (error) {
+            console.error('[Category] Error checking for associated books:', error);
             await session.abortTransaction();
             session.endSession();
-            return res.status(400).json({ 
+            return res.status(500).json({
                 success: false,
-                message: `Cannot delete category - it has ${booksCount} associated book(s)`,
-                bookCount: booksCount
+                message: 'Error checking for associated books',
+                error: 'BOOK_CHECK_ERROR',
+                details: process.env.NODE_ENV === 'development' ? error.message : undefined
             });
         }
         
         // 3. Delete the category
-        const deletedCategory = await Category.findByIdAndDelete(id)
-            .session(session);
+        let deletedCategory;
+        try {
+            console.log(`[Category] Attempting to delete category ${id}`);
+            deletedCategory = await Category.findByIdAndDelete(id)
+                .session(session)
+                .lean();
+                
+            if (!deletedCategory) {
+                console.error(`[Category] Failed to delete - no document was deleted for ID: ${id}`);
+                await session.abortTransaction();
+                session.endSession();
+                return res.status(500).json({ 
+                    success: false,
+                    message: 'Failed to delete category - no document was deleted',
+                    error: 'DELETE_FAILED'
+                });
+            }
             
-        if (!deletedCategory) {
-            console.error('Category was not deleted - unknown error');
-            await session.abortTransaction();
+            // 4. If we got here, everything is good - commit the transaction
+            console.log(`[Category] Category ${id} deleted successfully, committing transaction`);
+            await session.commitTransaction();
             session.endSession();
-            return res.status(500).json({ 
+            
+            console.log(`[Category] Successfully deleted category: ${deletedCategory._id} - ${deletedCategory.name}`);
+            
+            return res.json({ 
+                success: true,
+                message: 'Category deleted successfully',
+                data: {
+                    _id: deletedCategory._id,
+                    name: deletedCategory.name
+                }
+            });
+            
+        } catch (deleteError) {
+            console.error('[Category] Error during category deletion:', deleteError);
+            if (session.inTransaction()) {
+                await session.abortTransaction();
+            }
+            
+            // Handle specific MongoDB errors
+            if (deleteError.name === 'CastError') {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid category ID format',
+                    error: 'INVALID_ID_FORMAT'
+                });
+            }
+            
+            // Handle duplicate key errors (shouldn't happen on delete, but just in case)
+            if (deleteError.code === 11000) {
+                return res.status(409).json({
+                    success: false,
+                    message: 'A category with this name already exists',
+                    error: 'DUPLICATE_CATEGORY'
+                });
+            }
+            
+            // Default error response
+            return res.status(500).json({
                 success: false,
-                message: 'Failed to delete category' 
+                message: 'An error occurred while deleting the category',
+                error: 'DELETE_ERROR',
+                details: process.env.NODE_ENV === 'development' ? deleteError.message : undefined
             });
         }
-        
-        // 4. If we got here, everything is good - commit the transaction
-        await session.commitTransaction();
-        session.endSession();
-        
-        console.log(`Successfully deleted category: ${deletedCategory._id} - ${deletedCategory.name}`);
-        
-        res.json({ 
-            success: true,
-            message: 'Category deleted successfully',
-            data: {
-                _id: deletedCategory._id,
-                name: deletedCategory.name
-            }
-        });
         
     } catch (error) {
         // If we get here, something went wrong - abort the transaction
         console.error('Error in deleteCategory:', error);
         
+        // Log the full error for debugging
+        console.error('Error details:', {
+            name: error.name,
+            message: error.message,
+            code: error.code,
+            stack: error.stack
+        });
+        
         if (session.inTransaction()) {
-            await session.abortTransaction();
+            try {
+                await session.abortTransaction();
+            } catch (abortError) {
+                console.error('Error aborting transaction:', abortError);
+            }
         }
         
         // Handle specific error types
         if (error.name === 'CastError') {
             return res.status(400).json({
                 success: false,
-                message: 'Invalid category ID format'
+                message: 'Invalid category ID format',
+                error: 'INVALID_ID_FORMAT'
+            });
+        }
+        
+        // Handle duplicate key errors
+        if (error.code === 11000) {
+            return res.status(409).json({
+                success: false,
+                message: 'A category with this name already exists',
+                error: 'DUPLICATE_CATEGORY'
+            });
+        }
+        
+        // Handle validation errors
+        if (error.name === 'ValidationError') {
+            const errors = Object.values(error.errors).map(err => ({
+                field: err.path,
+                message: err.message
+            }));
+            
+            return res.status(400).json({
+                success: false,
+                message: 'Validation failed',
+                error: 'VALIDATION_ERROR',
+                errors
             });
         }
         
         // Default error response
         res.status(500).json({ 
             success: false,
-            message: 'Server error while deleting category',
-            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+            message: 'An error occurred while deleting the category',
+            error: 'SERVER_ERROR',
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
     } finally {
-        // Ensure the session is always ended
-        if (session.inTransaction()) {
-            await session.abortTransaction();
-        }
-        if (session.inTransaction() || session.id) {
-            session.endSession();
+        // Ensure the session is always properly cleaned up
+        try {
+            if (session.inTransaction()) {
+                console.log('[Category] Aborting any pending transaction in finally block');
+                await session.abortTransaction();
+            }
+            
+            if (session.id) {
+                console.log('[Category] Ending session in finally block');
+                await session.endSession();
+            }
+        } catch (cleanupError) {
+            console.error('[Category] Error during session cleanup:', cleanupError);
+            // Don't throw from finally block
         }
     }
 };
