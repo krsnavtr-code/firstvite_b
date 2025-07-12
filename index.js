@@ -29,6 +29,13 @@ const __dirname = path.dirname(__filename);
 // Load environment variables
 dotenv.config();
 
+// Configure express to handle larger payloads
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Increase the HTTP request timeout to 5 minutes (300000ms)
+app.timeout = 300000;
+
 // Middleware
 const allowedOrigins = [
   'http://localhost:5173',

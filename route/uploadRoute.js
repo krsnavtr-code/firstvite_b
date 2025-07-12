@@ -46,14 +46,25 @@ const imageUpload = multer({
 const videoUpload = multer({
     storage: storage,
     limits: {
-        fileSize: 500 * 1024 * 1024, // 500MB limit for videos
+        fileSize: 1024 * 1024 * 1024, // 1GB limit for videos
+        fieldSize: 1024 * 1024 * 1024, // 1GB limit for form fields
     },
     fileFilter: (req, file, cb) => {
-        const allowedTypes = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-m4v', 'video/x-matroska'];
+        const allowedTypes = [
+            'video/mp4', 
+            'video/webm', 
+            'video/quicktime', 
+            'video/x-m4v', 
+            'video/x-matroska',
+            'video/mpeg',
+            'video/avi',
+            'video/x-msvideo',
+            'video/x-ms-wmv'
+        ];
         if (allowedTypes.includes(file.mimetype)) {
             cb(null, true);
         } else {
-            cb(new Error('Invalid file type. Only videos are allowed (MP4, WebM, QuickTime, MKV).'));
+            cb(new Error('Invalid file type. Only videos are allowed (MP4, WebM, QuickTime, MKV, AVI, WMV).'));
         }
     }
 });
