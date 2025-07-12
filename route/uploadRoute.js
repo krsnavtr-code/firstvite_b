@@ -469,12 +469,45 @@ router.post('/image', protect, imageUpload.single('file'), async (req, res) => {
 });
 
 // Add OPTIONS handler for CORS preflight
+// Delete a file
+router.delete('/file/:filename', protect, async (req, res) => {
+    try {
+        const { filename } = req.params;
+        const filePath = path.join(process.cwd(), 'public', 'uploads', filename);
+        
+        // Check if file exists
+        try {
+            await fs.access(filePath);
+        } catch (err) {
+            return res.status(404).json({
+                success: false,
+                message: 'File not found'
+            });
+        }
+
+        // Delete the file
+        await fs.unlink(filePath);
+        
+        res.json({
+            success: true,
+            message: 'File deleted successfully'
+        });
+    } catch (error) {
+        console.error('Error deleting file:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to delete file',
+            error: error.message
+        });
+    }
+});
+
 router.options('*', (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'http://localhost:5173');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.status(200).send();
+    res.status(200).end();
 });
 
 // Helper function to get MIME type from filename
