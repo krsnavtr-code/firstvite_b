@@ -18,6 +18,8 @@ import contactRoute from "./route/contactRoutes.js";
 import enrollmentRoute from "./routes/enrollmentRoutes.js";
 import faqRoute from "./route/faq.route.js";
 import uploadRoute from "./route/uploadRoute.js";
+import authRoutes from "./route/authRoutes.js";
+import adminRoutes from "./route/adminRoutes.js";
 
 // Initialize express app
 const app = express();
@@ -245,6 +247,14 @@ app.get('/api/ping', (req, res) => {
 // API Routes
 app.use("/api/auth", authRoute);
 app.use("/api/users", userRoute);
+
+// Authentication routes
+app.use("/api/auth", authRoutes);
+
+// Admin routes
+app.use("/api/admin", adminRoutes);
+
+// Other routes
 app.use("/api/profile", profileRoute);
 app.use("/api/books", bookRoute);
 app.use("/api/cart", cartRoute);
@@ -273,6 +283,9 @@ const printRoutes = (routes, parentPath = '') => {
 
 console.log('\nRegistered Routes:');
 printRoutes(app._router.stack);
+
+// API Routes
+app.use("/api/auth", authRoute);  // Mount auth routes
 app.use("/api/books", bookRoute);
 app.use("/api/cart", cartRoute);
 app.use("/api/categories", categoryRoute);

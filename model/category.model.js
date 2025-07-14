@@ -25,6 +25,10 @@ const categorySchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    master: {
+        type: Boolean,
+        default: false
+    },
     image: {
         type: String,
         trim: true

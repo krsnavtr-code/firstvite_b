@@ -47,6 +47,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  isApproved: {
+    type: Boolean,
+    default: false
+  },
   studentId: {
     type: String,
     sparse: true,
@@ -67,6 +71,10 @@ userSchema.pre('save', async function(next) {
 });
 
 // Method to compare passwords
+userSchema.methods.matchPassword = async function(candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
+
 userSchema.methods.correctPassword = async function(candidatePassword, userPassword) {
   return await bcrypt.compare(candidatePassword, userPassword);
 };

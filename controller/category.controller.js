@@ -18,13 +18,15 @@ export const createCategory = async (req, res) => {
             });
         }
 
-        const { name, description, isActive = true, showOnHome = false } = req.body;
+        const { name, description, isActive = true, showOnHome = false, master = false, image } = req.body;
         
         console.log('Creating category with data:', {
             name,
             description,
             isActive,
-            showOnHome
+            showOnHome,
+            master,
+            image
         });
         
         // Check if category with same name already exists
@@ -42,7 +44,9 @@ export const createCategory = async (req, res) => {
             name,
             description: description || '',
             isActive,
-            showOnHome
+            showOnHome,
+            master,
+            image: image || null
         });
 
         const savedCategory = await category.save();
@@ -420,22 +424,20 @@ export const deleteCategory = async (req, res) => {
 
 export const getAllCategories = async (req, res) => {
     try {
-        console.log('Attempting to fetch categories...');
+        console.log('Fetching categories with query:', req.query);
         console.log('Mongoose connection state:', mongoose.connection.readyState);
         
         // Check if model is defined
         if (!Category) {
             console.error('Category model is not defined');
-            return res.status(500).json({ message: 'Category model not available' });
+            return res.status(500).json({ 
+                success: false,
+                message: 'Category model not available' 
+            });
         }
         
         // Build query
         const query = {};
-        
-        // Add showOnHome filter if provided
-        if (req.query.showOnHome === 'true') {
-            query.showOnHome = true;
-        }
         
         // Add status filter if provided
         if (req.query.status === 'active') {
@@ -444,8 +446,25 @@ export const getAllCategories = async (req, res) => {
             query.isActive = false;
         }
         
+        // Add showOnHome filter if provided
+        if (req.query.showOnHome === 'true') {
+            query.showOnHome = true;
+        } else if (req.query.showOnHome === 'false') {
+            query.showOnHome = false;
+        }
+        
+        // Add search query if provided
+        if (req.query.search) {
+            const searchRegex = new RegExp(req.query.search, 'i');
+            query.$or = [
+                { name: searchRegex },
+                { description: searchRegex },
+                { slug: searchRegex }
+            ];
+        }
+        
         // Build sort
-        let sort = { name: 1 }; // Default sort by name
+        let sort = { name: 1 }; // Default sort by name ascending
         if (req.query.sort) {
             if (req.query.sort.startsWith('-')) {
                 sort = { [req.query.sort.substring(1)]: -1 };
@@ -454,29 +473,54 @@ export const getAllCategories = async (req, res) => {
             }
         }
         
-        // Build fields
+        // Build fields selection
         let selectFields = '';
         if (req.query.fields) {
-            selectFields = req.query.fields.split(',').join(' ');
+            // Sanitize fields to prevent field selection injection
+            const allowedFields = ['_id', 'name', 'slug', 'description', 'image', 'isActive', 'showOnHome', 'createdAt', 'updatedAt', 'courseCount'];
+            selectFields = req.query.fields
+                .split(',')
+                .filter(field => allowedFields.includes(field))
+                .join(' ');
         }
         
-        // Execute query
-        let queryBuilder = Category.find(query).sort(sort);
+        // Pagination
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 25;
+        const skip = (page - 1) * limit;
+        
+        // Execute count query
+        const total = await Category.countDocuments(query);
+        
+        // Execute find query with pagination
+        let queryBuilder = Category.find(query)
+            .sort(sort)
+            .skip(skip)
+            .limit(limit);
         
         // Apply field selection if specified
         if (selectFields) {
             queryBuilder = queryBuilder.select(selectFields);
         }
         
-        // Apply limit if specified
-        if (req.query.limit) {
-            queryBuilder = queryBuilder.limit(parseInt(req.query.limit));
-        }
-        
         const categories = await queryBuilder.lean().exec();
+        const totalPages = Math.ceil(total / limit);
         
-        console.log('Successfully fetched categories:', categories.length);
-        res.json(categories);
+        console.log(`Fetched ${categories.length} of ${total} categories (page ${page} of ${totalPages})`);
+        
+        // Return paginated response
+        res.json({
+            success: true,
+            data: categories,
+            pagination: {
+                total,
+                totalPages,
+                page,
+                limit,
+                hasNextPage: page < totalPages,
+                hasPreviousPage: page > 1
+            }
+        });
     } catch (error) {
         console.error('Error fetching categories:', error);
         if (error.name === 'MongoServerError') {
