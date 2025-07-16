@@ -84,10 +84,13 @@ export const login = catchAsync(async (req, res, next) => {
     return next(new AppError('Invalid email or password', 401));
   }
 
-  // Check if user is approved
-  if (!user.isApproved) {
-    return next(new AppError('Your account is pending approval from the administrator', 401));
+  // Check if account is deactivated
+  if (user.isActive === false) {
+    return next(new AppError('Your account has been deactivated. Please contact support.', 401));
   }
+  
+  // If account is active but not approved yet, still allow login
+  // but limit access based on isApproved status (handled by frontend routes)
 
   // Check password
   const isMatch = await user.matchPassword(password);
