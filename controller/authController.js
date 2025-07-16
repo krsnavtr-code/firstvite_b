@@ -5,9 +5,32 @@ import catchAsync from '../utils/catchAsync.js';
 
 // Generate JWT Token
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: '30d', // Token expires in 30 days
-  });
+  return jwt.sign(
+    { 
+      id, // Store the user ID as 'id' in the token payload
+      type: 'access',
+      iat: Math.floor(Date.now() / 1000) // Issued at time
+    }, 
+    process.env.JWT_SECRET || 'your_jwt_secret', 
+    {
+      expiresIn: '15m' // Access token expires in 15 minutes
+    }
+  );
+};
+
+// Generate Refresh Token
+const generateRefreshToken = (id) => {
+  return jwt.sign(
+    {
+      id,
+      type: 'refresh',
+      iat: Math.floor(Date.now() / 1000)
+    },
+    process.env.JWT_REFRESH_SECRET || 'your_jwt_refresh_secret',
+    {
+      expiresIn: '7d' // Refresh token expires in 7 days
+    }
+  );
 };
 
 // @desc    Register a new user
@@ -77,25 +100,131 @@ export const login = catchAsync(async (req, res, next) => {
   user.lastLogin = Date.now();
   await user.save();
 
-  res.json({
+  console.log('Generating tokens for user:', user._id);
+  // Generate tokens
+  const token = generateToken(user._id);
+  const refreshToken = generateRefreshToken(user._id);
+  
+  console.log('Generated token:', token ? 'Token exists' : 'Token is missing');
+  console.log('Generated refreshToken:', refreshToken ? 'Refresh token exists' : 'Refresh token is missing');
+  
+  if (!token || !refreshToken) {
+    console.error('Token generation failed');
+    return next(new AppError('Failed to generate authentication tokens', 500));
+  }
+  
+  // Store refresh token in user document
+  user.refreshToken = refreshToken;
+  try {
+    await user.save();
+    console.log('Refresh token saved to user document');
+  } catch (saveError) {
+    console.error('Error saving refresh token:', saveError);
+    return next(new AppError('Failed to save refresh token', 500));
+  }
+  
+  // Prepare user data for response
+  const userData = {
     _id: user._id,
     fullname: user.fullname,
     email: user.email,
     role: user.role,
-    isApproved: user.isApproved,
-    token: generateToken(user._id),
-  });
+    isApproved: user.isApproved
+  };
+  
+  console.log('Sending login response with user data');
+  const responseData = {
+    success: true,
+    token,
+    refreshToken,
+    user: userData
+  };
+  
+  console.log('Login response data:', JSON.stringify(responseData, null, 2));
+  res.json(responseData);
 });
 
 // @desc    Get user profile
 // @route   GET /api/auth/profile
 // @access  Private
 export const getUserProfile = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.user.id).select('-password');
+  try {
+    // Get user from the database to ensure we have the latest data
+    const user = await User.findById(req.user.id).select('-password');
+    
+    if (!user) {
+      return next(new AppError('User not found', 404));
+    }
 
-  if (user) {
-    res.json(user);
-  } else {
-    return next(new AppError('User not found', 404));
+    res.json({
+      _id: user._id,
+      fullname: user.fullname,
+      email: user.email,
+      role: user.role,
+      isApproved: user.isApproved,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
+    });
+  } catch (error) {
+    console.error('Error in getUserProfile:', error);
+    return next(new AppError('Error fetching user profile', 500));
+  }
+});
+
+// @desc    Refresh access token
+// @route   POST /api/auth/refresh-token
+// @access  Public
+export const refreshToken = catchAsync(async (req, res, next) => {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return next(new AppError('Refresh token is required', 400));
+  }
+
+  try {
+    // Verify the refresh token
+    const decoded = jwt.verify(
+      refreshToken,
+      process.env.JWT_REFRESH_SECRET || 'your_jwt_refresh_secret'
+    );
+
+    if (decoded.type !== 'refresh') {
+      return next(new AppError('Invalid token type', 401));
+    }
+
+    // Find the user and check if the refresh token matches
+    const user = await User.findOne({
+      _id: decoded.id,
+      refreshToken: refreshToken
+    });
+
+    if (!user) {
+      return next(new AppError('User not found or invalid refresh token', 401));
+    }
+
+    // Generate new tokens
+    const newAccessToken = generateToken(user._id);
+    const newRefreshToken = generateRefreshToken(user._id);
+    
+    // Update refresh token in the database
+    user.refreshToken = newRefreshToken;
+    await user.save();
+
+    res.json({
+      token: newAccessToken,
+      refreshToken: newRefreshToken,
+      user: {
+        _id: user._id,
+        fullname: user.fullname,
+        email: user.email,
+        role: user.role,
+        isApproved: user.isApproved
+      }
+    });
+  } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      return next(new AppError('Refresh token has expired', 401));
+    }
+    return next(new AppError('Invalid refresh token', 401));
   }
 });

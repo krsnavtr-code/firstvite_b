@@ -212,8 +212,9 @@ export const createCourse = async (req, res) => {
 // Get all courses with optional filters
 export const getAllCourses = async (req, res) => {
     try {
-        const { category, status, fields, all, search, showOnHome } = req.query;
-        console.log('Getting all courses with params:', { category, status, fields, all, search, user: req.user });
+        const { category, status, fields, all, search, showOnHome, limit, sort, isPublished } = req.query;
+        console.log('Getting all courses with params:', { category, status, fields, all, search, showOnHome, limit, sort, isPublished, user: req.user?.role });
+        
         const query = {};
         
         // Add category filter if provided
@@ -235,49 +236,55 @@ export const getAllCourses = async (req, res) => {
         // Handle published status filtering
         const isAdmin = req.user && req.user.role === 'admin';
         
-        // Only apply isPublished filter if not requesting all courses (for admin)
-        if (all !== 'true') {
-            if (!isAdmin) {
-                // For non-admin users, only show published courses
-                query.isPublished = true;
-            } else if (status) {
-                // For admin users, respect the status filter if provided
-                query.isPublished = status === 'published';
-            }
+        // Handle isPublished filter if provided
+        if (isPublished === 'true') {
+            query.isPublished = true;
+        } else if (isPublished === 'false') {
+            query.isPublished = false;
+        } else if (all !== 'true' && !isAdmin) {
+            // For non-admin users, only show published courses by default
+            query.isPublished = true;
         }
-
+        
         // Handle showOnHome filter
-        console.log('showOnHome filter value:', showOnHome);
         if (showOnHome === 'true') {
             query.showOnHome = true;
-            console.log('Filtering for showOnHome: true');
         } else if (showOnHome === 'false') {
             query.showOnHome = false;
-            console.log('Filtering for showOnHome: false');
         }
         
         // Build the selection fields
-        let selection = '';
-        if (fields) {
-            // Convert comma-separated fields to space-separated for Mongoose
-            selection = fields.split(',').join(' ');
+        let selection = fields ? fields.split(',').join(' ') : '';
+        
+        // Build the sort object
+        let sortObj = { createdAt: -1 }; // Default sort
+        if (sort) {
+            sortObj = {};
+            const sortFields = sort.split(',');
+            sortFields.forEach(field => {
+                const sortOrder = field.startsWith('-') ? -1 : 1;
+                const fieldName = field.replace(/^-/, '');
+                sortObj[fieldName] = sortOrder;
+            });
         }
         
         // Execute the query with filters and selection
         let coursesQuery = Course.find(query)
             .populate('category', 'name')
-            .sort({ createdAt: -1 });
+            .sort(sortObj);
             
         // Apply field selection if specified
         if (selection) {
             coursesQuery = coursesQuery.select(selection);
         }
         
+        // Apply limit if specified
+        if (limit && !isNaN(parseInt(limit))) {
+            coursesQuery = coursesQuery.limit(parseInt(limit));
+        }
+        
         const courses = await coursesQuery.exec();
         console.log(`Found ${courses.length} courses matching query`);
-        if (courses.length > 0) {
-            console.log('First course showOnHome value:', courses[0].showOnHome);
-        }
         res.json(courses);
     } catch (error) {
         console.error('Error fetching courses:', error);

@@ -9,8 +9,32 @@ import {
     getCategoryById 
 } from "../controller/category.controller.js";
 import { isAdmin } from "../middleware/admin.js";
+import { protect } from "../middleware/auth.js";
 
 const router = express.Router();
+
+// Get all categories with optional filters (public)
+router.get('/', async (req, res) => {
+    try {
+        const filters = {
+            status: req.query.status,
+            fields: req.query.fields,
+            sort: req.query.sort,
+            limit: parseInt(req.query.limit) || 100,
+            page: parseInt(req.query.page) || 1
+        };
+        
+        const result = await getAllCategories(filters);
+        res.status(200).json(result);
+    } catch (error) {
+        console.error('Error fetching categories:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Error fetching categories',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+});
 
 // Middleware to validate MongoDB ObjectId more strictly
 const validateObjectId = [

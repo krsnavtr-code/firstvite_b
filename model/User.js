@@ -47,6 +47,55 @@ const userSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  refreshToken: {
+    type: String,
+    select: false // Don't include this field by default in queries
+  },
+  enrolledCourses: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Course'
+  }],
+  completedLessons: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Lesson'
+  }],
+  learningProgress: [{
+    course: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Course'
+    },
+    completedLessons: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Lesson'
+    }],
+    progress: {
+      type: Number,
+      min: 0,
+      max: 100,
+      default: 0
+    },
+    lastAccessed: {
+      type: Date,
+      default: Date.now
+    },
+    completed: {
+      type: Boolean,
+      default: false
+    },
+    completedAt: Date
+  }],
+  certificates: [{
+    course: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Course'
+    },
+    certificateId: String,
+    issuedAt: {
+      type: Date,
+      default: Date.now
+    },
+    downloadUrl: String
+  }],
   isApproved: {
     type: Boolean,
     default: false

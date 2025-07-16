@@ -3,6 +3,57 @@ import Category from "../model/category.model.js";
 import Book from "../model/book.model.js";
 import { validationResult } from 'express-validator';
 
+// Get all categories with optional filters
+export const getAllCategories = async (filters = {}) => {
+    try {
+        const { status, fields, sort, limit, page = 1 } = filters;
+        
+        // Build query
+        const query = {};
+        if (status) query.status = status;
+        
+        // Build projection
+        const projection = fields ? fields.split(',').join(' ') : {};
+        
+        // Build sort
+        const sortOptions = sort ? { [sort]: 1 } : { name: 1 };
+        
+        // Pagination
+        const skip = (page - 1) * limit;
+        
+        // Get total count
+        const total = await Category.countDocuments(query);
+        
+        // Build query builder
+        let queryBuilder = Category.find(query, projection)
+            .sort(sortOptions)
+            .skip(skip)
+            .limit(limit);
+        
+        // Execute query
+        const categories = await queryBuilder.lean();
+        
+        // Calculate pagination info
+        const totalPages = Math.ceil(total / limit);
+        
+        return {
+            success: true,
+            data: categories,
+            pagination: {
+                total,
+                totalPages,
+                currentPage: page,
+                limit,
+                hasNextPage: page < totalPages,
+                hasPreviousPage: page > 1
+            }
+        };
+    } catch (error) {
+        console.error('Error in getAllCategories:', error);
+        throw error;
+    }
+};
+
 
 export const createCategory = async (req, res) => {
     try {
@@ -397,7 +448,7 @@ export const deleteCategory = async (req, res) => {
         }
         
         // Default error response
-        res.status(500).json({ 
+        return res.status(500).json({ 
             success: false,
             message: 'An error occurred while deleting the category',
             error: 'SERVER_ERROR',
@@ -419,120 +470,6 @@ export const deleteCategory = async (req, res) => {
             console.error('[Category] Error during session cleanup:', cleanupError);
             // Don't throw from finally block
         }
-    }
-};
-
-export const getAllCategories = async (req, res) => {
-    try {
-        console.log('Fetching categories with query:', req.query);
-        console.log('Mongoose connection state:', mongoose.connection.readyState);
-        
-        // Check if model is defined
-        if (!Category) {
-            console.error('Category model is not defined');
-            return res.status(500).json({ 
-                success: false,
-                message: 'Category model not available' 
-            });
-        }
-        
-        // Build query
-        const query = {};
-        
-        // Add status filter if provided
-        if (req.query.status === 'active') {
-            query.isActive = true;
-        } else if (req.query.status === 'inactive') {
-            query.isActive = false;
-        }
-        
-        // Add showOnHome filter if provided
-        if (req.query.showOnHome === 'true') {
-            query.showOnHome = true;
-        } else if (req.query.showOnHome === 'false') {
-            query.showOnHome = false;
-        }
-        
-        // Add search query if provided
-        if (req.query.search) {
-            const searchRegex = new RegExp(req.query.search, 'i');
-            query.$or = [
-                { name: searchRegex },
-                { description: searchRegex },
-                { slug: searchRegex }
-            ];
-        }
-        
-        // Build sort
-        let sort = { name: 1 }; // Default sort by name ascending
-        if (req.query.sort) {
-            if (req.query.sort.startsWith('-')) {
-                sort = { [req.query.sort.substring(1)]: -1 };
-            } else {
-                sort = { [req.query.sort]: 1 };
-            }
-        }
-        
-        // Build fields selection
-        let selectFields = '';
-        if (req.query.fields) {
-            // Sanitize fields to prevent field selection injection
-            const allowedFields = ['_id', 'name', 'slug', 'description', 'image', 'isActive', 'showOnHome', 'createdAt', 'updatedAt', 'courseCount'];
-            selectFields = req.query.fields
-                .split(',')
-                .filter(field => allowedFields.includes(field))
-                .join(' ');
-        }
-        
-        // Pagination
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 25;
-        const skip = (page - 1) * limit;
-        
-        // Execute count query
-        const total = await Category.countDocuments(query);
-        
-        // Execute find query with pagination
-        let queryBuilder = Category.find(query)
-            .sort(sort)
-            .skip(skip)
-            .limit(limit);
-        
-        // Apply field selection if specified
-        if (selectFields) {
-            queryBuilder = queryBuilder.select(selectFields);
-        }
-        
-        const categories = await queryBuilder.lean().exec();
-        const totalPages = Math.ceil(total / limit);
-        
-        console.log(`Fetched ${categories.length} of ${total} categories (page ${page} of ${totalPages})`);
-        
-        // Return paginated response
-        res.json({
-            success: true,
-            data: categories,
-            pagination: {
-                total,
-                totalPages,
-                page,
-                limit,
-                hasNextPage: page < totalPages,
-                hasPreviousPage: page > 1
-            }
-        });
-    } catch (error) {
-        console.error('Error fetching categories:', error);
-        if (error.name === 'MongoServerError') {
-            console.error('MongoDB Error:', error.message);
-            if (error.code === 'ECONNREFUSED') {
-                console.error('MongoDB connection refused. Is MongoDB running?');
-            }
-        }
-        res.status(500).json({ 
-            message: 'Server error',
-            error: process.env.NODE_ENV === 'development' ? error.message : undefined
-        });
     }
 };
 

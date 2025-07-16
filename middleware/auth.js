@@ -39,15 +39,34 @@ export const protect = async (req, res, next) => {
       console.log('Decoded token:', JSON.stringify(decoded, null, 2));
       
       // Get user from the token
-      req.user = await User.findById(decoded.userId).select('-password');
-      console.log('Found user:', req.user ? `ID: ${req.user._id}, Role: ${req.user.role}` : 'No user found');
-      
-      if (!req.user) {
+      // The token payload contains the user ID directly as 'id' (not 'userId')
+      const userId = decoded.id || decoded.userId;
+      if (!userId) {
         return res.status(401).json({
           success: false,
-          message: 'User not found with this token.'
+          message: 'Invalid token format: No user ID found in token.'
         });
       }
+      
+      // Find user and select only necessary fields
+      const user = await User.findById(userId).select('-password');
+      console.log('Found user:', user ? `ID: ${user._id}, Email: ${user.email}, Role: ${user.role}` : 'No user found');
+      
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: 'User not found with this token. The user account might have been deleted.'
+        });
+      }
+      
+      // Attach user to request object
+      req.user = {
+        id: user._id,
+        email: user.email,
+        role: user.role,
+        fullname: user.fullname,
+        isApproved: user.isApproved
+      };
       
       next();
     } catch (error) {

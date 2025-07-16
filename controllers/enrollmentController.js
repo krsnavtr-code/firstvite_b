@@ -1,4 +1,4 @@
-import Enrollment from '../model/enrollmentModel.js';
+import Enrollment from '../model/enrollment.model.js';
 import Course from '../model/courseModel.js';
 import { validationResult } from 'express-validator';
 

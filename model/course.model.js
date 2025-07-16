@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import Lesson from "./lesson.model.js";
 
 const curriculumItemSchema = new mongoose.Schema({
     week: {
@@ -119,13 +120,21 @@ const courseSchema = new mongoose.Schema({
         trim: true
     }],
     faqs: [faqSchema],
-    isFeatured: {
-        type: Boolean,
-        default: false
-    },
     isPublished: {
         type: Boolean,
         default: false
+    },
+    showOnHome: {
+        type: Boolean,
+        default: false
+    },
+    lessons: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Lesson'
+    }],
+    enrollmentCount: {
+        type: Number,
+        default: 0
     },
     slug: {
         type: String,

@@ -3,13 +3,14 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
 import path from 'path';
+import Category from "./model/category.model.js";
 import { fileURLToPath } from 'url';
 
 
 // Import routes
 import bookRoute from "./route/book.route.js";
 import authRoute from "./route/auth.route.js";
-import userRoute from "./route/user.route.js";
+import { default as userRoutes } from "./routes/userRoutes.js";
 import profileRoute from "./route/profile.route.js";
 import cartRoute from "./route/cart.route.js";
 import categoryRoute from "./route/category.route.js";
@@ -20,6 +21,7 @@ import faqRoute from "./route/faq.route.js";
 import uploadRoute from "./route/uploadRoute.js";
 import authRoutes from "./route/authRoutes.js";
 import adminRoutes from "./route/adminRoutes.js";
+import lmsRoutes from "./route/lms.route.js";
 
 // Initialize express app
 const app = express();
@@ -244,26 +246,44 @@ app.get('/api/ping', (req, res) => {
     });
 });
 
-// API Routes
-app.use("/api/auth", authRoute);
-app.use("/api/users", userRoute);
+// Test public categories endpoint
+app.get('/api/test-categories', async (req, res) => {
+    try {
+        const categories = await Category.find({}).limit(10);
+        res.json({
+            success: true,
+            count: categories.length,
+            data: categories
+        });
+    } catch (err) {
+        console.error('Test categories error:', err);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching test categories',
+            error: process.env.NODE_ENV === 'development' ? err.message : undefined
+        });
+    }
+});
 
-// Authentication routes
-app.use("/api/auth", authRoutes);
+// Register category routes
+console.log('Mounting category routes at /api/categories');
+app.use('/api/categories', categoryRoute);
 
-// Admin routes
-app.use("/api/admin", adminRoutes);
+// Register user routes
+console.log('Mounting user routes at /api/users');
+app.use('/api/users', userRoutes);
 
-// Other routes
-app.use("/api/profile", profileRoute);
-app.use("/api/books", bookRoute);
-app.use("/api/cart", cartRoute);
-app.use("/api/categories", categoryRoute);
-app.use("/api/courses", courseRoute);
-app.use("/api/contact", contactRoute);
-app.use("/api/enrollments", enrollmentRoute);
-app.use("/api/faqs", faqRoute);
-app.use("/api/upload", uploadRoute);
+// Register course routes
+console.log('Mounting course routes at /api/courses');
+app.use('/api/courses', courseRoute);
+
+// Register auth routes
+console.log('Mounting auth routes at /api/auth');
+app.use('/api/auth', authRoutes);
+
+// Register enrollment routes
+console.log('Mounting enrollment routes at /api/enrollments');
+app.use('/api/enrollments', enrollmentRoute);
 
 // Log all routes for debugging
 const printRoutes = (routes, parentPath = '') => {
@@ -273,7 +293,7 @@ const printRoutes = (routes, parentPath = '') => {
       console.log(`${methods.padEnd(6)} ${parentPath}${route.route.path}`);
     } else if (route.name === 'router') {
       // This is a router instance
-      const routerPath = route.regexp?.toString().replace(/^\/\^|\$\//g, '').replace('\/?', '') || '';
+      const routerPath = route.regexp?.toString().replace(/^\/\^|\$\//g, '').replace('\\/?', '') || '';
       if (route.handle?.stack) {
         printRoutes(route.handle.stack, `${parentPath}${routerPath}/`);
       }
@@ -283,13 +303,6 @@ const printRoutes = (routes, parentPath = '') => {
 
 console.log('\nRegistered Routes:');
 printRoutes(app._router.stack);
-
-// API Routes
-app.use("/api/auth", authRoute);  // Mount auth routes
-app.use("/api/books", bookRoute);
-app.use("/api/cart", cartRoute);
-app.use("/api/categories", categoryRoute);
-app.use("/api/courses", courseRoute);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
