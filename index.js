@@ -313,7 +313,7 @@ app.get('/api/health', (req, res) => {
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({ 
-        message: 'Something went wrong!',
+        message: 'Something went wrong! Your request could not be processed now, Wait for approval.',
         error: process.env.NODE_ENV === 'development' ? err.message : {}
     });
 });
