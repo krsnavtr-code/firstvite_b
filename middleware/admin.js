@@ -20,16 +20,20 @@ export const isAdmin = async (req, res, next) => {
         console.log('Extracted token:', token ? 'Token exists' : 'No token');
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
-        console.log('Decoded token:', decoded);
+        console.log('Decoded token:', JSON.stringify(decoded, null, 2));
         
-        if (!decoded.userId) {
+        // Check for both 'id' and 'userId' in the token
+        const userId = decoded.id || decoded.userId;
+        
+        if (!userId) {
+            console.error('Invalid token format - missing user ID');
             return res.status(401).json({ 
                 success: false,
-                message: 'Invalid token format' 
+                message: 'Invalid token format - missing user ID' 
             });
         }
 
-        const user = await User.findById(decoded.userId);
+        const user = await User.findById(userId);
         console.log('Found user:', user ? `ID: ${user._id}, Role: ${user.role}` : 'No user found');
 
         if (!user) {

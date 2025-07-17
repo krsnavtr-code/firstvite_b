@@ -38,10 +38,10 @@ export const protect = async (req, res, next) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret');
       console.log('Decoded token:', JSON.stringify(decoded, null, 2));
       
-      // Get user from the token
-      // The token payload contains the user ID directly as 'id' (not 'userId')
+      // Get user from the token - check for both 'id' and 'userId' in the token
       const userId = decoded.id || decoded.userId;
       if (!userId) {
+        console.error('Invalid token format - missing user ID');
         return res.status(401).json({
           success: false,
           message: 'Invalid token format: No user ID found in token.'
