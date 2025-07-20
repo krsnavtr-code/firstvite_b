@@ -22,6 +22,7 @@ import uploadRoute from "./route/uploadRoute.js";
 import authRoutes from "./route/authRoutes.js";
 import adminRoutes from "./route/adminRoutes.js";
 import lmsRoutes from "./route/lms.route.js";
+import blogRoutes from "./route/blog.route.js";
 
 // Initialize express app
 const app = express();
@@ -76,7 +77,7 @@ const corsOptions = {
         return callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: [
         'Content-Type', 
         'Authorization',
@@ -284,6 +285,31 @@ app.use('/api/auth', authRoutes);
 // Register enrollment routes
 console.log('Mounting enrollment routes at /api/enrollments');
 app.use('/api/enrollments', enrollmentRoute);
+
+// Mount routes in specific order
+// Public routes first
+app.use("/api/books", bookRoute);
+app.use("/api/categories", categoryRoute);
+app.use("/api/courses", courseRoute);
+app.use("/api/contact", contactRoute);
+app.use("/api/faqs", faqRoute);
+
+// Blog routes (both public and protected)
+console.log('Mounting blog routes at /api/blog');
+app.use("/api/blog", blogRoutes);
+
+// Auth routes
+app.use("/api/auth", authRoutes);
+app.use("/api/auth", authRoute);  // Legacy auth route
+
+// Protected routes
+app.use("/api/users", userRoutes);
+app.use("/api/profile", profileRoute);
+app.use("/api/cart", cartRoute);
+app.use("/api/enrollments", enrollmentRoute);
+app.use("/api/upload", uploadRoute);
+app.use("/api/admin", adminRoutes);
+app.use("/api/lms", lmsRoutes);
 
 // Log all routes for debugging
 const printRoutes = (routes, parentPath = '') => {
