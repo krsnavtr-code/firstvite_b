@@ -1,5 +1,6 @@
 import Enrollment from '../model/enrollment.model.js';
 import Course from '../model/courseModel.js';
+import User from '../model/User.js';
 import { validationResult } from 'express-validator';
 
 // @desc    Enroll user in a course
@@ -240,6 +241,88 @@ export const updatePendingToActive = async (req, res) => {
 // @desc    Update enrollment status (Admin only)
 // @route   PUT /api/enrollments/:id/status
 // @access  Private/Admin
+// @desc    Get all enrollments with complete user details (Admin only)
+// @route   GET /api/enrollments/all
+// @access  Private/Admin
+export const getAllEnrollments = async (req, res) => {
+  try {
+    const { status, language = 'en' } = req.query;
+    
+    // Build query
+    const query = {};
+    if (status) {
+      query.status = status;
+    }
+
+    // Find enrollments with detailed user and course population
+    const enrollments = await Enrollment.find(query)
+      .populate({
+        path: 'user',
+        select: 'name email phone role createdAt',
+        model: User
+      })
+      .populate({
+        path: 'course',
+        select: 'title description thumbnail instructor price duration slug',
+        populate: {
+          path: 'instructor',
+          select: 'name email'
+        }
+      })
+      .sort({ createdAt: -1 });
+
+    // Format response with Thai language support
+    const formattedEnrollments = enrollments.map(enrollment => ({
+      _id: enrollment._id,
+      user: {
+        _id: enrollment.user?._id,
+        name: enrollment.user?.name || 'N/A',
+        email: enrollment.user?.email || 'N/A',
+        phone: enrollment.user?.phone || 'N/A',
+        role: enrollment.user?.role || 'user',
+        joined: enrollment.user?.createdAt || 'N/A'
+      },
+      course: {
+        _id: enrollment.course?._id || 'N/A',
+        title: enrollment.course?.title || enrollment.courseTitle || 'Course not found',
+        instructor: enrollment.course?.instructor?.name || 'N/A',
+        duration: enrollment.course?.duration || 'N/A'
+      },
+      status: enrollment.status,
+      progress: enrollment.progress || 0,
+      enrolledAt: enrollment.enrolledAt,
+      lastAccessed: enrollment.lastAccessed || 'Never',
+      contactInfo: enrollment.contactInfo || {}
+    }));
+
+    // Thai language messages
+    const messages = {
+      en: {
+        success: 'Enrollments retrieved successfully',
+        error: 'Error retrieving enrollments'
+      },
+      th: {
+        success: 'ดึงข้อมูลการลงทะเบียนสำเร็จ',
+        error: 'เกิดข้อผิดพลาดในการดึงข้อมูลการลงทะเบียน'
+      }
+    };
+
+    res.status(200).json({
+      success: true,
+      message: messages[language]?.success || messages.en.success,
+      count: formattedEnrollments.length,
+      data: formattedEnrollments
+    });
+  } catch (error) {
+    console.error('Error getting all enrollments:', error);
+    res.status(500).json({
+      success: false,
+      message: messages[req.query.language || 'en']?.error || 'Error getting enrollments',
+      error: error.message
+    });
+  }
+};
+
 export const updateEnrollmentStatus = async (req, res) => {
   try {
     const { status } = req.body;

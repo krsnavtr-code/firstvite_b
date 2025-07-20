@@ -282,10 +282,6 @@ app.use('/api/courses', courseRoute);
 console.log('Mounting auth routes at /api/auth');
 app.use('/api/auth', authRoutes);
 
-// Register enrollment routes
-console.log('Mounting enrollment routes at /api/enrollments');
-app.use('/api/enrollments', enrollmentRoute);
-
 // Mount routes in specific order
 // Public routes first
 app.use("/api/books", bookRoute);
@@ -293,6 +289,10 @@ app.use("/api/categories", categoryRoute);
 app.use("/api/courses", courseRoute);
 app.use("/api/contact", contactRoute);
 app.use("/api/faqs", faqRoute);
+
+// Protected routes (require authentication)
+console.log('Mounting enrollment routes at /api/enrollments');
+app.use('/api/enrollments', enrollmentRoute);
 
 // Blog routes (both public and protected)
 console.log('Mounting blog routes at /api/blog');

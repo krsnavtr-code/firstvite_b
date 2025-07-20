@@ -5,7 +5,8 @@ import {
   getMyEnrollments, 
   updateEnrollmentStatus,
   getPendingEnrollments,
-  updatePendingToActive
+  updatePendingToActive,
+  getAllEnrollments
 } from '../controllers/enrollmentController.js';
 
 const router = express.Router();
@@ -40,6 +41,10 @@ router.route('/me')
 // Admin routes
 router.route('/pending')
   .get(protect, authorize('admin'), getPendingEnrollments);
+
+// Get all enrollments with complete user details (Admin only)
+router.route('/all')
+  .get(protect, authorize('admin'), getAllEnrollments);
 
 // Temporary route to update all pending enrollments to active
 router.route('/update-to-active')
