@@ -132,7 +132,9 @@ export const login = catchAsync(async (req, res, next) => {
     fullname: user.fullname,
     email: user.email,
     role: user.role,
-    isApproved: user.isApproved
+    isApproved: user.isApproved,
+    phone: user.phone || '',
+    address: user.address || ''
   };
   
   console.log('Sending login response with user data');
@@ -165,6 +167,8 @@ export const getUserProfile = catchAsync(async (req, res, next) => {
       email: user.email,
       role: user.role,
       isApproved: user.isApproved,
+      phone: user.phone || '',
+      address: user.address || '',
       createdAt: user.createdAt,
       updatedAt: user.updatedAt
     });

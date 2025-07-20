@@ -1,5 +1,5 @@
 import express from "express";
-import { signup, login, getCurrentUser } from "../controller/user.controller.js";
+import { signup, login, getCurrentUser, updateProfile } from "../controller/user.controller.js";
 import { protect } from "../middleware/auth.js";
 
 const router = express.Router();
@@ -8,7 +8,8 @@ const router = express.Router();
 router.post("/signup", signup);
 router.post("/login", login);
 
-// Protected route - requires authentication
+// Protected routes - require authentication
 router.get("/me", protect, getCurrentUser);
+router.put("/profile", protect, updateProfile);
 
 export default router;

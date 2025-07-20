@@ -93,6 +93,54 @@ export const getCurrentUser = async (req, res) => {
     }
 };
 
+// Update user profile
+export const updateProfile = async (req, res) => {
+    try {
+        const { phone, address } = req.body;
+        const userId = req.user.id; // Get user ID from the authenticated request
+
+        // Validate input
+        if (!phone && !address) {
+            return res.status(400).json({
+                success: false,
+                message: 'At least one field (phone or address) is required for update'
+            });
+        }
+
+        // Find the user and update only the provided fields
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { 
+                $set: { 
+                    ...(phone && { phone }),
+                    ...(address && { address })
+                } 
+            },
+            { new: true, runValidators: true }
+        ).select('-password');
+
+        if (!updatedUser) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Profile updated successfully',
+            user: updatedUser
+        });
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error updating profile',
+            error: error.message
+        });
+    }
+};
+
 export const login = async(req, res) => {
     try {
         const { email, password } = req.body;

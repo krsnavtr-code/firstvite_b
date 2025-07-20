@@ -35,11 +35,13 @@ export const protect = async (req, res, next) => {
 
     try {
       // Verify token
+      console.log('Verifying token with JWT_SECRET length:', (process.env.JWT_SECRET || 'your_jwt_secret').length);
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret');
       console.log('Decoded token:', JSON.stringify(decoded, null, 2));
       
       // Get user from the token - check for both 'id' and 'userId' in the token
-      const userId = decoded.id || decoded.userId;
+      const userId = decoded.id || decoded.userId || decoded._id;
+      console.log('Extracted userId from token:', userId);
       if (!userId) {
         console.error('Invalid token format - missing user ID');
         return res.status(401).json({
