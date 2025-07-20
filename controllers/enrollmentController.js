@@ -119,10 +119,10 @@ export const getMyEnrollments = async (req, res) => {
 
     console.log(`Fetching enrollments for user: ${userId}`);
     
-    // Build query
+    // Build query - use completionStatus instead of status to match schema
     const query = { user: userId };
     if (status) {
-      query.status = status;
+      query.completionStatus = status;
     }
 
     // Log the query being executed
