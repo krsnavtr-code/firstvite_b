@@ -1,6 +1,11 @@
 import express from 'express';
 import { body } from 'express-validator';
-import { createDirectPayment, getPaymentDetails } from '../controllers/paymentController.js';
+import { 
+  createDirectPayment, 
+  getPaymentDetails,
+  createRazorpayOrder,
+  verifyPayment 
+} from '../controllers/paymentController.js';
 import { protect, authorize } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -23,8 +28,10 @@ const paymentValidationRules = [
     .isFloat({ min: 0 }).withMessage('Payment amount cannot be negative')
 ];
 
-// Public routes
+// Public routes (can be protected if needed)
 router.post('/direct', paymentValidationRules, createDirectPayment);
+router.post('/create-order', createRazorpayOrder);
+router.post('/verify', verifyPayment);
 
 // Protected routes
 router.use(protect);
