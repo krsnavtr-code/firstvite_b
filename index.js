@@ -24,6 +24,7 @@ import adminRoutes from "./route/adminRoutes.js";
 import lmsRoutes from "./route/lms.route.js";
 import blogRoutes from "./route/blog.route.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
+import adminPaymentRoutes from "./routes/adminPaymentRoutes.js";
 
 // Initialize express app
 const app = express();
@@ -298,25 +299,21 @@ app.use('/api/enrollments', enrollmentRoute);
 // Blog routes (both public and protected)
 console.log('Mounting blog routes at /api/blog');
 app.use("/api/blog", blogRoutes);
-
-// Payment routes
-console.log('Mounting payment routes at /api/payments');
-app.use('/api/payments', paymentRoutes);
-
-// Auth routes
-app.use("/api/auth", authRoutes);
-app.use("/api/auth", authRoute);  // Legacy auth route
-
-// Protected routes
 app.use("/api/users", userRoutes);
 app.use("/api/profile", profileRoute);
 app.use("/api/cart", cartRoute);
+app.use("/api/categories", categoryRoute);
+app.use("/api/courses", courseRoute);
+app.use("/api/contact", contactRoute);
 app.use("/api/enrollments", enrollmentRoute);
+app.use("/api/faqs", faqRoute);
 app.use("/api/upload", uploadRoute);
-app.use("/api/v1/admin", adminRoutes);
-app.use("/api/v1/lms", lmsRoutes);
-app.use("/api/v1/blogs", blogRoutes);
-app.use("/api/v1/payments", paymentRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/lms", lmsRoutes);
+app.use("/api/blogs", blogRoutes);
+app.use("/api/payments", paymentRoutes);
+app.use("/api/admin/payments", adminPaymentRoutes);
 
 // Log all routes for debugging
 const printRoutes = (routes, parentPath = '') => {

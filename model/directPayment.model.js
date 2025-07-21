@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import mongoosePaginate from 'mongoose-paginate-v2';
 
 const directPaymentSchema = new mongoose.Schema({
   name: {
@@ -53,6 +54,9 @@ const directPaymentSchema = new mongoose.Schema({
 
 // Add indexes for better query performance
 directPaymentSchema.index({ email: 1, paymentDate: -1 });
+
+// Add pagination plugin
+directPaymentSchema.plugin(mongoosePaginate);
 
 const DirectPayment = mongoose.model('DirectPayment', directPaymentSchema);
 
