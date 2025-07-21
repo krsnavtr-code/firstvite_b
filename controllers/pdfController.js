@@ -10,15 +10,19 @@ const __dirname = dirname(__filename);
 // @route   GET /api/courses/:id/generate-pdf
 // @access  Private/Admin
 export const generateCoursePDF = async (req, res) => {
+    console.log('PDF Generation - Starting for course ID:', req.params.id);
     try {
-        const course = await Course.findById(req.params.id);
+        const course = await Course.findById(req.params.id).lean();
         
         if (!course) {
+            console.error('PDF Generation - Course not found:', req.params.id);
             return res.status(404).json({
                 success: false,
                 message: 'Course not found'
             });
         }
+        
+        console.log('PDF Generation - Course found, preparing HTML content');
 
         // Create HTML content with proper styling
         const htmlContent = `
@@ -135,22 +139,41 @@ export const generateCoursePDF = async (req, res) => {
         </html>
         `;
 
+        console.log('PDF Generation - Launching browser...');
         let browser;
         try {
-            // Launch a headless browser
+            // Launch a headless browser with more detailed error handling
             browser = await puppeteer.launch({
                 headless: 'new',
-                args: ['--no-sandbox', '--disable-setuid-sandbox']
+                args: [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-dev-shm-usage',
+                    '--disable-accelerated-2d-canvas',
+                    '--no-first-run',
+                    '--no-zygote',
+                    '--single-process',
+                    '--disable-gpu'
+                ],
+                executablePath: process.env.PUPPETEER_EXECUTABLE_PATH
             });
             
+            console.log('Browser launched, creating new page...');
             const page = await browser.newPage();
             
-            // Set the HTML content
-            await page.setContent(htmlContent, {
-                waitUntil: 'networkidle0',
-                timeout: 30000 // 30 seconds timeout
-            });
+            // Set the HTML content with better error handling
+            console.log('Setting page content...');
+            try {
+                await page.setContent(htmlContent, {
+                    waitUntil: 'networkidle0',
+                    timeout: 30000 // 30 seconds timeout
+                });
+            } catch (contentError) {
+                console.error('Error setting page content:', contentError);
+                throw new Error(`Failed to set page content: ${contentError.message}`);
+            }
             
+            console.log('Generating PDF...');
             // Generate PDF
             const pdfBuffer = await page.pdf({
                 format: 'A4',
@@ -162,8 +185,13 @@ export const generateCoursePDF = async (req, res) => {
                 },
                 printBackground: true,
                 preferCSSPageSize: true,
-                timeout: 60000 // 60 seconds timeout
+                timeout: 60000, // 60 seconds timeout
+                scale: 0.8 // Try scaling down if content is too large
             });
+            
+            if (!pdfBuffer || pdfBuffer.length === 0) {
+                throw new Error('Generated PDF buffer is empty');
+            }
             
             // Set headers for PDF download
             const filename = `${course.title.replace(/\s+/g, '_')}_${course._id}.pdf`;
@@ -175,24 +203,35 @@ export const generateCoursePDF = async (req, res) => {
             // Send the PDF
             return res.end(pdfBuffer);
             
-        } catch (error) {
-            console.error('Error generating PDF:', error);
-            return res.status(500).json({
-                success: false,
-                message: 'Error generating PDF',
-                error: error.message
-            });
+        } catch (browserError) {
+            console.error('Browser error during PDF generation:', browserError);
+            throw new Error(`Browser error: ${browserError.message}`);
         } finally {
             if (browser) {
-                await browser.close().catch(console.error);
+                console.log('Closing browser...');
+                try {
+                    await browser.close();
+                } catch (closeError) {
+                    console.error('Error closing browser:', closeError);
+                }
             }
         }
     } catch (error) {
-        console.error('Error in PDF generation:', error);
+        console.error('FATAL ERROR in PDF generation:', {
+            error: error.message,
+            stack: error.stack,
+            name: error.name,
+            code: error.code
+        });
         return res.status(500).json({
             success: false,
             message: 'Failed to generate PDF',
-            error: error.message
+            error: process.env.NODE_ENV === 'development' 
+                ? error.message 
+                : 'An error occurred while generating the PDF',
+            details: process.env.NODE_ENV === 'development' 
+                ? { stack: error.stack, name: error.name, code: error.code }
+                : undefined
         });
     }
 };
