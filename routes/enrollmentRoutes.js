@@ -11,11 +11,9 @@ import {
 
 const router = express.Router();
 
-// Public routes (none for enrollments)
-
-// Protected routes - User enrollments
+// Public route for course enrollment
 router.route('/')
-  .post(protect, enrollInCourse);
+  .post(enrollInCourse);
 
 // Get enrollments for the authenticated user
 router.route('/me')

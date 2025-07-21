@@ -1,13 +1,13 @@
 import express from 'express';
-import { protect } from '../middleware/auth.js';
 import { enrollInCourse, getMyEnrollments } from '../controller/enrollment.controller.js';
 
 const router = express.Router();
 
-// Protected routes (require authentication)
+// Public route for course enrollment
 router.route('/')
-  .post(protect, enrollInCourse);
+  .post(enrollInCourse);
 
+// Protected route for viewing user's enrollments
 router.route('/my-enrollments')
   .get(protect, getMyEnrollments);
 

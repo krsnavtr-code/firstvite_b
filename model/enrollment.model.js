@@ -1,10 +1,31 @@
 import mongoose from 'mongoose';
 
+const contactInfoSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: function() { return this.isGuestEnrollment; }
+  },
+  email: {
+    type: String,
+    required: function() { return this.isGuestEnrollment; },
+    lowercase: true,
+    trim: true
+  },
+  phone: {
+    type: String,
+    default: ''
+  },
+  message: {
+    type: String,
+    default: ''
+  }
+});
+
 const enrollmentSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: function() { return !this.isGuestEnrollment; }
   },
   course: {
     type: mongoose.Schema.Types.ObjectId,
@@ -39,10 +60,31 @@ const enrollmentSchema = new mongoose.Schema({
     default: false
   },
   certificateId: String,
-  certificateIssuedAt: Date
+  certificateIssuedAt: Date,
+  // Guest enrollment fields
+  isGuestEnrollment: {
+    type: Boolean,
+    default: false
+  },
+  contactInfo: contactInfoSchema
 }, { timestamps: true });
 
-// Prevent duplicate enrollments
-enrollmentSchema.index({ user: 1, course: 1 }, { unique: true });
+// Prevent duplicate enrollments for authenticated users
+enrollmentSchema.index(
+  { user: 1, course: 1 },
+  { 
+    unique: true,
+    partialFilterExpression: { user: { $exists: true, $ne: null } }
+  }
+);
+
+// Prevent duplicate guest enrollments with the same email for a course
+enrollmentSchema.index(
+  { 'contactInfo.email': 1, course: 1 },
+  { 
+    unique: true,
+    partialFilterExpression: { isGuestEnrollment: true }
+  }
+);
 
 export default mongoose.model('Enrollment', enrollmentSchema);

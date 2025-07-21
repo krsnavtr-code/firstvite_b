@@ -5,7 +5,13 @@ import { validationResult } from 'express-validator';
 
 // @desc    Enroll user in a course
 // @route   POST /api/enrollments
-// @access  Private
+// @access  Public
+// @body    {string} courseId - ID of the course to enroll in
+// @body    {object} contactInfo - Contact information (required for guest users)
+// @body    {string} contactInfo.name - Full name (required for guests)
+// @body    {string} contactInfo.email - Email address (required for guests)
+// @body    {string} [contactInfo.phone] - Phone number (optional)
+// @body    {string} [contactInfo.message] - Additional message (optional)
 export const enrollInCourse = async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -13,29 +19,34 @@ export const enrollInCourse = async (req, res) => {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    // Get user ID from the authenticated token
-    const userId = req.user.id;
-    const { courseId, status = 'pending' } = req.body;
+    // Get user ID from the authenticated token (if available)
+    const userId = req.user?.id;
+    const { courseId, status = 'pending', contactInfo } = req.body;
     
+    // For guest users, validate required contact info
     if (!userId) {
-      return res.status(401).json({
-        success: false,
-        message: 'Authentication required. Please log in again.'
-      });
+      if (!contactInfo || !contactInfo.name || !contactInfo.email) {
+        return res.status(400).json({
+          success: false,
+          message: 'Name and email are required for guest enrollments'
+        });
+      }
     }
 
-    // Check if enrollment already exists
-    const existingEnrollment = await Enrollment.findOne({ 
-      user: userId, 
-      course: courseId 
-    });
-
-    if (existingEnrollment) {
-      return res.status(400).json({
-        success: false,
-        message: 'You are already enrolled in this course',
-        enrollment: existingEnrollment
+    // Check if enrollment already exists for authenticated users
+    if (userId) {
+      const existingEnrollment = await Enrollment.findOne({ 
+        user: userId, 
+        course: courseId 
       });
+
+      if (existingEnrollment) {
+        return res.status(400).json({
+          success: false,
+          message: 'You are already enrolled in this course',
+          enrollment: existingEnrollment
+        });
+      }
     }
 
     // Get course details
@@ -50,21 +61,22 @@ export const enrollInCourse = async (req, res) => {
 
     // Create new enrollment with contact info
     const enrollmentData = {
-      user: userId,
+      user: userId || null, // null for guest users
       course: courseId,
       courseId: courseId,
       courseTitle: course.title,
       status: 'active', // Set to active to show in My Learning
       enrolledAt: Date.now(),
       lastAccessed: Date.now(),
-      contactInfo: req.body.contactInfo || {
-        name: req.user.name || 'Unknown',
-        email: req.user.email,
-        phone: req.body.contactInfo?.phone || '',
-        message: req.body.contactInfo?.message || `Enrollment request for ${course.title}`
+      contactInfo: {
+        name: userId ? (req.user.name || 'Unknown') : contactInfo.name,
+        email: userId ? req.user.email : contactInfo.email,
+        phone: contactInfo?.phone || '',
+        message: contactInfo?.message || `Enrollment request for ${course.title}`
       },
       progress: 0, // Initialize progress
-      enrollmentDate: new Date()
+      enrollmentDate: new Date(),
+      isGuestEnrollment: !userId // Flag to identify guest enrollments
     };
     
     // Force status to be 'active' to ensure it shows in My Learning
