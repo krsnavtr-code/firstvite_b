@@ -26,6 +26,7 @@ import blogRoutes from "./route/blog.route.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import adminPaymentRoutes from "./routes/adminPaymentRoutes.js";
 import pdfRoutes from "./routes/pdfRoutes.js";
+import pdfRouter from "./route/pdf.route.js";
 
 // Initialize express app
 const app = express();
@@ -341,6 +342,10 @@ app.use("/api/lms", lmsRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/admin/payments", adminPaymentRoutes);
+
+// PDF routes
+console.log('Mounting PDF routes at /api/pdfs');
+app.use("/api/pdfs", pdfRouter);
 
 // Log all routes for debugging
 const printRoutes = (routes, parentPath = '') => {
