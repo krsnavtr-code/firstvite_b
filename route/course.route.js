@@ -6,10 +6,48 @@ import {
     getCourseById, 
     updateCourse, 
     deleteCourse,
-    uploadCourseImage
+    uploadCourseImage,
+    generatePdf,
+    deletePdf
 } from '../controller/course.controller.js';
 import { isAdmin } from '../middleware/admin.js';
-import { handleFileUpload } from '../utils/fileUpload.js';
+import multer from 'multer';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const uploadDir = path.join(__dirname, '../public/uploads');
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({ 
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+    fileFilter: function (req, file, cb) {
+        const filetypes = /jpeg|jpg|png|gif/;
+        const mimetype = filetypes.test(file.mimetype);
+        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+        
+        if (mimetype && extname) {
+            return cb(null, true);
+        }
+        cb(new Error('Only image files are allowed'));
+    }
+});
 
 const router = express.Router();
 
@@ -51,9 +89,9 @@ const validateCourse = [
 router.post('/', isAdmin, validateCourse, createCourse);
 router.put('/:id', isAdmin, validateCourse, updateCourse);
 router.delete('/:id', isAdmin, deleteCourse);
-
-// Image upload route - Must come before the ID parameter routes
-router.post('/upload-image', isAdmin, handleFileUpload, uploadCourseImage);
+router.post('/:id/upload-image', isAdmin, upload.single('image'), uploadCourseImage);
+router.post('/:id/generate-pdf', isAdmin, generatePdf);
+router.delete('/:id/pdf', isAdmin, deletePdf);
 
 // Public routes
 router.get('/', getAllCourses);

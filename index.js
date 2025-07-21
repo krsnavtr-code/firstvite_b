@@ -109,7 +109,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Serve static files from the public directory
 const publicDir = path.join(__dirname, 'public');
-const uploadsDir = path.join(__dirname, 'uploads');
+const uploadsDir = path.join(__dirname, 'public', 'uploads');
 const pdfsDir = path.join(publicDir, 'pdfs');
 
 // Ensure PDFs directory exists
@@ -156,10 +156,23 @@ const listPublicFiles = (dir) => {
 listPublicFiles(publicDir);
 listPublicFiles(uploadsDir);
 
+// Ensure PDFs directory exists
+if (!fs.existsSync(pdfsDir)) {
+    fs.mkdirSync(pdfsDir, { recursive: true });
+}
+
 // Serve static files from the public directory
 app.use(express.static(publicDir, {
     setHeaders: (res, path) => {
-        console.log('Serving static file:', path);
+        res.setHeader('Cache-Control', 'public, max-age=31536000');
+    }
+}));
+
+// Serve PDF files from the public/pdfs directory
+app.use('/pdfs', express.static(pdfsDir, {
+    setHeaders: (res, path) => {
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'inline; filename="' + path.basename(path) + '"');
     }
 }));
 

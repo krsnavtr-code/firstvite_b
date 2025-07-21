@@ -1,5 +1,12 @@
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import Course from "../model/course.model.js";
 import { validationResult } from 'express-validator';
+import { generateCoursePdf } from '../utils/pdfGenerator.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Helper function to clean array fields
 const cleanArrayField = (field, defaultVal = []) => {
@@ -532,7 +539,6 @@ export const updateCourse = async (req, res) => {
     }
 };
 
-// Delete a course
 // Upload course image
 export const uploadCourseImage = async (req, res) => {
     try {
@@ -581,5 +587,78 @@ export const deleteCourse = async (req, res) => {
     } catch (error) {
         console.error('Error deleting course:', error);
         res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// Generate PDF for a course
+export const generatePdf = async (req, res) => {
+    try {
+        const course = await Course.findById(req.params.id);
+        
+        if (!course) {
+            return res.status(404).json({ message: 'Course not found' });
+        }
+
+        // Generate the PDF
+        const pdfInfo = await generateCoursePdf(course);
+        
+        res.status(200).json({
+            success: true,
+            message: 'PDF generated successfully',
+            fileUrl: pdfInfo.fileUrl,
+            filename: pdfInfo.filename
+        });
+    } catch (error) {
+        console.error('Error in generatePdf:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message || 'Failed to generate PDF',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+};
+
+// Delete PDF for a course
+export const deletePdf = async (req, res) => {
+    try {
+        const course = await Course.findById(req.params.id);
+        
+        if (!course) {
+            return res.status(404).json({ message: 'Course not found' });
+        }
+
+        // Get the PDF path from the URL in the request body
+        if (!req.body.fileUrl) {
+            return res.status(400).json({
+                success: false,
+                message: 'PDF URL is required'
+            });
+        }
+
+        // Extract the filename from the URL and create the full path
+        const filename = path.basename(req.body.fileUrl);
+        const filePath = path.join(__dirname, '..', 'public', 'pdfs', filename);
+        
+        // Check if file exists and delete it
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+            return res.status(200).json({
+                success: true,
+                message: 'PDF deleted successfully'
+            });
+        }
+        
+        return res.status(404).json({
+            success: false,
+            message: 'PDF file not found'
+        });
+        
+    } catch (error) {
+        console.error('Error in deletePdf:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to delete PDF',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
     }
 };
