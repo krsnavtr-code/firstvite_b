@@ -4,9 +4,8 @@ import { dirname } from 'path';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import fs from 'fs';
 import QRCode from 'qrcode';
-
-
-
+import { sendCoursePdfEmail } from '../utils/email.js';
+import Enrollment from '../model/enrollmentModel.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -95,6 +94,147 @@ const drawSectionHeader = (page, text, x, y, options) => {
     return size * 1.5; // Return the height used
 };
 
+
+/**
+ * @desc    Send course PDF to student's email
+ * @route   POST /api/courses/:id/send-pdf
+ * @access  Private/Admin
+ */
+export const sendCoursePdfToStudent = async (req, res) => {
+    try {
+        const course = await Course.findById(req.params.id);
+        
+        if (!course) {
+            return res.status(404).json({
+                success: false,
+                message: 'Course not found'
+            });
+        }
+
+        const { emails } = req.body;
+
+        if (!emails || !Array.isArray(emails) || emails.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'At least one email address is required'
+            });
+        }
+
+        // Generate the PDF buffer once
+        const pdfBuffer = await generateCoursePDFBuffer(course);
+        const results = [];
+        
+        // Send email to each recipient
+        for (const email of emails) {
+            try {
+                await sendCoursePdfEmail(email, course, pdfBuffer, `${course.title}.pdf`);
+                results.push({ email, success: true });
+            } catch (error) {
+                console.error(`Error sending email to ${email}:`, error);
+                results.push({ 
+                    email, 
+                    success: false, 
+                    error: error.message 
+                });
+            }
+        }
+
+        // Check if all emails were sent successfully
+        const allSuccessful = results.every(result => result.success);
+        const someFailed = results.some(result => !result.success);
+        
+        let message = 'PDF sent successfully to all recipients';
+        if (someFailed) {
+            const failedEmails = results
+                .filter(r => !r.success)
+                .map(r => r.email)
+                .join(', ');
+            message = `PDF sent to some recipients, but failed for: ${failedEmails}`;
+        }
+        
+        res.status(someFailed ? 207 : 200).json({
+            success: allSuccessful,
+            message,
+            results
+        });
+        
+    } catch (error) {
+        console.error('Error in sendCoursePdfToStudent:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to process PDF sending',
+            error: error.message
+        });
+    }
+};
+
+/**
+ * Helper function to generate PDF buffer from course
+ */
+const generateCoursePDFBuffer = async (course) => {
+  // Create a new PDF document
+  const pdfDoc = await PDFDocument.create();
+  
+  // Add a new page to the document
+  const page = pdfDoc.addPage([595.28, 841.89]); // A4 size in points
+  
+  // Set up fonts
+  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  
+  // Draw the course title
+  const title = course.title || 'Course Material';
+  const titleSize = 20;
+  const margin = 50;
+  let yPosition = 800; // Start near the top of the page
+  
+  // Draw title
+  page.drawText(title, {
+    x: margin,
+    y: yPosition,
+    size: titleSize,
+    font: boldFont,
+    color: rgb(0, 0.5, 0.8),
+  });
+  
+  yPosition -= 30; // Move down for the next element
+  
+  // Draw course description if available
+  if (course.description) {
+    const descOptions = {
+      font,
+      size: 12,
+      color: rgb(0, 0, 0),
+      maxWidth: 500,
+      lineHeight: 14
+    };
+    
+    // Draw section header
+    yPosition -= drawSectionHeader(page, 'Description', margin, yPosition, {
+      font: boldFont,
+      size: 14,
+      color: rgb(0, 0.3, 0.6)
+    });
+    
+    // Draw description text with word wrapping
+    const descText = stripHtml(course.description);
+    yPosition -= drawWrappedText(page, descText, margin, yPosition, descOptions) + 10;
+  }
+  
+  // Add a simple footer
+  const footerText = `Generated on ${new Date().toLocaleDateString()}`;
+  page.drawText(footerText, {
+    x: margin,
+    y: 30,
+    size: 10,
+    font,
+    color: rgb(0.5, 0.5, 0.5)
+  });
+  
+  // Save the PDF to a buffer
+  const pdfBytes = await pdfDoc.save();
+  return pdfBytes;
+};
 
 export const generateCoursePDF = async (req, res) => {
   console.log('PDF Generation - Starting for course ID:', req.params.id);
