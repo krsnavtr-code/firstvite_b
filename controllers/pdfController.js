@@ -1,7 +1,12 @@
 import Course from '../model/courseModel.js';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import puppeteer from 'puppeteer';
+import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import fs from 'fs';
+import QRCode from 'qrcode';
+
+
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -9,229 +14,504 @@ const __dirname = dirname(__filename);
 // @desc    Generate PDF for a course
 // @route   GET /api/courses/:id/generate-pdf
 // @access  Private/Admin
-export const generateCoursePDF = async (req, res) => {
-    console.log('PDF Generation - Starting for course ID:', req.params.id);
-    try {
-        const course = await Course.findById(req.params.id).lean();
+// Helper function to strip HTML tags
+const stripHtml = (html) => {
+    if (!html) return '';
+    return html.replace(/<[^>]*>?/gm, ' ')
+              .replace(/\s+/g, ' ')
+              .trim();
+};
+
+// Helper function to add a new page to the document
+const addNewPage = (pdfDoc) => {
+    return pdfDoc.addPage([595.28, 841.89]); // A4 size in points
+};
+
+// Helper function to draw text with word wrapping
+const drawWrappedText = (page, text, x, y, options) => {
+    const { font, size, color, maxWidth, lineHeight } = options;
+    const words = text.split(' ');
+    const lines = [];
+    let currentLine = words[0] || '';
+
+    for (let i = 1; i < words.length; i++) {
+        const word = words[i];
+        const testLine = currentLine ? `${currentLine} ${word}` : word;
+        const testWidth = font.widthOfTextAtSize(testLine, size);
         
-        if (!course) {
-            console.error('PDF Generation - Course not found:', req.params.id);
-            return res.status(404).json({
-                success: false,
-                message: 'Course not found'
-            });
+        if (testWidth <= maxWidth) {
+            currentLine = testLine;
+        } else {
+            if (currentLine) lines.push(currentLine);
+            currentLine = word;
         }
-        
-        console.log('PDF Generation - Course found, preparing HTML content');
-
-        // Create HTML content with proper styling
-        const htmlContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>${course.title}</title>
-            <style>
-                body { 
-                    font-family: Arial, sans-serif; 
-                    line-height: 1.6; 
-                    color: #333; 
-                    max-width: 800px; 
-                    margin: 0 auto; 
-                    padding: 20px; 
-                }
-                h1 { 
-                    color: #2c3e50; 
-                    border-bottom: 2px solid #eee; 
-                    padding-bottom: 10px; 
-                    margin-top: 0;
-                }
-                h2 { 
-                    color: #3498db; 
-                    margin: 20px 0 10px 0;
-                    font-size: 22px;
-                }
-                h3 { 
-                    color: #2c3e50; 
-                    margin: 15px 0 10px 0;
-                    font-size: 18px;
-                }
-                p { 
-                    margin: 10px 0; 
-                    line-height: 1.6;
-                }
-                ul, ol { 
-                    margin: 10px 0 10px 20px; 
-                    padding-left: 20px;
-                }
-                li { 
-                    margin: 5px 0; 
-                    line-height: 1.5;
-                }
-                .course-meta { 
-                    background: #f8f9fa; 
-                    padding: 15px; 
-                    border-radius: 5px; 
-                    margin: 15px 0; 
-                    border-left: 4px solid #3498db;
-                }
-                .meta-item { 
-                    margin: 5px 0; 
-                }
-                .section { 
-                    margin-bottom: 20px; 
-                }
-                .curriculum-week { 
-                    margin-bottom: 20px;
-                    page-break-inside: avoid;
-                }
-                .curriculum-topics { 
-                    margin-left: 20px; 
-                }
-                .footer { 
-                    margin-top: 40px; 
-                    padding-top: 10px;
-                    border-top: 1px solid #eee;
-                    font-size: 12px; 
-                    color: #7f8c8d; 
-                    text-align: center; 
-                }
-                @page {
-                    margin: 20mm 10mm;
-                }
-            </style>
-        </head>
-        <body>
-            <h1>${course.title}</h1>
-            
-            <div class="course-meta">
-                <div class="meta-item"><strong>Duration:</strong> ${course.duration || 'N/A'}</div>
-                <div class="meta-item"><strong>Level:</strong> ${course.level || 'N/A'}</div>
-                <div class="meta-item"><strong>Price:</strong> $${course.price || '0.00'}</div>
-            </div>
-
-            <div class="section">
-                ${course.description || ''}
-            </div>
-
-            ${course.curriculum && course.curriculum.length > 0 ? `
-                <h2>Curriculum</h2>
-                <div class="curriculum">
-                    ${course.curriculum.map(week => `
-                        <div class="curriculum-week">
-                            <h3>Week ${week.week}: ${week.title || ''}</h3>
-                            ${week.topics && week.topics.length > 0 ? `
-                                <div class="curriculum-topics">
-                                    <ul>
-                                        ${week.topics.map(topic => `<li>${topic}</li>`).join('')}
-                                    </ul>
-                                </div>
-                            ` : ''}
-                        </div>
-                    `).join('')}
-                </div>
-            ` : ''}
-
-            <div class="footer">
-                <p>Generated on ${new Date().toLocaleDateString()}</p>
-            </div>
-        </body>
-        </html>
-        `;
-
-        console.log('PDF Generation - Launching browser...');
-        let browser;
-        try {
-            // Launch a headless browser with more detailed error handling
-            browser = await puppeteer.launch({
-                headless: 'new',
-                args: [
-                    '--no-sandbox',
-                    '--disable-setuid-sandbox',
-                    '--disable-dev-shm-usage',
-                    '--disable-accelerated-2d-canvas',
-                    '--no-first-run',
-                    '--no-zygote',
-                    '--single-process',
-                    '--disable-gpu'
-                ],
-                executablePath: process.env.PUPPETEER_EXECUTABLE_PATH
-            });
-            
-            console.log('Browser launched, creating new page...');
-            const page = await browser.newPage();
-            
-            // Set the HTML content with better error handling
-            console.log('Setting page content...');
-            try {
-                await page.setContent(htmlContent, {
-                    waitUntil: 'networkidle0',
-                    timeout: 30000 // 30 seconds timeout
-                });
-            } catch (contentError) {
-                console.error('Error setting page content:', contentError);
-                throw new Error(`Failed to set page content: ${contentError.message}`);
-            }
-            
-            console.log('Generating PDF...');
-            // Generate PDF
-            const pdfBuffer = await page.pdf({
-                format: 'A4',
-                margin: {
-                    top: '20mm',
-                    right: '10mm',
-                    bottom: '20mm',
-                    left: '10mm'
-                },
-                printBackground: true,
-                preferCSSPageSize: true,
-                timeout: 60000, // 60 seconds timeout
-                scale: 0.8 // Try scaling down if content is too large
-            });
-            
-            if (!pdfBuffer || pdfBuffer.length === 0) {
-                throw new Error('Generated PDF buffer is empty');
-            }
-            
-            // Set headers for PDF download
-            const filename = `${course.title.replace(/\s+/g, '_')}_${course._id}.pdf`;
-            
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-            res.setHeader('Content-Length', pdfBuffer.length);
-            
-            // Send the PDF
-            return res.end(pdfBuffer);
-            
-        } catch (browserError) {
-            console.error('Browser error during PDF generation:', browserError);
-            throw new Error(`Browser error: ${browserError.message}`);
-        } finally {
-            if (browser) {
-                console.log('Closing browser...');
-                try {
-                    await browser.close();
-                } catch (closeError) {
-                    console.error('Error closing browser:', closeError);
-                }
-            }
-        }
-    } catch (error) {
-        console.error('FATAL ERROR in PDF generation:', {
-            error: error.message,
-            stack: error.stack,
-            name: error.name,
-            code: error.code
-        });
-        return res.status(500).json({
-            success: false,
-            message: 'Failed to generate PDF',
-            error: process.env.NODE_ENV === 'development' 
-                ? error.message 
-                : 'An error occurred while generating the PDF',
-            details: process.env.NODE_ENV === 'development' 
-                ? { stack: error.stack, name: error.name, code: error.code }
-                : undefined
-        });
     }
+    if (currentLine) lines.push(currentLine);
+
+    // Draw each line
+    lines.forEach((line, i) => {
+        if (line.trim()) { // Only draw non-empty lines
+            page.drawText(line, {
+                x,
+                y: y - (i * lineHeight),
+                size,
+                font,
+                color,
+                lineHeight: lineHeight * 1.2
+            });
+        }
+    });
+
+    return lines.length * lineHeight * 1.2; // Add some extra space between lines
+};
+
+// Helper function to draw a section header
+const drawSectionHeader = (page, text, x, y, options) => {
+    const { font, size, color } = options;
+    
+    // Draw a subtle background
+    const textWidth = font.widthOfTextAtSize(text, size);
+    page.drawRectangle({
+        x: x - 10,
+        y: y - size / 2,
+        width: textWidth + 20,
+        height: size * 1.5,
+        color: rgb(0.95, 0.95, 0.95),
+        borderColor: rgb(0.8, 0.8, 0.8),
+        borderWidth: 1,
+        borderColor: rgb(0.9, 0.9, 0.9),
+        opacity: 0.8
+    });
+    
+    // Draw the text
+    page.drawText(text, {
+        x: x,
+        y: y,
+        size,
+        font,
+        color: color || rgb(0.2, 0.2, 0.5)
+    });
+    
+    return size * 1.5; // Return the height used
+};
+
+
+export const generateCoursePDF = async (req, res) => {
+  console.log('PDF Generation - Starting for course ID:', req.params.id);
+
+  try {
+    const course = await Course.findById(req.params.id).lean();
+
+    if (!course) {
+      console.error('PDF Generation - Course not found:', req.params.id);
+      return res.status(404).json({ success: false, message: 'Course not found' });
+    }
+
+    const pdfDoc = await PDFDocument.create();
+    let page = addNewPage(pdfDoc);
+
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+    const fontSize = 10;
+    const titleFontSize = 20;
+    const sectionFontSize = 12;
+    const lineHeight = 14;
+    const margin = 60;
+    const contentWidth = 500;
+    const contentX = (page.getWidth() - contentWidth) / 2;
+    let y = page.getHeight() - margin;
+
+    const checkForNewPage = (requiredSpace) => {
+      if (y < (margin + requiredSpace)) {
+        page = addNewPage(pdfDoc);
+        y = page.getHeight() - margin;
+      }
+    };
+
+    // Optional: Add logo
+    if (fs.existsSync('./logo.png')) {
+      const logoBytes = fs.readFileSync('./logo.png');
+      const logoImage = await pdfDoc.embedPng(logoBytes);
+      const logoDims = logoImage.scale(0.2);
+      page.drawImage(logoImage, {
+        x: contentX,
+        y: y - logoDims.height,
+        width: logoDims.width,
+        height: logoDims.height
+      });
+      y -= logoDims.height + 20;
+    }
+
+    // Title
+    const title = course.title || 'Course Details';
+    page.drawText(title, {
+      x: contentX,
+      y: y,
+      size: titleFontSize,
+      font: boldFont,
+      color: rgb(0.2, 0.4, 0.6)
+    });
+    
+    y -= titleFontSize + 30;
+
+    // Metadata
+    const metaInfo = [
+      { label: 'Duration', value: course.duration + ' Weeks' || 'N/A' },
+      { label: 'Level', value: course.level || 'N/A' },
+      { label: 'Price', value: `Rs. ${course.price || '0.00'}` }
+    ];
+    const metaBoxHeight = (metaInfo.length * (fontSize + 8)) + 20;
+    checkForNewPage(metaBoxHeight + 20);
+
+    metaInfo.forEach((item, index) => {
+      const itemY = y - (index * (fontSize + 8)) - 10;
+      page.drawText(`${item.label}:`, {
+        x: contentX + 15,
+        y: itemY,
+        size: fontSize,
+        font: boldFont,
+        color: rgb(0.4, 0.4, 0.4)
+      });
+      page.drawText(item.value, {
+        x: contentX + 120,
+        y: itemY,
+        size: fontSize,
+        font: font,
+        color: rgb(0.1, 0.1, 0.1)
+      });
+    });
+
+      y -= metaBoxHeight + 25;
+      
+      //   shortDescription
+      if (course.shortDescription) {
+        checkForNewPage(40);
+        
+        // Draw section title without background
+        page.drawText('Short Description', {
+          x: contentX,
+          y: y,
+          size: sectionFontSize,
+          font: boldFont,
+          color: rgb(0.2, 0.4, 0.6)
+        });
+        y -= (sectionFontSize + 15);
+        // Process short description with basic HTML formatting
+        const processHtmlContent = (html, startY) => {
+          let currentY = startY;
+          
+          // Split by paragraphs and process each
+          const paragraphs = course.shortDescription.split(/<\/p>|<br\s*\/?>/i);
+          
+          for (const para of paragraphs) {
+            if (!para.trim()) continue;
+            
+            // Strip HTML tags but keep line breaks
+            let text = para.replace(/<[^>]*>?/gm, '').trim();
+            
+            // Check if this is a list item
+            const isListItem = para.trim().startsWith('<li>');
+            const indent = isListItem ? 20 : 0;
+            
+            if (text) {
+              // Add bullet point for list items
+              if (isListItem) {
+                page.drawText('•', {
+                  x: contentX,
+                  y: currentY,
+                  size: fontSize,
+                  font,
+                  color: rgb(0.1, 0.1, 0.1)
+                });
+              }
+              
+              // Draw the text with proper indentation
+              const height = drawWrappedText(
+                page, 
+                text,
+                contentX + (isListItem ? 15 : 0),
+                currentY,
+                {
+                  font,
+                  size: fontSize,
+                  color: rgb(0.1, 0.1, 0.1),
+                  maxWidth: contentWidth - (isListItem ? 15 : 0),
+                  lineHeight
+                }
+              );
+              
+              // Add extra space after paragraphs
+              const extraSpace = isListItem ? 5 : 10;
+              currentY -= (height + extraSpace);
+              
+              // Check for page break
+              if (currentY < margin + 50) {
+                page = addNewPage(pdfDoc);
+                currentY = page.getHeight() - margin;
+              }
+            }
+          }
+          
+          return startY - currentY;
+        };
+        
+        // Process the short description with formatting
+        const shortDescHeight = processHtmlContent(course.shortDescription, y);
+        y -= (shortDescHeight + 25);
+      }
+
+    // Description
+    // if (course.description) {
+    //   checkForNewPage(40);
+      
+    //   // Draw section title without background
+    //   page.drawText('Course Description', {
+    //     x: contentX,
+    //     y: y,
+    //     size: sectionFontSize,
+    //     font: boldFont,
+    //     color: rgb(0.2, 0.4, 0.6)
+    //   });
+    //   y -= (sectionFontSize + 15);
+    //   // Process description with basic HTML formatting
+    //   const processHtmlContent = (html, startY) => {
+    //     let currentY = startY;
+        
+    //     // Split by paragraphs and process each
+    //     const paragraphs = course.description.split(/<\/p>|<br\s*\/?>/i);
+        
+    //     for (const para of paragraphs) {
+    //       if (!para.trim()) continue;
+          
+    //       // Strip HTML tags but keep line breaks
+    //       let text = para.replace(/<[^>]*>?/gm, '').trim();
+          
+    //       // Check if this is a list item
+    //       const isListItem = para.trim().startsWith('<li>');
+    //       const indent = isListItem ? 20 : 0;
+          
+    //       if (text) {
+    //         // Add bullet point for list items
+    //         if (isListItem) {
+    //           page.drawText('•', {
+    //             x: contentX,
+    //             y: currentY,
+    //             size: fontSize,
+    //             font,
+    //             color: rgb(0.1, 0.1, 0.1)
+    //           });
+    //         }
+            
+    //         // Draw the text with proper indentation
+    //         const height = drawWrappedText(
+    //           page, 
+    //           text,
+    //           contentX + (isListItem ? 15 : 0),
+    //           currentY,
+    //           {
+    //             font,
+    //             size: fontSize,
+    //             color: rgb(0.1, 0.1, 0.1),
+    //             maxWidth: contentWidth - (isListItem ? 15 : 0),
+    //             lineHeight
+    //           }
+    //         );
+            
+    //         // Add extra space after paragraphs
+    //         const extraSpace = isListItem ? 5 : 10;
+    //         currentY -= (height + extraSpace);
+            
+    //         // Check for page break
+    //         if (currentY < margin + 50) {
+    //           page = addNewPage(pdfDoc);
+    //           currentY = page.getHeight() - margin;
+    //         }
+    //       }
+    //     }
+        
+    //     return startY - currentY;
+    //   };
+      
+    //   // Process the description with formatting
+    //   const descHeight = processHtmlContent(course.description, y);
+    //   y -= (descHeight + 25);
+    // }
+
+    // Curriculum
+    if (course.curriculum?.length > 0) {
+      checkForNewPage(40);
+      
+      // Draw section title without background
+      page.drawText('Course Curriculum', {
+        x: contentX,
+        y: y,
+        size: sectionFontSize,
+        font: boldFont,
+        color: rgb(0.2, 0.4, 0.6)
+      });
+      y -= (sectionFontSize + 15);
+
+      for (const week of course.curriculum) {
+        checkForNewPage(40);
+        const weekTitle = `Week ${week.week}${week.title ? ': ' + week.title : ''}`;
+
+        page.drawText(weekTitle, {
+          x: contentX + 10,
+          y: y,
+          size: fontSize,
+          font: boldFont,
+          color: rgb(0.3, 0.3, 0.5)
+        });
+        y -= fontSize + 12;
+
+        for (const topic of week.topics || []) {
+          checkForNewPage(30);
+          const bulletPoint = '• ' + stripHtml(topic);
+          const topicHeight = drawWrappedText(page, bulletPoint, contentX + 20, y, {
+            font,
+            size: fontSize,
+            color: rgb(0.1, 0.1, 0.1),
+            maxWidth: contentWidth - 30,
+            lineHeight
+          });
+          y -= topicHeight + 6;
+        }
+        y -= 10;
+      }
+    }
+
+    //   Skills
+    if (course.skills?.length > 0) {
+      checkForNewPage(40);
+      
+      // Draw section title without background
+      page.drawText('Skills', {
+        x: contentX,
+        y: y,
+        size: sectionFontSize,
+        font: boldFont,
+        color: rgb(0.2, 0.4, 0.6)
+      });
+      y -= (sectionFontSize + 15);
+
+      for (const skill of course.skills) {
+        checkForNewPage(30);
+        const bulletPoint = '• ' + stripHtml(skill);
+        const skillHeight = drawWrappedText(page, bulletPoint, contentX + 20, y, {
+          font,
+          size: fontSize,
+          color: rgb(0.1, 0.1, 0.1),
+          maxWidth: contentWidth - 30,
+          lineHeight
+        });
+        y -= skillHeight + 6;
+      }
+    }
+      
+    //   Prerequisites
+    if (course.prerequisites?.length > 0) {
+      checkForNewPage(40);
+      
+      // Draw section title without background
+      page.drawText('Prerequisites', {
+        x: contentX,
+        y: y,
+        size: sectionFontSize,
+        font: boldFont,
+        color: rgb(0.2, 0.4, 0.6)
+      });
+      y -= (sectionFontSize + 15);
+
+      for (const topic of course.prerequisites) {
+        checkForNewPage(30);
+        const bulletPoint = '• ' + stripHtml(topic);
+        const topicHeight = drawWrappedText(page, bulletPoint, contentX + 20, y, {
+          font,
+          size: fontSize,
+          color: rgb(0.1, 0.1, 0.1),
+          maxWidth: contentWidth - 30,
+          lineHeight
+        });
+        y -= topicHeight + 6;
+      }
+    }
+      
+    // whatYouWillLearn
+    if (course.whatYouWillLearn?.length > 0) {
+      checkForNewPage(40);
+      
+      // Draw section title without background
+      page.drawText('What You Will Learn', {
+        x: contentX,
+        y: y,
+        size: sectionFontSize,
+        font: boldFont,
+        color: rgb(0.2, 0.4, 0.6)
+      });
+      y -= (sectionFontSize + 15);
+
+      for (const topic of course.whatYouWillLearn) {
+        checkForNewPage(30);
+        const bulletPoint = '• ' + stripHtml(topic);
+        const topicHeight = drawWrappedText(page, bulletPoint, contentX + 20, y, {
+          font,
+          size: fontSize,
+          color: rgb(0.1, 0.1, 0.1),
+          maxWidth: contentWidth - 30,
+          lineHeight
+        });
+        y -= topicHeight + 6;
+      }
+    }
+    
+
+    // Footer
+    const pages = pdfDoc.getPages();
+    const footerFontSize = fontSize - 2;
+    const footerY = margin / 2;
+    pages.forEach((p, index) => {
+      const pageNum = `Page ${index + 1} of ${pages.length}`;
+      const footerText = `Generated on ${new Date().toLocaleDateString()}`;
+      const pageNumWidth = font.widthOfTextAtSize(pageNum, footerFontSize);
+      p.drawText(pageNum, {
+        x: p.getWidth() - margin - pageNumWidth,
+        y: footerY,
+        size: footerFontSize,
+        font,
+        color: rgb(0.5, 0.5, 0.5)
+      });
+      p.drawText(footerText, {
+        x: margin,
+        y: footerY,
+        size: footerFontSize,
+        font,
+        color: rgb(0.5, 0.5, 0.5)
+      });
+      p.drawLine({
+        start: { x: margin, y: footerY + 10 },
+        end: { x: p.getWidth() - margin, y: footerY + 10 },
+        thickness: 0.5,
+        color: rgb(0.8, 0.8, 0.8),
+        opacity: 0.5
+      });
+    });
+
+    const pdfBytes = await pdfDoc.save();
+    const filename = `${course.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Length', pdfBytes.length);
+    res.end(Buffer.from(pdfBytes));
+
+    console.log('PDF Generation - Successfully generated PDF');
+  } catch (error) {
+    console.error('PDF generation failed:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to generate PDF',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'An error occurred'
+    });
+  }
 };
