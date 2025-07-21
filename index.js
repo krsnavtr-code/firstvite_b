@@ -25,6 +25,7 @@ import lmsRoutes from "./route/lms.route.js";
 import blogRoutes from "./route/blog.route.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import adminPaymentRoutes from "./routes/adminPaymentRoutes.js";
+import pdfRoutes from "./routes/pdfRoutes.js";
 
 // Initialize express app
 const app = express();
@@ -85,12 +86,17 @@ const corsOptions = {
         'Authorization',
         'x-auth-token', 
         'x-user-agent', 
-        'x-client-ip'
+        'x-client-ip',
+        'Cache-Control',
+        'Accept'
     ],
     exposedHeaders: [
-        'Content-Length', 
+        'Content-Length',
         'Content-Type',
-        'Authorization'
+        'Content-Disposition',
+        'x-auth-token',
+        'x-user-agent',
+        'x-client-ip'
     ]
 };
 
@@ -101,9 +107,16 @@ app.options('*', cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Set up public directory for static files
+// Serve static files from the public directory
 const publicDir = path.join(__dirname, 'public');
-const uploadsDir = path.join(publicDir, 'uploads');
+const uploadsDir = path.join(__dirname, 'uploads');
+const pdfsDir = path.join(publicDir, 'pdfs');
+
+// Ensure PDFs directory exists
+if (!fs.existsSync(pdfsDir)) {
+    fs.mkdirSync(pdfsDir, { recursive: true });
+    console.log(`Created PDFs directory at: ${pdfsDir}`);
+}
 import fs from 'fs';
 
 // Ensure uploads directory exists
@@ -232,6 +245,7 @@ mongoose.connection.on('error', err => {
 // Routes - Specific routes first
 console.log('Mounting upload route at /api/upload');
 app.use('/api/upload', uploadRoute); // File upload routes
+app.use('/api', pdfRoutes); // PDF generation routes
 
 // Debug route to test if the server is running
 app.get('/api/ping', (req, res) => {
