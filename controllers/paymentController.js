@@ -10,18 +10,29 @@ dotenv.config();
 // Initialize Razorpay instance
 let razorpay;
 
-try {
-  if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
-    console.error('Razorpay credentials are missing. Please check your .env file');
-  } else {
+const initializeRazorpay = () => {
+  try {
+    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+      const errorMsg = 'Razorpay credentials are missing. Please check your environment configuration.';
+      console.error(errorMsg);
+      throw new Error(errorMsg);
+    }
+    
     razorpay = new Razorpay({
       key_id: process.env.RAZORPAY_KEY_ID,
       key_secret: process.env.RAZORPAY_KEY_SECRET,
     });
+    
+    console.log('Razorpay initialized successfully');
+    return true;
+  } catch (error) {
+    console.error('Failed to initialize Razorpay:', error.message);
+    return false;
   }
-} catch (error) {
-  console.error('Failed to initialize Razorpay:', error.message);
-}
+};
+
+// Initialize on startup
+const isRazorpayInitialized = initializeRazorpay();
 
 // @desc    Create a new direct payment
 // @route   POST /api/payments/direct
@@ -87,12 +98,16 @@ export const createDirectPayment = async (req, res) => {
 // @access  Public (or protected as needed)
 export const createRazorpayOrder = async (req, res) => {
   try {
-    // Check if Razorpay is properly initialized
-    if (!razorpay) {
-      return res.status(500).json({
-        success: false,
-        message: 'Payment gateway is not properly configured. Please contact support.'
-      });
+    // Try to reinitialize Razorpay if not already initialized
+    if (!razorpay || !isRazorpayInitialized) {
+      const initialized = initializeRazorpay();
+      if (!initialized) {
+        console.error('Razorpay initialization failed. Check your environment variables.');
+        return res.status(500).json({
+          success: false,
+          message: 'Payment gateway is not properly configured. Please contact support.'
+        });
+      }
     }
     const { amount, currency = 'INR', receipt, notes } = req.body;
 
@@ -136,12 +151,16 @@ export const createRazorpayOrder = async (req, res) => {
 // @access  Public (or protected as needed)
 export const verifyPayment = async (req, res) => {
   try {
-    // Check if Razorpay is properly initialized
-    if (!razorpay) {
-      return res.status(500).json({
-        success: false,
-        message: 'Payment gateway is not properly configured. Please contact support.'
-      });
+    // Try to reinitialize Razorpay if not already initialized
+    if (!razorpay || !isRazorpayInitialized) {
+      const initialized = initializeRazorpay();
+      if (!initialized) {
+        console.error('Razorpay initialization failed during payment verification. Check your environment variables.');
+        return res.status(500).json({
+          success: false,
+          message: 'Payment gateway is not properly configured. Please contact support.'
+        });
+      }
     }
     const { orderId, paymentId, signature, ...paymentData } = req.body;
     
