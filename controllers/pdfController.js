@@ -1,5 +1,6 @@
 import Course from '../model/courseModel.js';
 import { fileURLToPath } from 'url';
+import path from 'path';
 import { dirname } from 'path';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import fs from 'fs';
@@ -654,4 +655,70 @@ export const generateCoursePDF = async (req, res) => {
       error: process.env.NODE_ENV === 'development' ? error.message : 'An error occurred'
     });
   }
+};
+
+/**
+ * @desc    Download course brochure
+ * @route   GET /api/courses/:id/download-brochure
+ * @access  Private
+ */
+export const downloadCourseBrochure = async (req, res) => {
+    try {
+        const course = await Course.findById(req.params.id);
+        
+        if (!course) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Course not found' 
+            });
+        }
+
+        // Check if brochure exists
+        if (!course.brochureUrl) {
+            return res.status(404).json({ 
+                success: false,
+                message: 'No brochure available for this course' 
+            });
+        }
+
+        // Construct the full path to the PDF file
+        const filePath = path.join(__dirname, '..', 'public', course.brochureUrl);
+        
+        // Check if file exists
+        if (!fs.existsSync(filePath)) {
+            console.error('Brochure file not found at path:', filePath);
+            return res.status(404).json({ 
+                success: false,
+                message: 'Brochure file not found' 
+            });
+        }
+
+        // Set headers for file download
+        const filename = `brochure-${course.slug || course._id}.pdf`;
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        
+        // Stream the file
+        const fileStream = fs.createReadStream(filePath);
+        fileStream.pipe(res);
+        
+        // Handle stream errors
+        fileStream.on('error', (error) => {
+            console.error('Error streaming brochure file:', error);
+            if (!res.headersSent) {
+                res.status(500).json({ 
+                    success: false, 
+                    message: 'Error downloading brochure' 
+                });
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error in downloadCourseBrochure:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Server error',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
 };

@@ -330,7 +330,8 @@ export const getCourseById = async (req, res) => {
             'duration', 'level', 'benefits', 'whatYouWillLearn', 
             'requirements', 'whoIsThisFor', 'curriculum', 'isFeatured',
             'isPublished', 'slug', 'tags', 'faqs', 'certificateIncluded',
-            'metaTitle', 'metaDescription', 'previewVideo', 'image'
+            'metaTitle', 'metaDescription', 'previewVideo', 'image',
+            'brochureUrl', 'brochureGeneratedAt'
         ];
         
         // Add required fields to the select if they're not already included
@@ -602,11 +603,17 @@ export const generatePdf = async (req, res) => {
         // Generate the PDF
         const pdfInfo = await generateCoursePdf(course);
         
+        // Update the course with the brochure URL
+        course.brochureUrl = pdfInfo.fileUrl;
+        course.brochureGeneratedAt = new Date();
+        await course.save();
+        
         res.status(200).json({
             success: true,
             message: 'PDF generated successfully',
             fileUrl: pdfInfo.fileUrl,
-            filename: pdfInfo.filename
+            filename: pdfInfo.filename,
+            brochureUrl: pdfInfo.fileUrl
         });
     } catch (error) {
         console.error('Error in generatePdf:', error);

@@ -169,6 +169,14 @@ const courseSchema = new mongoose.Schema({
     showOnHome: {
         type: Boolean,
         default: false
+    },
+    brochureUrl: {
+        type: String,
+        default: ''
+    },
+    brochureGeneratedAt: {
+        type: Date,
+        default: null
     }
 }, { timestamps: true });
 
