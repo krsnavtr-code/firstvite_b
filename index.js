@@ -125,7 +125,7 @@ if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
     console.log('Created uploads directory:', uploadsDir);
 } else {
-    console.log('Uploads directory exists at:', uploadsDir);
+    // console.log('Uploads directory exists at:', uploadsDir);
     // List files in the uploads directory for debugging
     // fs.readdir(uploadsDir, (err, files) => {
     //     if (err) {
@@ -137,16 +137,16 @@ if (!fs.existsSync(uploadsDir)) {
 }
 
 // Debug: Log the current working directory and paths
-console.log('Current working directory:', process.cwd());
-console.log('__dirname:', __dirname);
-console.log('Public directory path:', path.join(__dirname, 'public'));
-console.log('Uploads directory path:', uploadsDir);
+// console.log('Current working directory:', process.cwd());
+// console.log('__dirname:', __dirname);
+// console.log('Public directory path:', path.join(__dirname, 'public'));
+// console.log('Uploads directory path:', uploadsDir);
 
 // List all files in the public directory
 const listPublicFiles = (dir) => {
     try {
         const files = fs.readdirSync(dir);
-        console.log(`Files in ${dir}:`, files);
+        // console.log(`Files in ${dir}:`, files);
         return files;
     } catch (err) {
         console.error(`Error reading directory ${dir}:`, err);
@@ -219,8 +219,8 @@ app.get('/test-upload/:filename', (req, res) => {
   }
 });
 
-console.log('Serving static files from:', publicDir);
-console.log('Uploads directory at:', uploadsDir);
+// console.log('Serving static files from:', publicDir);
+// console.log('Uploads directory at:', uploadsDir);
 
 // Database connection
 const PORT = process.env.PORT || 4002;
@@ -363,8 +363,8 @@ const printRoutes = (routes, parentPath = '') => {
   });
 };
 
-console.log('\nRegistered Routes:');
-printRoutes(app._router.stack);
+// console.log('\nRegistered Routes:');
+// printRoutes(app._router.stack);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
