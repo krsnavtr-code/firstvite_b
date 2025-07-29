@@ -99,14 +99,18 @@ const prepareCourseData = (data) => {
     }
 
     // Process other fields with defaults
+    const price = Math.max(0, Number(data.price) || 0);
+    const isFree = data.isFree !== undefined ? Boolean(data.isFree) : price === 0;
+    
     const result = {
         title: data.title?.toString().trim() || 'Untitled Course',
         shortDescription: data.shortDescription?.toString().trim() || '',
         description: data.description?.toString().trim() || '',
         category: data.category?.toString().trim() || null,
         instructor: data.instructor?.toString().trim() || 'Unknown Instructor',
-        price: Math.max(0, Number(data.price) || 0),
-        originalPrice: Math.max(0, Number(data.originalPrice) || 0),
+        price: isFree ? 0 : price,
+        originalPrice: isFree ? 0 : Math.max(0, Number(data.originalPrice) || price),
+        isFree: isFree,
         totalHours: cleanData.totalHours,  // Already processed above
         image: data.image?.toString().trim() || '',
         thumbnail: data.thumbnail?.toString().trim() || data.image?.toString().trim() || '',
@@ -219,14 +223,19 @@ export const createCourse = async (req, res) => {
 // Get all courses with optional filters
 export const getAllCourses = async (req, res) => {
     try {
-        const { category, status, fields, all, search, showOnHome, limit, sort, isPublished } = req.query;
-        console.log('Getting all courses with params:', { category, status, fields, all, search, showOnHome, limit, sort, isPublished, user: req.user?.role });
+        const { category, status, fields, all, search, showOnHome, limit, sort, isPublished, price } = req.query;
+        console.log('Getting all courses with params:', { category, status, fields, all, search, showOnHome, limit, sort, isPublished, price, user: req.user?.role });
         
         const query = {};
         
         // Add category filter if provided
         if (category) {
             query.category = category;
+        }
+        
+        // Add price filter if provided
+        if (price !== undefined) {
+            query.price = Number(price);
         }
         
         // Handle search query
@@ -428,6 +437,7 @@ export const updateCourse = async (req, res) => {
             instructor,
             price = 0,
             originalPrice = 0,
+            isFree = false,
             totalHours = 0,
             duration = '',
             level = 'Beginner',
@@ -461,8 +471,9 @@ export const updateCourse = async (req, res) => {
             description: description?.toString()?.trim() || '',
             category: category?.toString()?.trim() || null,
             instructor: instructor?.toString()?.trim() || null,
-            price: Math.max(0, Number(price) || 0),
-            originalPrice: Math.max(0, Number(originalPrice) || 0),
+            price: isFree ? 0 : Math.max(0, Number(price) || 0),
+            originalPrice: isFree ? 0 : Math.max(0, Number(originalPrice) || 0),
+            isFree: Boolean(isFree),
             totalHours: Math.max(0, Number(totalHours) || 0),
             duration: duration?.toString()?.trim() || '0 min',
             level: ['Beginner', 'Intermediate', 'Advanced'].includes(level) ? level : 'Beginner',

@@ -85,6 +85,11 @@ const courseSchema = new mongoose.Schema({
         min: 0,
         default: 0
     },
+    isFree: {
+        type: Boolean,
+        default: false,
+        index: true
+    },
     totalHours: {
         type: Number,
         min: 0,
