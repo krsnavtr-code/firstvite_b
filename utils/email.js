@@ -111,8 +111,87 @@ export const sendCoursePdfEmail = async (email, course, pdfBuffer, fileName = ''
   });
 };
 
+/**
+ * Send contact form submission notifications
+ * @param {Object} contact - Contact form submission data
+ * @returns {Promise} - Promise that resolves when emails are sent
+ */
+export const sendContactNotifications = async (contact) => {
+  try {
+    console.log('Sending contact notifications...');
+    console.log('Admin Email:', process.env.ADMIN_EMAIL);
+    console.log('SMTP User:', process.env.SMTP_USER);
+    // 1. Send confirmation email to the user
+    const userSubject = `Thank you for contacting ${process.env.APP_NAME || 'us'}`;
+    const userHtml = `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+        <h2>Hello ${contact.name},</h2>
+        <p>Thank you for reaching out to us. We have received your message and our team will get back to you shortly.</p>
+        
+        <h3>Your Message Details:</h3>
+        <p><strong>Subject:</strong> ${contact.subject || 'No subject'}</p>
+        <p><strong>Message:</strong> ${contact.message}</p>
+        
+        ${contact.courseTitle ? `<p><strong>Course:</strong> ${contact.courseTitle}</p>` : ''}
+        
+        <p>We'll respond to you at: ${contact.email}</p>
+        
+        <p>Best regards,<br>The ${process.env.APP_NAME || 'FirstVite'} Team</p>
+      </div>
+    `;
+
+    await sendEmail({
+      to: contact.email,
+      subject: userSubject,
+      html: userHtml
+    });
+
+    // 2. Send notification to admin
+    const adminSubject = `New Contact Form Submission: ${contact.subject || 'No Subject'}`;
+    const adminHtml = `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+        <h2>New Contact Form Submission</h2>
+        
+        <h3>Contact Details:</h3>
+        <p><strong>Name:</strong> ${contact.name}</p>
+        <p><strong>Email:</strong> ${contact.email}</p>
+        ${contact.phone ? `<p><strong>Phone:</strong> ${contact.phone}</p>` : ''}
+        <p><strong>Subject:</strong> ${contact.subject || 'No subject'}</p>
+        
+        <h3>Message:</h3>
+        <p>${contact.message}</p>
+        
+        ${contact.courseTitle ? `
+          <h3>Course Information:</h3>
+          <p><strong>Course Title:</strong> ${contact.courseTitle}</p>
+          ${contact.courseId ? `<p><strong>Course ID:</strong> ${contact.courseId}</p>` : ''}
+        ` : ''}
+        
+        <h3>Submission Details:</h3>
+        <p><strong>Submitted At:</strong> ${new Date(contact.submittedAt).toLocaleString()}</p>
+        <p><strong>IP Address:</strong> ${contact.ipAddress}</p>
+        <p><strong>User Agent:</strong> ${contact.userAgent}</p>
+        
+        <p>Please respond to this inquiry as soon as possible.</p>
+      </div>
+    `;
+
+    await sendEmail({
+      to: process.env.ADMIN_EMAIL || process.env.SMTP_USER,
+      subject: adminSubject,
+      html: adminHtml
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending contact notifications:', error);
+    throw error;
+  }
+};
+
 export default {
   sendEmail,
   sendCoursePdfEmail,
+  sendContactNotifications,
   transporter,
 };

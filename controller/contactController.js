@@ -1,6 +1,7 @@
 import Contact from '../model/Contact.js';
 import { validationResult } from 'express-validator';
 import mongoose from 'mongoose';
+import { sendContactNotifications } from '../utils/email.js';
 
 /**
  * @desc    Submit a contact form
@@ -63,11 +64,18 @@ export const submitContactForm = async (req, res) => {
     // Save to database
     const savedContact = await contact.save();
     
-    // Send welcome email (to be implemented)
-    // await sendContactConfirmationEmail(savedContact);
-    
-    // Notify admin (to be implemented)
-    // await notifyAdminAboutNewContact(savedContact);
+    // Send email notifications (to user and admin)
+    try {
+      await sendContactNotifications({
+        ...savedContact.toObject(),
+        ipAddress: req.ip,
+        userAgent: req.get('user-agent')
+      });
+    } catch (emailError) {
+      console.error('Error sending contact notifications:', emailError);
+      // Don't fail the request if email sending fails
+      // Just log the error and continue
+    }
     
     // Send success response
     res.status(201).json({ 
