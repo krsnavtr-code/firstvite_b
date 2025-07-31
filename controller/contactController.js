@@ -77,8 +77,8 @@ export const submitContactForm = async (req, res) => {
       // Just log the error and continue
     }
     
-    // Send success response
-    res.status(201).json({ 
+    // Prepare success response
+    const responseData = { 
       success: true,
       message: 'Thank you for your message. We will get back to you soon!',
       data: {
@@ -88,7 +88,11 @@ export const submitContactForm = async (req, res) => {
         subject: savedContact.subject,
         submittedAt: savedContact.submittedAt
       }
-    });
+    };
+
+    // Send response
+    console.log('Sending success response:', responseData);
+    return res.status(201).json(responseData);
     
   } catch (error) {
     console.error('Error submitting contact form:', {
