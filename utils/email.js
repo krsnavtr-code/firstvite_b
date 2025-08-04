@@ -10,13 +10,34 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Create a transporter using SMTP
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com', // Default to Gmail SMTP
-  port: process.env.SMTP_PORT || 587,
-  secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
+  host: process.env.SMTP_HOST || 'smtp.gmail.com',
+  port: parseInt(process.env.SMTP_PORT) || 587,
+  secure: process.env.SMTP_SECURE === 'true',
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
+  tls: {
+    // Do not fail on invalid certs
+    rejectUnauthorized: false
+  },
+  debug: true, // Enable debug output
+  logger: true // Log to console
+});
+
+// Verify connection configuration
+transporter.verify(function(error, success) {
+  if (error) {
+    console.error('SMTP Connection Error:', error);
+  } else {
+    console.log('SMTP Server is ready to take our messages');
+    console.log('SMTP Config:', {
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
+      user: process.env.SMTP_USER ? 'Set' : 'Not Set',
+      from: process.env.EMAIL_FROM_ADDRESS
+    });
+  }
 });
 
 /**
@@ -37,6 +58,8 @@ export const sendEmail = async ({
   attachments = [],
 }) => {
   try {
+    console.log('Preparing to send email to:', to);
+    
     if (!to) {
       throw new Error('Recipient email is required');
     }
@@ -45,20 +68,57 @@ export const sendEmail = async ({
       throw new Error('Email subject is required');
     }
 
+    const fromEmail = process.env.EMAIL_FROM_ADDRESS || process.env.SMTP_USER;
+    if (!fromEmail) {
+      throw new Error('Sender email address is not configured');
+    }
+
     const mailOptions = {
-      from: `"${process.env.EMAIL_FROM_NAME || 'FirstVite Admin'}" <${process.env.EMAIL_FROM_ADDRESS || process.env.SMTP_USER}>`,
-      to,
-      subject,
-      text,
-      html,
-      attachments,
+      from: `"${process.env.EMAIL_FROM_NAME || 'FirstVite Admin'}" <${fromEmail}>`,
+      to: to,
+      subject: subject,
+      text: text,
+      html: html || text.replace(/\n/g, '<br>'),
+      attachments: Array.isArray(attachments) ? attachments : [],
     };
 
+    console.log('Mail options prepared:', {
+      from: mailOptions.from,
+      to: mailOptions.to,
+      subject: mailOptions.subject,
+      hasAttachments: mailOptions.attachments ? mailOptions.attachments.length : 0
+    });
+
+    // Test connection first
+    await new Promise((resolve, reject) => {
+      transporter.verify((error, success) => {
+        if (error) {
+          console.error('SMTP Connection Error:', error);
+          reject(new Error(`SMTP Connection Error: ${error.message}`));
+        } else {
+          console.log('SMTP Server is ready to take our messages');
+          resolve();
+        }
+      });
+    });
+
+    // Send the email
     const info = await transporter.sendMail(mailOptions);
-    console.log('Email sent:', info.messageId);
-    return { success: true, messageId: info.messageId };
+    console.log('Email sent successfully:', info.messageId);
+    return { 
+      success: true, 
+      messageId: info.messageId,
+      response: info.response 
+    };
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error('Error in sendEmail function:', {
+      error: error.message,
+      stack: error.stack,
+      code: error.code,
+      syscall: error.syscall,
+      path: error.path,
+      response: error.response
+    });
     throw new Error(`Failed to send email: ${error.message}`);
   }
 };
