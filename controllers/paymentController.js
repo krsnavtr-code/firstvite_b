@@ -162,12 +162,26 @@ export const verifyPayment = async (req, res) => {
         });
       }
     }
+    
     const { orderId, paymentId, signature, ...paymentData } = req.body;
     
+    // Validate required fields
     if (!orderId || !paymentId || !signature) {
       return res.status(400).json({
         success: false,
-        message: 'Missing required parameters'
+        message: 'Missing required parameters: orderId, paymentId, and signature are required'
+      });
+    }
+
+    // Validate payment data
+    const requiredFields = ['name', 'email', 'phone', 'course', 'paymentAmount'];
+    const missingFields = requiredFields.filter(field => !paymentData[field]);
+    
+    if (missingFields.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Missing required fields: ${missingFields.join(', ')}`,
+        missingFields
       });
     }
 
@@ -182,31 +196,45 @@ export const verifyPayment = async (req, res) => {
     if (!isSignatureValid) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid payment signature'
+        message: 'Invalid payment signature. Payment verification failed.'
+      });
+    }
+
+    // Check if payment already exists to prevent duplicates
+    const existingPayment = await DirectPayment.findOne({ paymentId });
+    if (existingPayment) {
+      return res.status(200).json({
+        success: true,
+        message: 'Payment was already processed',
+        paymentId: existingPayment._id
       });
     }
 
     // Save payment details to database
     const payment = new DirectPayment({
       name: paymentData.name,
-      email: paymentData.email,
-      phone: paymentData.phone,
+      email: paymentData.email.toLowerCase().trim(),
+      phone: String(paymentData.phone).trim(),
       course: paymentData.course,
-      address: paymentData.address,
-      paymentAmount: paymentData.paymentAmount,
+      address: paymentData.address || 'Not provided',
+      paymentAmount: Number(paymentData.paymentAmount),
       paymentId,
       orderId,
       status: 'completed',
       paymentMethod: 'razorpay',
-      userId: paymentData.userId || null
+      userId: paymentData.userId || null,
+      paymentDate: new Date()
     });
 
     await payment.save();
 
+    // Log successful payment for debugging
+    console.log(`Payment ${paymentId} for order ${orderId} saved successfully`);
+
     res.status(200).json({
       success: true,
       message: 'Payment verified and recorded successfully',
-      paymentId
+      paymentId: payment._id
     });
   } catch (error) {
     console.error('Error verifying payment:', error);
