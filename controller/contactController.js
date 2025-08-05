@@ -145,8 +145,7 @@ export const getAllContacts = async (req, res) => {
     const contacts = await Contact.find(query)
       .sort({ submittedAt: -1 })
       .limit(limit * 1)
-      .skip((page - 1) * limit)
-      .populate('courseInterests', 'title');
+      .skip((page - 1) * limit);
       
     const count = await Contact.countDocuments(query);
     

@@ -317,7 +317,8 @@ app.use('/api/auth', authRoutes);
 app.use("/api/books", bookRoute);
 app.use("/api/categories", categoryRoute);
 app.use("/api/courses", courseRoute);
-app.use("/api/contact", contactRoute);
+// Mount contact routes at /api/contacts (plural) to match frontend expectations
+app.use("/api/contacts", contactRoute);
 app.use("/api/faqs", faqRoute);
 
 // Protected routes (require authentication)
@@ -332,7 +333,8 @@ app.use("/api/profile", profileRoute);
 app.use("/api/cart", cartRoute);
 app.use("/api/categories", categoryRoute);
 app.use("/api/courses", courseRoute);
-app.use("/api/contact", contactRoute);
+// Mount contact routes at /api/contacts (plural) to match frontend expectations
+app.use("/api/contacts", contactRoute);
 app.use("/api/enrollments", enrollmentRoute);
 app.use("/api/faqs", faqRoute);
 app.use("/api/upload", uploadRoute);
