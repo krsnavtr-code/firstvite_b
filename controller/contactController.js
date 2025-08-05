@@ -135,7 +135,7 @@ export const submitContactForm = async (req, res) => {
 
 export const getAllContacts = async (req, res) => {
   try {
-    const { status, date, page = 1, limit = 10 } = req.query;
+    const { status, date, course, page = 1, limit = 10 } = req.query;
     const query = {};
     
     if (status) {
@@ -155,6 +155,11 @@ export const getAllContacts = async (req, res) => {
         $gte: startDate,
         $lte: endDate
       };
+    }
+    
+    if (course) {
+      console.log('Filtering by course:', course);
+      query.courseTitle = { $regex: course, $options: 'i' }; // Case-insensitive partial match
     }
     
     // Convert limit to number and ensure it's positive
