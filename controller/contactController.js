@@ -135,24 +135,57 @@ export const submitContactForm = async (req, res) => {
 
 export const getAllContacts = async (req, res) => {
   try {
-    const { status, page = 1, limit = 10 } = req.query;
+    const { status, date, page = 1, limit = 10 } = req.query;
     const query = {};
     
     if (status) {
       query.status = status;
     }
     
+    if (date) {
+      console.log('Filtering by date:', date);
+      // Create a date range for the selected date (from start to end of day)
+      const startDate = new Date(date);
+      const endDate = new Date(date);
+      endDate.setHours(23, 59, 59, 999);
+      
+      console.log('Date range:', { startDate, endDate });
+      
+      query.submittedAt = {
+        $gte: startDate,
+        $lte: endDate
+      };
+    }
+    
+    // Convert limit to number and ensure it's positive
+    const limitNum = Math.max(1, parseInt(limit, 10) || 10);
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    
     const contacts = await Contact.find(query)
       .sort({ submittedAt: -1 })
-      .limit(limit * 1)
-      .skip((page - 1) * limit);
+      .limit(limitNum)
+      .skip((pageNum - 1) * limitNum);
       
-    const count = await Contact.countDocuments(query);
+    const totalItems = await Contact.countDocuments(query);
+    const totalPages = Math.ceil(totalItems / limitNum);
+    
+    console.log('Pagination info:', {
+      totalItems,
+      totalPages,
+      currentPage: pageNum,
+      itemsPerPage: limitNum,
+      itemsInResponse: contacts.length
+    });
     
     res.json({
       success: true,
       data: contacts,
-      totalPages: Math.ceil(count / limit),
+      meta: {
+        total: totalItems,
+        totalPages,
+        currentPage: pageNum,
+        limit: limitNum
+      },
       currentPage: page
     });
   } catch (error) {
