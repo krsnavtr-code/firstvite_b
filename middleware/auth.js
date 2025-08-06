@@ -87,15 +87,7 @@ export const protect = async (req, res, next) => {
   }
 };
 
-// Role hierarchy - higher index means higher privileges
-const ROLE_HIERARCHY = ['student', 'teacher', 'childAdmin', 'admin', 'superChildAdmin'];
-
-// Check if user's role has at least the required role level
-const hasRequiredRole = (userRole, requiredRole) => {
-  return ROLE_HIERARCHY.indexOf(userRole) >= ROLE_HIERARCHY.indexOf(requiredRole);
-};
-
-// Grant access to specific roles with hierarchy support
+// Grant access to specific roles
 export const authorize = (...roles) => {
   return (req, res, next) => {
     if (!req.user) {
@@ -105,20 +97,7 @@ export const authorize = (...roles) => {
       });
     }
     
-    // Check if user has any of the required roles or a higher privilege role
-    const hasAccess = roles.some(role => {
-      // If checking for admin role, also allow superChildAdmin
-      if (role === 'admin' && req.user.role === 'superChildAdmin') {
-        return true;
-      }
-      // If checking for childAdmin, also allow admin and superChildAdmin
-      if (role === 'childAdmin' && (req.user.role === 'admin' || req.user.role === 'superChildAdmin')) {
-        return true;
-      }
-      return req.user.role === role;
-    });
-    
-    if (!hasAccess) {
+    if (!roles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
         message: `User role ${req.user.role} is not authorized to access this route`
@@ -130,9 +109,3 @@ export const authorize = (...roles) => {
 
 // Admin middleware (shortcut for authorize('admin'))
 export const admin = authorize('admin');
-
-// Child Admin middleware
-export const childAdmin = authorize('childAdmin');
-
-// Super Child Admin middleware
-export const superChildAdmin = authorize('superChildAdmin');
