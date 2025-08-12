@@ -21,8 +21,8 @@ const transporter = nodemailer.createTransport({
     // Do not fail on invalid certs
     rejectUnauthorized: false
   },
-  debug: true, // Enable debug output
-  logger: true // Log to console
+  debug: false, // Disable detailed debug output
+  logger: process.env.NODE_ENV === 'development' // Only log in development
 });
 
 // Verify connection configuration

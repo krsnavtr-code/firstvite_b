@@ -36,9 +36,8 @@ export const getAvailablePdfs = async (req, res) => {
         // Path to generated PDFs (in backend)
         const pdfsDir = path.join(__dirname, '..', 'public', 'pdfs');
         
-        // Path to uploaded brochures (in frontend)
-        const frontendDir = path.join(__dirname, '..', '..', 'Frontend', 'public');
-        const uploadedBrochuresDir = path.join(frontendDir, 'uploaded_brochure');
+        // Path to uploaded brochures (in backend)
+        const uploadedBrochuresDir = path.join(__dirname, '..', 'public', 'uploaded_brochure');
         
         // Get both generated and uploaded PDFs
         const generatedPdfs = getFilesFromDir(pdfsDir, '/pdfs');
@@ -83,9 +82,8 @@ export const sendBrochure = async (req, res) => {
         // Determine the full path based on the type of brochure
         let fullPath;
         if (pdfPath.includes('uploaded_brochure')) {
-            // Look in the frontend's public directory for uploaded brochures
-            const frontendDir = path.join(__dirname, '..', '..', 'Frontend', 'public');
-            fullPath = path.join(frontendDir, 'uploaded_brochure', path.basename(pdfPath));
+            // Look in the backend's public directory for uploaded brochures
+            fullPath = path.join(__dirname, '..', 'public', 'uploaded_brochure', path.basename(pdfPath));
         } else if (pdfPath.includes('pdfs')) {
             // Look in the backend's public directory for generated PDFs
             fullPath = path.join(__dirname, '..', 'public', 'pdfs', path.basename(pdfPath));
@@ -111,14 +109,30 @@ export const sendBrochure = async (req, res) => {
 
         console.log('Sending email with attachment:', { to: email, subject, attachment: fullPath });
 
+        // Format the message with proper HTML line breaks and styling
+        const formattedMessage = message 
+            ? message.split('\n').map(paragraph => 
+                paragraph.trim() === '' ? '<br>' : `<p style="margin: 10px 0;">${paragraph}</p>`
+              ).join('\n')
+            : 'Please find attached the course brochure you requested.';
+
         // Send the email with the PDF attachment
         await sendEmail({
             to: email,
             subject: subject || 'Course Brochure',
             text: message || 'Please find attached the course brochure you requested.',
-            html: `<div style="font-family: Arial, sans-serif; line-height: 1.6;">
-                    ${message ? message.replace(/\n/g, '<br>') : 'Please find attached the course brochure you requested.'}
-                  </div>`,
+            html: `
+                <div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto;">
+                    ${formattedMessage}
+                    <p style="margin-top: 20px;">
+                        Warm Regards,<br>
+                        <strong>Akansh Tyagi</strong><br>
+                        Career Advisor – FirstVite E-Learning<br>
+                        📧 info@firstvite.com<br>
+                        📱 +91-9582244812
+                    </p>
+                </div>
+            `,
             attachments: [
                 {
                     filename: path.basename(pdfPath),

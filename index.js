@@ -169,6 +169,15 @@ app.use(express.static(publicDir, {
     }
 }));
 
+// Serve uploaded brochures from the public/uploaded_brochure directory
+const uploadedBrochuresDir = path.join(publicDir, 'uploaded_brochure');
+app.use('/uploaded_brochure', express.static(uploadedBrochuresDir, {
+    setHeaders: (res, path) => {
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'inline');
+    }
+}));
+
 // Serve PDF files from the public/pdfs directory
 app.use('/pdfs', express.static(pdfsDir, {
     setHeaders: (res, path) => {
@@ -257,9 +266,13 @@ mongoose.connection.on('error', err => {
     console.error('MongoDB connection error:', err);});
 
 // Routes - Specific routes first
-console.log('Mounting upload route at /api/upload');
+// console.log('Mounting upload route at /api/upload');
 app.use('/api/upload', uploadRoute); // File upload routes
 app.use('/api', pdfRoutes); // PDF generation routes
+
+// Mount PDF routes at /api/pdfs
+// console.log('Mounting PDF routes at /api/pdfs');
+app.use('/api/pdfs', pdfRouter);
 
 // Debug route to test if the server is running
 app.get('/api/ping', (req, res) => {
@@ -297,19 +310,19 @@ app.get('/api/test-categories', async (req, res) => {
 });
 
 // Register category routes
-console.log('Mounting category routes at /api/categories');
+// console.log('Mounting category routes at /api/categories');
 app.use('/api/categories', categoryRoute);
 
 // Register user routes
-console.log('Mounting user routes at /api/users');
+// console.log('Mounting user routes at /api/users');
 app.use('/api/users', userRoutes);
 
 // Register course routes
-console.log('Mounting course routes at /api/courses');
+// console.log('Mounting course routes at /api/courses');
 app.use('/api/courses', courseRoute);
 
 // Register auth routes
-console.log('Mounting auth routes at /api/auth');
+// console.log('Mounting auth routes at /api/auth');
 app.use('/api/auth', authRoutes);
 
 // Mount routes in specific order
@@ -322,11 +335,11 @@ app.use("/api/contacts", contactRoute);
 app.use("/api/faqs", faqRoute);
 
 // Protected routes (require authentication)
-console.log('Mounting enrollment routes at /api/enrollments');
+// console.log('Mounting enrollment routes at /api/enrollments');
 app.use('/api/enrollments', enrollmentRoute);
 
 // Blog routes (both public and protected)
-console.log('Mounting blog routes at /api/blog');
+// console.log('Mounting blog routes at /api/blog');
 app.use("/api/blog", blogRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/profile", profileRoute);
@@ -346,7 +359,7 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/admin/payments", adminPaymentRoutes);
 
 // PDF routes
-console.log('Mounting PDF routes at /api/pdfs');
+// console.log('Mounting PDF routes at /api/pdfs');
 app.use("/api/pdfs", pdfRouter);
 
 // Log all routes for debugging
