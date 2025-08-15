@@ -19,11 +19,11 @@ export const contactValidationRules = [
     .optional({ checkFalsy: true })
     .isMobilePhone().withMessage('Please enter a valid phone number'),
     
-  // Message validation
+  // Message validation (optional but must be valid if provided)
   body('message')
+    .optional({ checkFalsy: true })
     .trim()
-    .notEmpty().withMessage('Message is required')
-    .isLength({ min: 10, max: 1000 }).withMessage('Message must be between 10 and 1000 characters'),
+    .isLength({ min: 1, max: 1000 }).withMessage('Message must be between 1 and 1000 characters if provided'),
     
   // Course ID validation (optional, can be any string)
   body('courseId')
