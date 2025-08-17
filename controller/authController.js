@@ -38,18 +38,19 @@ const generateRefreshToken = (id) => {
 // @access  Public
 export const register = catchAsync(async (req, res, next) => {
   const { fullname, email, password, role, department, phone } = req.body;
+  const normalizedEmail = String(email || '').trim().toLowerCase();
 
   // Check if user exists
-  const userExists = await User.findOne({ email });
+  const userExists = await User.findOne({ email: normalizedEmail });
 
   if (userExists) {
-    return next(new AppError('User already exists', 400));
+    return next(new AppError('Email already registered. Go to Login page', 409));
   }
 
   // Create user (initially not approved)
   const user = await User.create({
     fullname,
-    email,
+    email: normalizedEmail,
     password,
     role: role || 'student',
     department,
@@ -175,6 +176,78 @@ export const getUserProfile = catchAsync(async (req, res, next) => {
   } catch (error) {
     console.error('Error in getUserProfile:', error);
     return next(new AppError('Error fetching user profile', 500));
+  }
+});
+
+// @desc    Refresh access token
+// @route   POST /api/auth/refresh-token
+// @access  Public
+// @desc    Change user password
+// @route   PUT /api/auth/change-password
+// @access  Private
+export const changePassword = catchAsync(async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    console.log('Change password request received:', { userId: req.user?.id });
+    
+    if (!req.user || !req.user.id) {
+      console.error('No user ID in request');
+      return next(new AppError('Authentication required', 401));
+    }
+
+    // 1) Get user from collection
+    const user = await User.findById(req.user.id).select('+password');
+    if (!user) {
+      console.error('User not found with ID:', req.user.id);
+      return next(new AppError('User not found', 404));
+    }
+
+    // 2) Check if current password is correct
+    const isPasswordCorrect = await user.correctPassword(currentPassword, user.password);
+    console.log('Password check result:', isPasswordCorrect);
+    
+    if (!isPasswordCorrect) {
+      return next(new AppError('Your current password is incorrect', 401));
+    }
+
+    // 3) Update password
+    user.password = newPassword;
+    // Clear refresh token when password changes
+    user.refreshToken = undefined;
+    await user.save();
+    console.log('Password updated successfully for user:', user._id);
+
+    // 4) Generate new tokens
+    const token = generateToken(user._id);
+    const refreshToken = generateRefreshToken(user._id);
+    
+    // Save the new refresh token
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    // Remove password from output
+    user.password = undefined;
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Password updated successfully',
+      token,
+      refreshToken,
+      data: {
+        user: {
+          id: user._id,
+          email: user.email,
+          fullname: user.fullname,
+          role: user.role
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Error in changePassword:', error);
+    if (error.name === 'ValidationError') {
+      return next(new AppError(error.message, 400));
+    }
+    next(error);
   }
 });
 

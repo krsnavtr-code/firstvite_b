@@ -388,10 +388,31 @@ app.get('/api/health', (req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ 
-        message: 'Something went wrong! Your request could not be processed now, Wait for approval.',
-        error: process.env.NODE_ENV === 'development' ? err.message : {}
+    const isDev = process.env.NODE_ENV === 'development';
+
+    // Default values
+    let statusCode = err.statusCode || 500;
+    let message = err.message || 'Internal Server Error';
+
+    // Handle common Mongoose/Mongo errors
+    if (err.code === 11000) { // Duplicate key error
+        statusCode = 409;
+        const fields = Object.keys(err.keyValue || {});
+        if (fields.includes('email')) {
+            message = 'Email already registered. Go to Login page';
+        } else {
+            message = 'Duplicate value entered';
+        }
+    }
+
+    if (err.name === 'ValidationError') {
+        statusCode = 400;
+    }
+
+    res.status(statusCode).json({
+        status: String(statusCode).startsWith('4') ? 'fail' : 'error',
+        message,
+        ...(isDev ? { stack: err.stack } : {})
     });
 });
 

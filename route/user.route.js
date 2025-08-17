@@ -212,7 +212,7 @@ router.post('/', [auth, isAdmin], async (req, res) => {
 // @access  Private/Admin
 router.put('/:id', [auth, isAdmin, validateObjectId], async (req, res) => {
   try {
-    const { name, email, role, isActive } = req.body;
+    const { fullname, name, email, role, isActive } = req.body;
 
     const user = await User.findById(req.params.id);
     if (!user) {
@@ -237,7 +237,8 @@ router.put('/:id', [auth, isAdmin, validateObjectId], async (req, res) => {
     }
 
     // Update user fields
-    if (name) user.name = name;
+    // Prefer `fullname` field used in the schema; accept `name` as fallback for legacy payloads
+    if (fullname || name) user.fullname = fullname || name;
     if (role) user.role = role;
     if (isActive !== undefined) user.isActive = isActive;
 
