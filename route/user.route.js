@@ -210,6 +210,44 @@ router.post('/', [auth, isAdmin], async (req, res) => {
 // @route   PUT /api/users/:id
 // @desc    Update user (Admin only)
 // @access  Private/Admin
+// @route   PUT /api/users/:id/status
+// @desc    Update user status (active/inactive)
+// @access  Private/Admin
+router.put('/:id/status', [auth, isAdmin, validateObjectId], async (req, res) => {
+  try {
+    const { isActive } = req.body;
+    
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { isActive },
+      { new: true, runValidators: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'User status updated successfully',
+      data: user
+    });
+  } catch (error) {
+    console.error('Error updating user status:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating user status',
+      error: error.message
+    });
+  }
+});
+
+// @route   PUT /api/users/:id
+// @desc    Update user
+// @access  Private/Admin
 router.put('/:id', [auth, isAdmin, validateObjectId], async (req, res) => {
   try {
     const { fullname, name, email, role, isActive } = req.body;

@@ -309,52 +309,26 @@ app.get('/api/test-categories', async (req, res) => {
     }
 });
 
-// Register category routes
-// console.log('Mounting category routes at /api/categories');
-app.use('/api/categories', categoryRoute);
-
-// Register user routes
-// console.log('Mounting user routes at /api/users');
-app.use('/api/users', userRoutes);
-
-// Register course routes
-// console.log('Mounting course routes at /api/courses');
-app.use('/api/courses', courseRoute);
-
-// Register auth routes
-// console.log('Mounting auth routes at /api/auth');
-app.use('/api/auth', authRoutes);
-
 // Mount routes in specific order
 // Public routes first
 app.use("/api/books", bookRoute);
 app.use("/api/categories", categoryRoute);
 app.use("/api/courses", courseRoute);
-// Mount contact routes at /api/contacts (plural) to match frontend expectations
 app.use("/api/contacts", contactRoute);
 app.use("/api/faqs", faqRoute);
+app.use("/api/blog", blogRoutes);
+
+// Auth routes
+app.use("/api/auth", authRoutes);
 
 // Protected routes (require authentication)
-// console.log('Mounting enrollment routes at /api/enrollments');
-app.use('/api/enrollments', enrollmentRoute);
-
-// Blog routes (both public and protected)
-// console.log('Mounting blog routes at /api/blog');
-app.use("/api/blog", blogRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/profile", profileRoute);
 app.use("/api/cart", cartRoute);
-app.use("/api/categories", categoryRoute);
-app.use("/api/courses", courseRoute);
-// Mount contact routes at /api/contacts (plural) to match frontend expectations
-app.use("/api/contacts", contactRoute);
 app.use("/api/enrollments", enrollmentRoute);
-app.use("/api/faqs", faqRoute);
 app.use("/api/upload", uploadRoute);
-app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/lms", lmsRoutes);
-app.use("/api/blogs", blogRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/admin/payments", adminPaymentRoutes);
 

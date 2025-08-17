@@ -67,3 +67,69 @@ export const deleteUser = async (req, res) => {
         res.status(500).json({ message: 'Error deleting user' });
     }
 };
+
+// Update user status (active/inactive)
+export const updateUserStatus = async (req, res) => {
+    try {
+        const { isActive } = req.body;
+        
+        const user = await User.findByIdAndUpdate(
+            req.params.id,
+            { isActive },
+            { new: true, runValidators: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'User status updated successfully',
+            data: user
+        });
+    } catch (error) {
+        console.error('Error updating user status:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error updating user status',
+            error: error.message
+        });
+    }
+};
+
+// Update user LMS approval status
+export const updateUserLMSStatus = async (req, res) => {
+    try {
+        const { isApproved } = req.body;
+        
+        const user = await User.findByIdAndUpdate(
+            req.params.id,
+            { isApproved },
+            { new: true, runValidators: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'User LMS status updated successfully',
+            data: user
+        });
+    } catch (error) {
+        console.error('Error updating user LMS status:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error updating user LMS status',
+            error: error.message
+        });
+    }
+};
