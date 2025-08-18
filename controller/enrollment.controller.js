@@ -1,5 +1,6 @@
 import Enrollment from '../model/enrollment.model.js';
-import Course from '../model/courseModel.js';
+import Course from '../model/course.model.js';
+import User from '../model/User.js';
 import asyncHandler from 'express-async-handler';
 
 // @desc    Enroll in a course (for both guests and authenticated users)
@@ -115,13 +116,157 @@ export const enrollInCourse = asyncHandler(async (req, res) => {
 // @desc    Get user's enrollments
 // @route   GET /api/enrollments/my-enrollments
 // @access  Private
+// @desc    Admin enrolls a user in a course
+// @route   POST /api/enrollments/admin-enroll
+// @access  Private/Admin
+export const adminEnrollUser = asyncHandler(async (req, res) => {
+  const { userId, courseId, status = 'active' } = req.body;
+
+  // Check if user exists
+  const user = await User.findById(userId);
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  // Check if course exists
+  const course = await Course.findById(courseId);
+  if (!course) {
+    res.status(404);
+    throw new Error('Course not found');
+  }
+
+  // Check for existing enrollment
+  const existingEnrollment = await Enrollment.findOne({
+    user: userId,
+    course: courseId
+  });
+
+  if (existingEnrollment) {
+    res.status(400);
+    throw new Error('User is already enrolled in this course');
+  }
+
+  // Create new enrollment
+  const enrollment = await Enrollment.create({
+    user: userId,
+    course: courseId,
+    courseId: course._id.toString(),
+    courseTitle: course.title,
+    status,
+    enrollmentDate: new Date(),
+    lastAccessed: new Date(),
+    progress: 0,
+    isGuestEnrollment: false,
+    enrolledAt: Date.now(),
+    enrolledBy: req.user._id // Track which admin enrolled the user
+  });
+
+  res.status(201).json({
+    success: true,
+    data: enrollment
+  });
+});
+
+// @desc    Get user's enrollments
+// @route   GET /api/enrollments/my-enrollments
+// @access  Private
 export const getMyEnrollments = asyncHandler(async (req, res) => {
-  const enrollments = await Enrollment.find({ user: req.user._id })
+  let query = {};
+  
+  // If userId is provided and user is admin, use that userId
+  if (req.query.userId && req.user.role === 'admin') {
+    query.user = req.query.userId;
+  } else {
+    // Otherwise, use the logged-in user's ID
+    query.user = req.user._id;
+  }
+
+  const enrollments = await Enrollment.find(query)
     .populate('course', 'title thumbnail price')
     .sort('-createdAt');
 
   res.json({
     success: true,
     data: enrollments
+  });
+});
+
+// @desc    Get all enrollments (admin only)
+// @route   GET /api/enrollments/all
+// @access  Private/Admin
+export const getAllEnrollments = asyncHandler(async (req, res) => {
+  const enrollments = await Enrollment.find({})
+    .populate('user', 'name email')
+    .populate('course', 'title')
+    .sort('-enrolledAt');
+
+  res.json({
+    success: true,
+    count: enrollments.length,
+    data: enrollments
+  });
+});
+
+// @desc    Get pending enrollments (admin only)
+// @route   GET /api/enrollments/pending
+// @access  Private/Admin
+export const getPendingEnrollments = asyncHandler(async (req, res) => {
+  const enrollments = await Enrollment.find({ status: 'pending' })
+    .populate('user', 'name email')
+    .populate('course', 'title')
+    .sort('-enrolledAt');
+
+  res.json({
+    success: true,
+    count: enrollments.length,
+    data: enrollments
+  });
+});
+
+// @desc    Update enrollment status (admin only)
+// @route   PUT /api/enrollments/:id/status
+// @access  Private/Admin
+export const updateEnrollmentStatus = asyncHandler(async (req, res) => {
+  const { status } = req.body;
+  
+  const enrollment = await Enrollment.findById(req.params.id);
+  
+  if (!enrollment) {
+    res.status(404);
+    throw new Error('Enrollment not found');
+  }
+  
+  enrollment.status = status;
+  await enrollment.save();
+  
+  res.json({
+    success: true,
+    data: enrollment
+  });
+});
+
+// @desc    Update pending enrollment to active (admin only)
+// @route   PUT /api/enrollments/:id/activate
+// @access  Private/Admin
+export const updatePendingToActive = asyncHandler(async (req, res) => {
+  const enrollment = await Enrollment.findById(req.params.id);
+  
+  if (!enrollment) {
+    res.status(404);
+    throw new Error('Enrollment not found');
+  }
+  
+  if (enrollment.status !== 'pending') {
+    res.status(400);
+    throw new Error('Only pending enrollments can be activated');
+  }
+  
+  enrollment.status = 'active';
+  await enrollment.save();
+  
+  res.json({
+    success: true,
+    data: enrollment
   });
 });

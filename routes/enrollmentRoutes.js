@@ -1,54 +1,39 @@
 import express from 'express';
-import { protect, authorize } from '../middleware/auth.js';
 import { 
   enrollInCourse, 
   getMyEnrollments, 
+  adminEnrollUser,
   updateEnrollmentStatus,
   getPendingEnrollments,
   updatePendingToActive,
   getAllEnrollments
-} from '../controllers/enrollmentController.js';
+} from '../controller/enrollment.controller.js';
+import { protect, admin, authorize } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Public route for course enrollment
+// Public route for course enrollment (both guests and authenticated users)
 router.route('/')
   .post(enrollInCourse);
 
-// Get enrollments for the authenticated user
-router.route('/me')
-  .get(protect, (req, res, next) => {
-    // Use the user ID from query params or token for security
-    const requestedUserId = req.query.userId;
-    const tokenUserId = req.user.id;
-    
-    // If a specific user ID is requested, verify it matches the token user ID
-    // This prevents users from accessing other users' enrollments
-    if (requestedUserId && requestedUserId !== tokenUserId) {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to access these enrollments'
-      });
-    }
-    
-    // Always use the token user ID for security
-    req.query.userId = tokenUserId;
-    next();
-  }, getMyEnrollments);
+// Protected route for viewing user's enrollments (only for authenticated users)
+router.route('/my-enrollments')
+  .get(protect, getMyEnrollments);
 
-// Admin routes
-router.route('/pending')
-  .get(protect, authorize('admin'), getPendingEnrollments);
+// Admin route for enrolling users in courses
+router.route('/admin-enroll')
+  .post(protect, admin, adminEnrollUser);
 
-// Get all enrollments with complete user details (Admin only)
+// Get all enrollments (admin only)
 router.route('/all')
-  .get(protect, authorize('admin'), getAllEnrollments);
+  .get(protect, admin, getAllEnrollments);
 
-// Temporary route to update all pending enrollments to active
-router.route('/update-to-active')
-  .put(protect, authorize('admin'), updatePendingToActive);
+// Get pending enrollments (admin only)
+router.route('/pending')
+  .get(protect, admin, getPendingEnrollments);
 
+// Update enrollment status (admin only)
 router.route('/:id/status')
-  .put(protect, authorize('admin'), updateEnrollmentStatus);
+  .put(protect, admin, updateEnrollmentStatus);
 
 export default router;
