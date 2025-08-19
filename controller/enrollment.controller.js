@@ -172,24 +172,81 @@ export const adminEnrollUser = asyncHandler(async (req, res) => {
 // @route   GET /api/enrollments/my-enrollments
 // @access  Private
 export const getMyEnrollments = asyncHandler(async (req, res) => {
-  let query = {};
-  
-  // If userId is provided and user is admin, use that userId
-  if (req.query.userId && req.user.role === 'admin') {
-    query.user = req.query.userId;
-  } else {
-    // Otherwise, use the logged-in user's ID
-    query.user = req.user._id;
+  try {
+    console.log('=== START getMyEnrollments ===');
+    console.log('Request user:', {
+      id: req.user?._id,
+      email: req.user?.email,
+      role: req.user?.role,
+      isAuthenticated: !!req.user
+    });
+    console.log('Request query:', req.query);
+
+    if (!req.user) {
+      console.error('No authenticated user found');
+      return res.status(401).json({
+        success: false,
+        message: 'Not authenticated'
+      });
+    }
+
+    let query = {};
+    
+    // If userId is provided and user is admin, use that userId
+    if (req.query.userId && req.user.role === 'admin') {
+      query.user = req.query.userId;
+      console.log('Admin viewing enrollments for user:', req.query.userId);
+    } else {
+      // Otherwise, use the logged-in user's ID
+      query.user = req.user._id;
+      console.log('User viewing their own enrollments');
+    }
+
+    console.log('MongoDB query:', JSON.stringify(query, null, 2));
+
+    const enrollments = await Enrollment.find(query)
+      .populate('course', 'title thumbnail price')
+      .sort('-createdAt')
+      .lean(); // Convert to plain JS objects for logging
+
+    console.log(`Found ${enrollments.length} enrollments`);
+    
+    if (enrollments.length > 0) {
+      console.log('Sample enrollment:', {
+        _id: enrollments[0]._id,
+        user: enrollments[0].user,
+        course: enrollments[0].course ? {
+          _id: enrollments[0].course._id,
+          title: enrollments[0].course.title
+        } : 'No course data',
+        status: enrollments[0].status,
+        progress: enrollments[0].progress,
+        isGuestEnrollment: enrollments[0].isGuestEnrollment
+      });
+    } else {
+      console.log('No enrollments found for query');
+      // Verify if the user exists
+      const user = await User.findById(query.user);
+      console.log('User exists in database:', !!user);
+      if (!user) {
+        console.error('User not found in database');
+      }
+    }
+
+    res.json({
+      success: true,
+      data: enrollments
+    });
+    
+    console.log('=== END getMyEnrollments ===');
+  } catch (error) {
+    console.error('Error in getMyEnrollments:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
-
-  const enrollments = await Enrollment.find(query)
-    .populate('course', 'title thumbnail price')
-    .sort('-createdAt');
-
-  res.json({
-    success: true,
-    data: enrollments
-  });
 });
 
 // @desc    Get all enrollments (admin only)
