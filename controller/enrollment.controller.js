@@ -174,11 +174,15 @@ export const adminEnrollUser = asyncHandler(async (req, res) => {
 export const getMyEnrollments = asyncHandler(async (req, res) => {
   try {
     console.log('=== START getMyEnrollments ===');
-    console.log('Request user:', {
+    console.log('Request user object:', JSON.stringify(req.user, null, 2));
+    console.log('Request user details:', {
       id: req.user?._id,
+      idType: req.user?._id ? typeof req.user._id : 'undefined',
+      stringId: req.user?._id?.toString(),
       email: req.user?.email,
       role: req.user?.role,
-      isAuthenticated: !!req.user
+      isAuthenticated: !!req.user,
+      hasUser: !!req.user
     });
     console.log('Request query:', req.query);
 
@@ -192,14 +196,26 @@ export const getMyEnrollments = asyncHandler(async (req, res) => {
 
     let query = {};
     
+    // Ensure we have a valid user ID
+    const userId = req.user?._id || req.user?.id;
+    
+    if (!userId) {
+      console.error('No user ID found in request');
+      return res.status(400).json({
+        success: false,
+        message: 'User ID not found in request'
+      });
+    }
+
     // If userId is provided and user is admin, use that userId
     if (req.query.userId && req.user.role === 'admin') {
       query.user = req.query.userId;
       console.log('Admin viewing enrollments for user:', req.query.userId);
     } else {
-      // Otherwise, use the logged-in user's ID
-      query.user = req.user._id;
-      console.log('User viewing their own enrollments');
+      // For regular users, only return their non-guest enrollments
+      query.user = userId; // Use the user ID directly
+      query.isGuestEnrollment = { $ne: true }; // Explicitly exclude guest enrollments
+      console.log('User viewing their own non-guest enrollments for user ID:', userId);
     }
 
     console.log('MongoDB query:', JSON.stringify(query, null, 2));

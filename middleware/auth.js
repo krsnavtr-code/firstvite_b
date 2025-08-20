@@ -61,14 +61,14 @@ export const protect = async (req, res, next) => {
         });
       }
       
-      // Attach user to request object
-      req.user = {
-        id: user._id,
-        email: user.email,
-        role: user.role,
-        fullname: user.fullname,
-        isApproved: user.isApproved
-      };
+      // Attach complete user object to request
+      req.user = user.toObject();
+      console.log('Attached user to request:', {
+        _id: req.user._id,
+        id: req.user._id,
+        email: req.user.email,
+        role: req.user.role
+      });
       
       next();
     } catch (error) {
