@@ -224,7 +224,7 @@ export const createCourse = async (req, res) => {
 export const getAllCourses = async (req, res) => {
     try {
         const { category, status, fields, all, search, showOnHome, limit, sort, isPublished, price } = req.query;
-        console.log('Getting all courses with params:', { category, status, fields, all, search, showOnHome, limit, sort, isPublished, price, user: req.user?.role });
+        // console.log('Getting all courses with params:', { category, status, fields, all, search, showOnHome, limit, sort, isPublished, price, user: req.user?.role });
         
         const query = {};
         
@@ -300,7 +300,7 @@ export const getAllCourses = async (req, res) => {
         }
         
         const courses = await coursesQuery.exec();
-        console.log(`Found ${courses.length} courses matching query`);
+        // console.log(`Found ${courses.length} courses matching query`);
         res.json(courses);
     } catch (error) {
         console.error('Error fetching courses:', error);
