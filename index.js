@@ -27,6 +27,7 @@ import paymentRoutes from "./routes/paymentRoutes.js";
 import adminPaymentRoutes from "./routes/adminPaymentRoutes.js";
 import pdfRoutes from "./routes/pdfRoutes.js";
 import pdfRouter from "./route/pdf.route.js";
+import sprintRoutes from "./routes/sprintRoutes.js";
 
 // Initialize express app
 const app = express();
@@ -329,8 +330,9 @@ app.use("/api/enrollments", enrollmentRoute);
 app.use("/api/upload", uploadRoute);
 app.use("/api/admin", adminRoutes);
 app.use("/api/lms", lmsRoutes);
-app.use("/api/payments", paymentRoutes);
-app.use("/api/admin/payments", adminPaymentRoutes);
+app.use("/api/v1/payments", paymentRoutes);
+app.use("/api/v1/admin/payments", adminPaymentRoutes);
+app.use("/api/v1/sprints", sprintRoutes);
 
 // PDF routes
 // console.log('Mounting PDF routes at /api/pdfs');

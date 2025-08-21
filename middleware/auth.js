@@ -50,26 +50,31 @@ export const protect = async (req, res, next) => {
         });
       }
       
-      // Find user and select only necessary fields
+      // Find the user and attach to request object
       const user = await User.findById(userId).select('-password');
-      console.log('Found user:', user ? `ID: ${user._id}, Email: ${user.email}, Role: ${user.role}` : 'No user found');
-      
       if (!user) {
+        console.error('User not found with ID:', userId);
         return res.status(401).json({
           success: false,
-          message: 'User not found with this token. The user account might have been deleted.'
+          message: 'User not found with this ID.'
         });
       }
       
-      // Attach complete user object to request
-      req.user = user.toObject();
-      console.log('Attached user to request:', {
-        _id: req.user._id,
-        id: req.user._id,
-        email: req.user.email,
-        role: req.user.role
+      console.log('Found user:', {
+        id: user._id,
+        email: user.email,
+        role: user.role
       });
       
+      // Attach user object to request with all necessary fields
+      req.user = {
+        _id: user._id,
+        id: user._id.toString(),
+        email: user.email,
+        role: user.role
+      };
+      
+      console.log('Attached user to request:', req.user);
       next();
     } catch (error) {
       console.error('Token verification error:', error);
