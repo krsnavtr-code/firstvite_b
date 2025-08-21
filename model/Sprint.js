@@ -58,6 +58,13 @@ sprintSchema.virtual('durationInDays').get(function() {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 });
 
+// Virtual for sessions
+sprintSchema.virtual('sessions', {
+  ref: 'Session',
+  localField: '_id',
+  foreignField: 'sprintId'
+});
+
 // Prevent duplicate sprint names within the same course
 sprintSchema.index({ name: 1, courseId: 1 }, { unique: true });
 
