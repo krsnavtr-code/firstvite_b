@@ -29,6 +29,7 @@ import pdfRoutes from "./routes/pdfRoutes.js";
 import pdfRouter from "./route/pdf.route.js";
 import sprintRoutes from "./routes/sprintRoutes.js";
 import sessionRoutes from "./routes/sessionRoutes.js";
+import taskRoutes from "./routes/taskRoutes.js";
 
 // Initialize express app
 const app = express();
@@ -91,7 +92,10 @@ const corsOptions = {
         'x-user-agent', 
         'x-client-ip',
         'Cache-Control',
-        'Accept'
+        'Pragma',
+        'Expires',
+        'Accept',
+        'Access-Control-Allow-Origin'
     ],
     exposedHeaders: [
         'Content-Length',
@@ -336,6 +340,7 @@ app.use("/api/sessions", sessionRoutes);
 app.use("/api/v1/payments", paymentRoutes);
 app.use("/api/v1/admin/payments", adminPaymentRoutes);
 app.use("/api/v1/sprints", sprintRoutes);
+app.use("/api/v1/tasks", taskRoutes);
 
 
 // PDF routes
