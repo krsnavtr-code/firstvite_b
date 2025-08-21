@@ -44,6 +44,24 @@ export const createSprint = catchAsync(async (req, res, next) => {
   }
 });
 
+// @desc    Get all sprints
+// @route   GET /api/sprints
+// @access  Private/Admin
+export const getAllSprints = catchAsync(async (req, res, next) => {
+  const sprints = await Sprint.find({})
+    .sort('-createdAt')
+    .select('-__v')
+    .populate('courseId', 'title');
+
+  res.status(200).json({
+    status: 'success',
+    results: sprints.length,
+    data: {
+      sprints
+    }
+  });
+});
+
 // @desc    Get all sprints for a course
 // @route   GET /api/sprints/course/:courseId
 // @access  Private

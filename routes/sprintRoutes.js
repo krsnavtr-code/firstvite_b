@@ -4,7 +4,8 @@ import {
   getSprintsByCourse, 
   getSprint, 
   updateSprint, 
-  deleteSprint 
+  deleteSprint,
+  getAllSprints
 } from '../controller/sprintController.js';
 import { protect, admin } from '../middleware/auth.js';
 
@@ -18,6 +19,7 @@ router.use(admin);
 
 router
   .route('/')
+  .get(getAllSprints)
   .post(createSprint);
 
 router
