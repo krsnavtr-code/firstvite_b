@@ -14,22 +14,18 @@ const router = express.Router();
 // Protect all routes after this middleware
 router.use(protect);
 
-// Restrict the following routes to admin only
-router.use(admin);
+// Admin-only routes
+router.route('/')
+  .get(admin, getAllSprints)
+  .post(admin, createSprint);
 
-router
-  .route('/')
-  .get(getAllSprints)
-  .post(createSprint);
+router.route('/:id')
+  .get(admin, getSprint)
+  .patch(admin, updateSprint)
+  .delete(admin, deleteSprint);
 
-router
-  .route('/course/:courseId')
+// Allow both students and admins to access sprints for a course
+router.route('/course/:courseId')
   .get(getSprintsByCourse);
-
-router
-  .route('/:id')
-  .get(getSprint)
-  .patch(updateSprint)
-  .delete(deleteSprint);
 
 export default router;

@@ -1,4 +1,5 @@
 import Sprint from '../model/Sprint.js';
+import Enrollment from '../model/enrollment.model.js';
 import AppError from '../utils/appError.js';
 import catchAsync from '../utils/catchAsync.js';
 
@@ -67,9 +68,24 @@ export const getAllSprints = catchAsync(async (req, res, next) => {
 // @access  Private
 export const getSprintsByCourse = catchAsync(async (req, res, next) => {
   const { courseId } = req.params;
+  const userId = req.user.id;
+
+  // Check if user is enrolled in the course or is an admin
+  if (req.user.role !== 'admin') {
+    const enrollment = await Enrollment.findOne({
+      $or: [
+        { user: userId, course: courseId, status: { $ne: 'cancelled' } },
+        { 'guestInfo.email': req.user.email, course: courseId, status: { $ne: 'cancelled' } }
+      ]
+    });
+
+    if (!enrollment) {
+      return next(new AppError('You are not enrolled in this course', 403));
+    }
+  }
   
-  const sprints = await Sprint.find({ courseId })
-    .sort('-createdAt')
+  const sprints = await Sprint.find({ courseId, isActive: true })
+    .sort('order')
     .select('-__v');
 
   res.status(200).json({
