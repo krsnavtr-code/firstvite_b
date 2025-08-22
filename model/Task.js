@@ -47,6 +47,37 @@ const taskSchema = new mongoose.Schema({
     required: true
   },
   questions: [questionSchema],
+  submissions: [{
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    session: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Session',
+      required: true
+    },
+    answers: {
+      type: mongoose.Schema.Types.Mixed,
+      required: true
+    },
+    score: {
+      type: Number,
+      required: true,
+      min: 0,
+      max: 100
+    },
+    timeSpent: {
+      type: Number,
+      required: true,
+      min: 0
+    },
+    submittedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
   isActive: {
     type: Boolean,
     default: true

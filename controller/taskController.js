@@ -151,3 +151,62 @@ export const reorderTasks = catchAsync(async (req, res, next) => {
     message: 'Tasks reordered successfully'
   });
 });
+
+// @desc    Submit task answers
+// @route   POST /api/tasks/:id/submit
+// @access  Private
+export const submitTaskAnswers = catchAsync(async (req, res, next) => {
+  const { id: taskId } = req.params;
+  const { sessionId, answers, score, timeSpent } = req.body;
+  const userId = req.user.id;
+
+  // 1) Check if task exists
+  const task = await Task.findById(taskId);
+  if (!task) {
+    return next(new AppError('No task found with that ID', 404));
+  }
+
+  // 2) Create submission object
+  const submission = {
+    user: userId,
+    session: sessionId,
+    answers,
+    score,
+    timeSpent,
+    submittedAt: Date.now()
+  };
+
+  // 3) Add submission to task
+  task.submissions = task.submissions || [];
+  
+  // Check if user already has a submission
+  const existingSubmissionIndex = task.submissions.findIndex(
+    sub => sub.user.toString() === userId
+  );
+
+  if (existingSubmissionIndex >= 0) {
+    // Update existing submission
+    task.submissions[existingSubmissionIndex] = {
+      ...task.submissions[existingSubmissionIndex].toObject(),
+      ...submission
+    };
+  } else {
+    // Add new submission
+    task.submissions.push(submission);
+  }
+
+  // 4) Save the task with updated submissions
+  await task.save();
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      submission: {
+        ...submission,
+        _id: existingSubmissionIndex >= 0 
+          ? task.submissions[existingSubmissionIndex]._id 
+          : task.submissions[task.submissions.length - 1]._id
+      }
+    }
+  });
+});

@@ -5,7 +5,8 @@ import {
   getTask,
   updateTask,
   deleteTask,
-  reorderTasks
+  reorderTasks,
+  submitTaskAnswers
 } from '../controller/taskController.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 
@@ -28,5 +29,9 @@ router.route('/:id')
   .get(getTask)
   .patch(admin, updateTask)
   .delete(admin, deleteTask);
+
+// Submit task answers
+router.route('/:id/submit')
+  .post(protect, submitTaskAnswers);
 
 export default router;
