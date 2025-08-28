@@ -165,11 +165,20 @@ export const deleteDiscussion = async (req, res) => {
 // @access  Private
 export const addComment = async (req, res) => {
   try {
+    console.log('Request body:', req.body);
+    console.log('User:', req.user);
+    
     const { content } = req.body;
+    
+    if (!content) {
+      console.error('No content provided in request');
+      return res.status(400).json({ success: false, message: 'Comment content is required' });
+    }
 
     const discussion = await Discussion.findById(req.params.id);
 
     if (!discussion) {
+      console.error('Discussion not found:', req.params.id);
       return res.status(404).json({ success: false, message: 'Discussion not found' });
     }
 
@@ -180,17 +189,50 @@ export const addComment = async (req, res) => {
       dislikes: []
     };
 
+    console.log('Adding comment:', comment);
     discussion.comments.unshift(comment);
-    await discussion.save();
-
-    // Populate user data in the new comment
-    const newComment = discussion.comments[0];
-    await newComment.populate('user', 'name email avatar');
-
-    res.status(201).json({ success: true, data: newComment });
+    
+    try {
+      // Save the discussion with the new comment
+      const savedDiscussion = await discussion.save();
+      console.log('Comment saved successfully');
+      
+      // Get the newly added comment (it's the first one in the array)
+      const newComment = savedDiscussion.comments[0];
+      
+      // Populate the user data using the Discussion model
+      const populatedDiscussion = await Discussion.populate(savedDiscussion, {
+        path: 'comments.user',
+        select: 'name email avatar'
+      });
+      
+      // Get the populated comment
+      const populatedComment = populatedDiscussion.comments.id(newComment._id);
+      
+      console.log('Sending response with new comment');
+      res.status(201).json({ 
+        success: true, 
+        data: populatedComment.toObject()
+      });
+    } catch (saveError) {
+      console.error('Error saving discussion:', saveError);
+      if (saveError.name === 'ValidationError') {
+        console.error('Validation errors:', saveError.errors);
+      }
+      throw saveError;
+    }
   } catch (error) {
-    console.error('Error adding comment:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error('Error in addComment:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+      errors: error.errors
+    });
+    res.status(500).json({ 
+      success: false, 
+      message: 'Server error',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 };
 
