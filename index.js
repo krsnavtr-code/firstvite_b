@@ -28,6 +28,7 @@ import adminPaymentRoutes from "./routes/adminPaymentRoutes.js";
 import pdfRoutes from "./routes/pdfRoutes.js";
 import pdfRouter from "./route/pdf.route.js";
 import sprintRoutes from "./routes/sprintRoutes.js";
+import chatRoutes from "./route/chat.route.js";
 import sessionRoutes from "./routes/sessionRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
 import discussionRoutes from "./routes/discussionRoutes.js";
@@ -343,6 +344,7 @@ app.use("/api/v1/admin/payments", adminPaymentRoutes);
 app.use("/api/v1/sprints", sprintRoutes);
 app.use("/api/v1/tasks", taskRoutes);
 app.use("/api/discussions", discussionRoutes);
+app.use("/api/chat", chatRoutes);
 
 // PDF routes
 // console.log('Mounting PDF routes at /api/pdfs');
