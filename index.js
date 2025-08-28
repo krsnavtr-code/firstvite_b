@@ -30,6 +30,7 @@ import pdfRouter from "./route/pdf.route.js";
 import sprintRoutes from "./routes/sprintRoutes.js";
 import sessionRoutes from "./routes/sessionRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
+import discussionRoutes from "./routes/discussionRoutes.js";
 
 // Initialize express app
 const app = express();
@@ -341,7 +342,7 @@ app.use("/api/v1/payments", paymentRoutes);
 app.use("/api/v1/admin/payments", adminPaymentRoutes);
 app.use("/api/v1/sprints", sprintRoutes);
 app.use("/api/v1/tasks", taskRoutes);
-
+app.use("/api/discussions", discussionRoutes);
 
 // PDF routes
 // console.log('Mounting PDF routes at /api/pdfs');
