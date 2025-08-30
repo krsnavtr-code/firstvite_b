@@ -33,6 +33,10 @@ const sessionSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  zoomMeetingLink: {
+    type: String,
+    trim: true
+  },
   resources: [{
     title: String,
     url: String,

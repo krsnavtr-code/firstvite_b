@@ -7,7 +7,7 @@ import mongoose from 'mongoose';
 // @route   POST /api/v1/sessions
 // @access  Private/Admin
 const createSession = catchAsync(async (req, res, next) => {
-  const { name, description, sprintId, duration, content, videoUrl, resources } = req.body;
+  const { name, description, sprintId, duration, content, videoUrl, zoomMeetingLink, resources } = req.body;
 
   // Get the highest order number for this sprint
   const lastSession = await Session.findOne({ sprintId })
@@ -24,6 +24,7 @@ const createSession = catchAsync(async (req, res, next) => {
     duration,
     content,
     videoUrl,
+    zoomMeetingLink,
     resources: resources || [],
     createdBy: req.user.id
   });
@@ -78,7 +79,7 @@ const getSession = catchAsync(async (req, res, next) => {
 // @route   PATCH /api/v1/sessions/:id
 // @access  Private/Admin
 const updateSession = catchAsync(async (req, res, next) => {
-  const { name, description, duration, content, videoUrl, resources, isActive } = req.body;
+  const { name, description, duration, content, videoUrl, zoomMeetingLink, resources, isActive } = req.body;
   
   const session = await Session.findByIdAndUpdate(
     req.params.id,
@@ -88,7 +89,8 @@ const updateSession = catchAsync(async (req, res, next) => {
       duration,
       content,
       videoUrl,
-      resources: resources || [],
+      zoomMeetingLink,
+      resources,
       isActive
     },
     {
