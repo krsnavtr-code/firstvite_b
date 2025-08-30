@@ -10,7 +10,7 @@ import { fileURLToPath } from 'url';
 // Import routes
 import bookRoute from "./route/book.route.js";
 import authRoute from "./route/auth.route.js";
-import { default as userRoutes } from "./routes/userRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 import profileRoute from "./route/profile.route.js";
 import cartRoute from "./route/cart.route.js";
 import categoryRoute from "./route/category.route.js";
@@ -32,6 +32,8 @@ import chatRoutes from "./route/chat.route.js";
 import sessionRoutes from "./routes/sessionRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
 import discussionRoutes from "./routes/discussionRoutes.js";
+import careerRoutes from "./routes/careerRoutes.js";
+import applicationRoutes from "./routes/applicationRoutes.js";
 
 // Initialize express app
 const app = express();
@@ -345,6 +347,8 @@ app.use("/api/v1/sprints", sprintRoutes);
 app.use("/api/v1/tasks", taskRoutes);
 app.use("/api/discussions", discussionRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/careers", careerRoutes);
+app.use("/api/applications", applicationRoutes);
 
 // PDF routes
 // console.log('Mounting PDF routes at /api/pdfs');
