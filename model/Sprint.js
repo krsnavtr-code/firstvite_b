@@ -22,15 +22,13 @@ const sprintSchema = new mongoose.Schema({
   },
   endDate: {
     type: Date,
-    required: [true, 'End date is required'],
-    validate: {
-      validator: function(value) {
-        return value > this.startDate;
-      },
-      message: 'End date must be after start date'
-    }
+    required: [true, 'End date is required']
   },
   goal: {
+    type: String,
+    trim: true
+  },
+  whatsappGroupLink: {
     type: String,
     trim: true
   },

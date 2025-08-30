@@ -23,6 +23,7 @@ export const createSprint = catchAsync(async (req, res, next) => {
       startDate: req.body.startDate,
       endDate: req.body.endDate,
       goal: req.body.goal,
+      whatsappGroupLink: req.body.whatsappGroupLink,
       isActive: req.body.isActive !== undefined ? req.body.isActive : true,
       createdBy: req.user._id || req.user.id // Use _id if available, fallback to id
     };
@@ -119,7 +120,9 @@ export const getSprint = catchAsync(async (req, res, next) => {
 // @route   PATCH /api/sprints/:id
 // @access  Private/Admin
 export const updateSprint = catchAsync(async (req, res, next) => {
-  const { name, description, startDate, endDate, goal, isActive } = req.body;
+  // console.log('Update sprint request body:', req.body);
+  const { name, description, startDate, endDate, goal, whatsappGroupLink, isActive } = req.body;
+  // console.log('whatsappGroupLink from request:', whatsappGroupLink);
 
   const sprint = await Sprint.findByIdAndUpdate(
     req.params.id,
@@ -129,6 +132,7 @@ export const updateSprint = catchAsync(async (req, res, next) => {
       startDate,
       endDate,
       goal,
+      whatsappGroupLink,
       isActive
     },
     {
