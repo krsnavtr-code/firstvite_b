@@ -26,6 +26,7 @@
     },
     "homepage": "https://github.com/akhil2k-lc/FirstViteApp#readme",
     "dependencies": {
+        "@google-cloud/local-auth": "^3.0.1",
         "@react-pdf/renderer": "^4.3.0",
         "bcryptjs": "^2.4.3",
         "cors": "^2.8.5",
@@ -33,6 +34,7 @@
         "express": "^4.18.3",
         "express-async-handler": "^1.2.0",
         "express-validator": "^7.0.1",
+        "googleapis": "^159.0.0",
         "html-pdf-node": "^1.0.8",
         "jsonwebtoken": "^9.0.2",
         "mongodb": "^6.17.0",
