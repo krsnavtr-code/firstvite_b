@@ -34,6 +34,7 @@ import taskRoutes from "./routes/taskRoutes.js";
 import discussionRoutes from "./routes/discussionRoutes.js";
 import careerRoutes from "./routes/careerRoutes.js";
 import applicationRoutes from "./routes/applicationRoutes.js";
+import externalContactRoutes from "./routes/externalContactRoutes.js";
 
 // Initialize express app
 const app = express();
@@ -349,6 +350,9 @@ app.use("/api/discussions", discussionRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/careers", careerRoutes);
 app.use("/api/applications", applicationRoutes);
+
+// External API Routes
+app.use("/api/outcontact", externalContactRoutes);
 
 // PDF routes
 // console.log('Mounting PDF routes at /api/pdfs');
