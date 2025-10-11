@@ -1,10 +1,11 @@
 import Candidate from "../model/Candidate.js";
 import path from "path";
 import fs from "fs";
-import { fileURLToPath } from "url";
 import nodemailer from "nodemailer";
+import generateIdCard from "../utils/idCardGenerator.js";
 import dotenv from "dotenv";
 import crypto from "crypto";
+import { fileURLToPath } from 'url';
 
 // Get the current module's directory
 const __filename = fileURLToPath(import.meta.url);
@@ -430,11 +431,82 @@ ${companyName || "FirstVITE"}
 `,
         };
 
+        // Read profile photo if it exists
+        let profilePhotoData = null;
+        if (req.file) {
+            try {
+                const fileData = fs.readFileSync(req.file.path);
+                const mimeType = req.file.mimetype || 'image/jpeg';
+                profilePhotoData = {
+                    data: fileData,
+                    mimeType: mimeType,
+                    base64: fileData.toString('base64')
+                };
+            } catch (err) {
+                console.error('Error reading profile photo:', err);
+            }
+        }
+
+        // Generate ID card with profile photo
+        const idCard = await generateIdCard({
+            ...candidate.toObject(),
+            profilePhoto: profilePhotoData
+        }, {
+            eventName,
+            eventDate,
+            venue,
+            city,
+            qrCodeUrl: `https://firstvite.com/verify/${candidate._id}`,
+            logoUrl: 'https://firstvite.com/logo.png'
+        });
+
+        // Add ID card as PDF attachment
+        welcomeMailOptions.attachments = [{
+            filename: idCard.fileName,
+            path: idCard.filePath,
+            contentType: 'application/pdf'
+        }];
+
+        // Add ID card download link in email body
+        const idCardSection = `
+            <div style="margin: 20px 0; padding: 15px; background: #f0f9ff; border-left: 4px solid #3b82f6; border-radius: 4px;">
+                <h3 style="margin: 0 0 10px 0; color: #1e40af;">📌 Your Event ID Card</h3>
+                <p style="margin: 0 0 10px 0; color: #1e3a8a;">
+                    Your personalized event ID card is attached to this email. Please download and carry a printed copy to the event for verification.
+                </p>
+                <p style="margin: 0; font-size: 13px; color: #3b82f6;">
+                    <strong>ID Number:</strong> ${idCard.registrationId}
+                </p>
+            </div>
+        `;
+
+        // Insert ID card section after the greeting
+        welcomeMailOptions.html = welcomeMailOptions.html.replace(
+            '<p style="margin:0 0 12px; font-size:15px; color:#111827;">',
+            idCardSection + '<p style="margin:0 0 12px; font-size:15px; color:#111827;">'
+        );
+
         // Send welcome email (don't await to avoid delaying the response)
         transporter
             .sendMail(welcomeMailOptions)
-            .then((info) => console.log("Welcome email sent:", info.messageId))
-            .catch((error) => console.error("Error sending welcome email:", error));
+            .then((info) => {
+                console.log("Welcome email sent:", info.messageId);
+                // Clean up the temporary ID card file after sending
+                if (fs.existsSync(idCard.filePath)) {
+                    fs.unlink(idCard.filePath, (err) => {
+                        if (err) console.error("Error deleting temporary ID card:", err);
+                    });
+                }
+            })
+            .catch((error) => {
+                console.error("Error sending welcome email:", error);
+                // Clean up the temporary ID card file on error
+                if (fs.existsSync(idCard.filePath)) {
+                    fs.unlink(idCard.filePath, (err) => {
+                        if (err) console.error("Error deleting temporary ID card:", err);
+                    });
+                }
+            });
 
         res.status(201).json({
             success: true,

@@ -198,6 +198,9 @@ app.use('/pdfs', express.static(pdfsDir, {
     }
 }));
 
+// Serve static files from the public directory
+app.use(express.static(publicDir));
+
 // Serve candidate profile images
 const candidateProfileDir = path.join(publicDir, 'candidate_profile');
 app.use('/candidate_profile', express.static(candidateProfileDir, {

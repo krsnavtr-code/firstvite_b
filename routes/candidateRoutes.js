@@ -43,6 +43,41 @@ const upload = multer({
 // Public routes
 router.post('/', upload.single('profilePhoto'), createCandidate);
 
+// Test route to view ID card
+router.get('/test-id-card', (req, res) => {
+    // Mock candidate data for testing
+    const testCandidate = {
+        name: 'John Doe',
+        email: 'john.doe@example.com',
+        phone: '+1234567890',
+        college: 'Example University',
+        course: 'Computer Science',
+        graduationYear: '2024'
+    };
+    
+    // Mock event details
+    const eventDetails = {
+        eventName: 'Career Hiring Camp 2025',
+        eventDate: 'November 15, 2025',
+        venue: 'Grand Conference Center',
+        city: 'Mumbai',
+        qrCodeUrl: 'https://firstvite.com/verify/123456',
+        logoUrl: 'https://firstvite.com/logo.png'
+    };
+    
+    // Import the generateIdCard function directly
+    import('../utils/idCardGenerator.js').then(({ default: generateIdCard }) => {
+        generateIdCard(testCandidate, eventDetails)
+            .then(({ html }) => {
+                res.send(html);
+            })
+            .catch(error => {
+                console.error('Error generating ID card:', error);
+                res.status(500).send('Error generating ID card');
+            });
+    });
+});
+
 // OTP routes
 router.post('/send-otp', sendOTP);
 router.post('/verify-otp', verifyOTP);
