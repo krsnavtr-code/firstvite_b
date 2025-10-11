@@ -29,6 +29,12 @@ const candidateSchema = new mongoose.Schema(
       required: [true, 'College is required'],
       trim: true,
     },
+    registrationId: {
+      type: String,
+      unique: true,
+      sparse: true,
+      trim: true,
+    },
     university: {
       type: String,
       required: [true, 'University is required'],

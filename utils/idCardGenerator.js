@@ -2,14 +2,13 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import Candidate from '../model/Candidate.js';
 
 // Define __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Now we can use __dirname
-const logoImagePath = path.join(__dirname, '../public/img-1753961989896-7541613.png');
-
 // We'll use HTML directly for now instead of PDF generation
 // import pdf from 'html-pdf';
 
@@ -19,16 +18,21 @@ const generateIdCard = async (candidate, eventDetails = {}) => {
 
     const {
         eventName = 'Career Hiring Camp 2025',
-        logoUrl = `file://${logoImagePath}`
     } = eventDetails;
 
     // Generate a unique ID number
     const registrationId = `FV${Date.now().toString().slice(-6)}`;
-    const currentDate = new Date().toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-    });
+    try {
+        // Save the registrationId to the candidate document
+        await Candidate.findByIdAndUpdate(
+            candidate._id,
+            { registrationId },
+            { new: true, runValidators: true }
+        );
+    } catch (error) {
+        console.error('Error saving registrationId:', error);
+        throw new Error('Failed to generate registration ID');
+    }
 
     // Create HTML content for the ID card
     const htmlContent = `
@@ -177,15 +181,15 @@ const generateIdCard = async (candidate, eventDetails = {}) => {
             
             <div class="id-photo-container">
                 <div class="id-photo">
-                    ${candidate.profilePhoto ? 
-                        `<img src="data:${candidate.profilePhoto.mimeType || 'image/jpeg'};base64,${candidate.profilePhoto.base64}" 
+                    ${candidate.profilePhoto ?
+            `<img src="data:${candidate.profilePhoto.mimeType || 'image/jpeg'};base64,${candidate.profilePhoto.base64}" 
                               alt="Profile Photo" 
-                              style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">` : 
-                        `<div style="text-align: center; color: #4f46e5; font-size: 12px; display: flex; flex-direction: column; justify-content: center; height: 100%;">
+                              style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">` :
+            `<div style="text-align: center; color: #4f46e5; font-size: 12px; display: flex; flex-direction: column; justify-content: center; height: 100%;">
                             <div style="font-size: 40px; margin-bottom: 5px; line-height: 1;">👤</div>
                             <div>No Photo</div>
                         </div>`
-                    }
+        }
                 </div>
             </div>
             
