@@ -249,9 +249,42 @@ export const sendContactNotifications = async (contact) => {
   }
 };
 
+/**
+ * Send proposal emails to multiple colleges
+ * @param {Array<string>} emailList - Array of recipient email addresses
+ * @param {string} subject - Email subject
+ * @param {string} htmlContent - HTML content of the email
+ * @param {Object} [attachments] - Optional attachments
+ * @returns {Promise<Array>} - Array of results for each email sent
+ */
+export const sendBulkEmails = async (emailList, subject, htmlContent, attachments = []) => {
+  const results = [];
+  
+  for (const email of emailList) {
+    try {
+      await sendEmail({
+        to: email,
+        subject,
+        html: htmlContent,
+        attachments
+      });
+      results.push({ email, status: 'success', message: 'Email sent successfully' });
+    } catch (error) {
+      console.error(`Failed to send email to ${email}:`, error);
+      results.push({ 
+        email, 
+        status: 'error', 
+        message: error.message || 'Failed to send email' 
+      });
+    }
+  }
+  
+  return results;
+};
+
 export default {
   sendEmail,
   sendCoursePdfEmail,
   sendContactNotifications,
-  transporter,
+  sendBulkEmails
 };

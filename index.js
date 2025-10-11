@@ -36,6 +36,7 @@ import careerRoutes from "./routes/careerRoutes.js";
 import applicationRoutes from "./routes/applicationRoutes.js";
 import externalContactRoutes from "./routes/externalContactRoutes.js";
 import candidateRoutes from "./routes/candidateRoutes.js";
+import adminEmailRoutes from "./routes/adminEmailRoutes.js";
 
 // Initialize express app
 const app = express();
@@ -363,6 +364,9 @@ app.use("/api/discussions", discussionRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/careers", careerRoutes);
 app.use("/api/applications", applicationRoutes);
+
+// Admin email routes
+app.use('/api/v1/admin/emails', adminEmailRoutes);
 
 // External API Routes
 app.use("/api/outcontact", externalContactRoutes);
