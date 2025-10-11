@@ -205,13 +205,13 @@ export const createCandidate = async (req, res) => {
     // Default values for email template
     const companyName = 'FirstVite E-Learning Pvt.Ltd';
     const eventName = 'Career Hiring Camp 2025';
-    const eventDate = 'October 25, 2025';
+    const eventDate = 'November 9, 2025 - Sunday';
     const eventTime = '9:00 AM - 5:00 PM';
-    const venue = 'BSI H-15';
-    const city = 'Noida';
-    const mapLink = 'https://maps.app.goo.gl/WdAdD42EWJdaMAmNA';
-    const supportEmail = 'firstvite@gmail.com';
-    const supportPhone = '9084407615';
+    const venue = 'Mosaic Hotel Noida - C-1, C Block, Pocket C, Sector 18';
+    const city = 'Noida, Uttar Pradesh 201301';
+    const mapLink = 'https://maps.app.goo.gl/PjBJ8U51Kn1as9Aq6';
+    const supportEmail = 'info@firstvite.com';
+    const supportPhone = '9990056799';
     const website = 'https://firstvite.com';
     const yourName = 'FirstVITE E-Learning';
 
@@ -305,7 +305,7 @@ export const createCandidate = async (req, res) => {
       <tr>
         <td style="padding:20px 24px; text-align:left; background: linear-gradient(90deg,#4f46e5 0%, #6366f1 100%); color:#fff;">
           <h1 style="margin:0; font-size:20px; line-height:1.2;">Welcome, ${name}!</h1>
-          <p style="margin:6px 0 0; font-size:14px; opacity:0.95;">Your registration for <strong>${eventName || "Career Hiring Camp 2025"
+          <p style="margin:6px 0 0; font-size:14px; opacity:0.95;">Your registration for <strong>${eventName 
                 }</strong> is confirmed.</p>
         </td>
       </tr>
@@ -313,7 +313,7 @@ export const createCandidate = async (req, res) => {
       <tr>
         <td style="padding:20px 24px;">
           <p style="margin:0 0 12px; font-size:15px; color:#111827;">
-            Thank you for registering for <strong>${eventName || "Career Hiring Camp 2025"
+            Thank you for registering for <strong>${eventName 
                 }</strong>, organized by <strong>FirstVITE</strong> in collaboration with our partner companies. We’re excited to have you — this event will connect you directly with recruiters, provide skill sessions, and create real job & internship opportunities.
           </p>
 
@@ -322,23 +322,22 @@ export const createCandidate = async (req, res) => {
               <td style="vertical-align:top; padding:8px 0;">
                 <p style="margin:0; font-weight:600; color:#374151;">📍 Event</p>
                 <p style="margin:6px 0 0; color:#4b5563;">
-                  <strong>${eventName || "Career Hiring Camp 2025"}</strong><br>
-                  <span style="display:block; margin-top:6px;"><strong>Date:</strong> ${eventDate || "[Insert Date]"
-                }</span>
-                  <span style="display:block;"><strong>Time:</strong> ${eventTime || "[Insert Time]"
-                }</span>
-                  <span style="display:block;"><strong>Venue:</strong> ${venue || "[Insert Venue / Address]"
-                }</span>
-                  <span style="display:block;"><strong>City:</strong> ${city || "[Insert City]"
-                }</span>
+                  <strong>${eventName }</strong><br>
+                  <span style="display:block; margin-top:6px;"><strong>Date:</strong> ${eventDate }
+                </span>
+                  <span style="display:block;"><strong>Time:</strong> ${eventTime }
+                </span>
+                  <span style="display:block;"><strong>Venue:</strong> ${venue }
+                </span>
+                  <span style="display:block;"><strong>City:</strong> ${city }
+                </span>
                 </p>
               </td>
             </tr>
           </table>
 
           <div style="margin:18px 0;">
-            <a href="${mapLink || "#"
-                }" style="display:inline-block; text-decoration:none; padding:10px 16px; border-radius:8px; background:#4f46e5; color:#ffffff; font-weight:600; font-size:14px;">
+            <a href="${mapLink }" style="display:inline-block; text-decoration:none; padding:10px 16px; border-radius:8px; background:#4f46e5; color:#ffffff; font-weight:600; font-size:14px;">
               View Location / Google Maps
             </a>
           </div>
@@ -391,25 +390,23 @@ export const createCandidate = async (req, res) => {
       <tr>
         <td style="background:#f9fafb; padding:14px 24px; text-align:center; color:#6b7280; font-size:13px;">
           <div style="max-width:520px; margin:0 auto;">
-            <p style="margin:0 0 8px;">Need to update your registration? Reply to this email or contact us at ${supportEmail || "support@firstvite.com"
-                }.</p>
-            <p style="margin:0;">© ${new Date().getFullYear()} ${companyName || "FirstVITE"
-                }. All rights reserved.</p>
+            <p style="margin:0 0 8px;">Need to update your registration? Reply to this email or contact us at ${supportEmail }.</p>
+            <p style="margin:0;">© ${new Date().getFullYear()} ${companyName }. All rights reserved.</p>
           </div>
         </td>
       </tr>
     </table>
   </div>
   `,
-            text: `Welcome to ${companyName || "FirstVITE"}, ${name}!
+            text: `Welcome to ${companyName }, ${name}!
 
-Thank you for registering for ${eventName || "Career Hiring Camp 2025"}.
+Thank you for registering for ${eventName }.
 
 Event Details:
-- Date: ${eventDate || "[Insert Date]"}
-- Time: ${eventTime || "[Insert Time]"}
-- Venue: ${venue || "[Insert Venue / Address]"}
-- City: ${city || "[Insert City]"}
+- Date: ${eventDate }
+- Time: ${eventTime }
+- Venue: ${venue }
+- City: ${city }
 
 What to Expect:
 - On-the-spot interviews & hiring opportunities
@@ -422,12 +419,11 @@ Please bring:
 - College ID / Valid Photo ID
 - Passport-size photograph (optional)
 
-For questions contact: ${supportEmail || "support@firstvite.com"} | ${supportPhone || "[Support Phone]"
-                }
+For questions contact: ${supportEmail } | ${supportPhone }
 
 Warm regards,
-${yourName || "The FirstVITE Team"}
-${companyName || "FirstVITE"}
+${yourName }
+${companyName }
 `,
         };
 
