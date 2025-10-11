@@ -29,6 +29,7 @@
         "@google-cloud/local-auth": "^3.0.1",
         "@react-pdf/renderer": "^4.3.0",
         "bcryptjs": "^2.4.3",
+        "cloudinary": "^2.7.0",
         "cors": "^2.8.5",
         "dotenv": "^16.6.1",
         "express": "^4.18.3",

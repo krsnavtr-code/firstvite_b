@@ -35,6 +35,7 @@ import discussionRoutes from "./routes/discussionRoutes.js";
 import careerRoutes from "./routes/careerRoutes.js";
 import applicationRoutes from "./routes/applicationRoutes.js";
 import externalContactRoutes from "./routes/externalContactRoutes.js";
+import candidateRoutes from "./routes/candidateRoutes.js";
 
 // Initialize express app
 const app = express();
@@ -197,6 +198,15 @@ app.use('/pdfs', express.static(pdfsDir, {
     }
 }));
 
+// Serve candidate profile images
+const candidateProfileDir = path.join(publicDir, 'candidate_profile');
+app.use('/candidate_profile', express.static(candidateProfileDir, {
+    setHeaders: (res, path) => {
+        // Set appropriate cache headers for images
+        res.setHeader('Cache-Control', 'public, max-age=31536000');
+    }
+}));
+
 // Serve uploads with specific headers
 app.use('/uploads', (req, res, next) => {
     console.log('Request for upload file:', req.path);
@@ -335,14 +345,14 @@ app.use("/api/auth", authRoutes);
 // Protected routes (require authentication)
 app.use("/api/users", userRoutes);
 app.use("/api/profile", profileRoute);
-app.use("/api/cart", cartRoute);
+app.use("/api/contact", contactRoute);
 app.use("/api/enrollments", enrollmentRoute);
+app.use("/api/candidates", candidateRoutes);
 app.use("/api/upload", uploadRoute);
 app.use("/api/admin", adminRoutes);
 app.use("/api/lms", lmsRoutes);
 app.use("/api/sprints", sprintRoutes);
 app.use("/api/sessions", sessionRoutes);
-app.use("/api/payments", paymentRoutes);
 app.use("/api/admin/payments", adminPaymentRoutes);
 app.use("/api/v1/sprints", sprintRoutes);
 app.use("/api/v1/tasks", taskRoutes);
