@@ -1,5 +1,5 @@
 import express from 'express';
-import { createCandidate, getCandidates, updateCandidateStatus } from '../controller/candidateController.js';
+import { createCandidate, getCandidates, updateCandidateStatus, sendOTP, verifyOTP } from '../controller/candidateController.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 import multer from 'multer';
 import path from 'path';
@@ -42,6 +42,10 @@ const upload = multer({
 
 // Public routes
 router.post('/', upload.single('profilePhoto'), createCandidate);
+
+// OTP routes
+router.post('/send-otp', sendOTP);
+router.post('/verify-otp', verifyOTP);
 
 // Protected admin routes
 router.get('/', protect, admin, getCandidates);
