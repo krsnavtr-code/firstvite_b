@@ -92,7 +92,7 @@ export const createHandoff = async (req, res) => {
     // Fire-and-forget admin email notification (do not block response on email failure)
     (async () => {
       try {
-        const adminTo = 'krishnaavtar955@gmail.com';
+        const adminTo = process.env.ADMIN_EMAIL;
         if (!adminTo) {
           console.warn('No ADMIN_EMAIL/SMTP_USER configured; skipping handoff email notification');
           return;
