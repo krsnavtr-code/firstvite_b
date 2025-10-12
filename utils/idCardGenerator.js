@@ -11,8 +11,8 @@ const __dirname = dirname(__filename);
 
 // PDF generation options
 const pdfOptions = {
-    height: '125mm',
-    width: '95mm',
+    height: '160mm',
+    width: '120mm',
     border: {
         top: '0',
         right: '0',
