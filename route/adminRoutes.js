@@ -4,7 +4,10 @@ import {
   getPendingUsers,
   approveUser,
   rejectUser,
-  getAllUsers
+  getAllUsers,
+  getAllCandidates,
+  getCandidate,
+  updateCandidateStatus
 } from '../controller/adminController.js';
 
 const router = express.Router();
@@ -16,9 +19,15 @@ router.use(protect);
 router.use(restrictTo('admin'));
 
 // Admin routes
+// User management routes
 router.get('/users', getAllUsers);
 router.get('/pending-users', getPendingUsers);
 router.patch('/approve-user/:id', approveUser);
 router.delete('/reject-user/:id', rejectUser);
+
+// Candidate management routes
+router.get('/candidates', getAllCandidates);
+router.get('/candidates/:id', getCandidate);
+router.patch('/candidates/:id/status', updateCandidateStatus);
 
 export default router;
