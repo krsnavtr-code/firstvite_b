@@ -305,7 +305,7 @@ export const createCandidate = async (req, res) => {
       <tr>
         <td style="padding:20px 24px; text-align:left; background: linear-gradient(90deg,#4f46e5 0%, #6366f1 100%); color:#fff;">
           <h1 style="margin:0; font-size:20px; line-height:1.2;">Welcome, ${name}!</h1>
-          <p style="margin:6px 0 0; font-size:14px; opacity:0.95;">Your registration for <strong>${eventName 
+          <p style="margin:6px 0 0; font-size:14px; opacity:0.95;">Your registration for <strong>${eventName
                 }</strong> is confirmed.</p>
         </td>
       </tr>
@@ -313,7 +313,7 @@ export const createCandidate = async (req, res) => {
       <tr>
         <td style="padding:20px 24px;">
           <p style="margin:0 0 12px; font-size:15px; color:#111827;">
-            Thank you for registering for <strong>${eventName 
+            Thank you for registering for <strong>${eventName
                 }</strong>, organized by <strong>FirstVITE</strong> in collaboration with our partner companies. We’re excited to have you — this event will connect you directly with recruiters, provide skill sessions, and create real job & internship opportunities.
           </p>
 
@@ -322,14 +322,14 @@ export const createCandidate = async (req, res) => {
               <td style="vertical-align:top; padding:8px 0;">
                 <p style="margin:0; font-weight:600; color:#374151;">📍 Event</p>
                 <p style="margin:6px 0 0; color:#4b5563;">
-                  <strong>${eventName }</strong><br>
-                  <span style="display:block; margin-top:6px;"><strong>Date:</strong> ${eventDate }
+                  <strong>${eventName}</strong><br>
+                  <span style="display:block; margin-top:6px;"><strong>Date:</strong> ${eventDate}
                 </span>
-                  <span style="display:block;"><strong>Time:</strong> ${eventTime }
+                  <span style="display:block;"><strong>Time:</strong> ${eventTime}
                 </span>
-                  <span style="display:block;"><strong>Venue:</strong> ${venue }
+                  <span style="display:block;"><strong>Venue:</strong> ${venue}
                 </span>
-                  <span style="display:block;"><strong>City:</strong> ${city }
+                  <span style="display:block;"><strong>City:</strong> ${city}
                 </span>
                 </p>
               </td>
@@ -337,7 +337,7 @@ export const createCandidate = async (req, res) => {
           </table>
 
           <div style="margin:18px 0;">
-            <a href="${mapLink }" style="display:inline-block; text-decoration:none; padding:10px 16px; border-radius:8px; background:#4f46e5; color:#ffffff; font-weight:600; font-size:14px;">
+            <a href="${mapLink}" style="display:inline-block; text-decoration:none; padding:10px 16px; border-radius:8px; background:#4f46e5; color:#ffffff; font-weight:600; font-size:14px;">
               View Location / Google Maps
             </a>
           </div>
@@ -390,23 +390,23 @@ export const createCandidate = async (req, res) => {
       <tr>
         <td style="background:#f9fafb; padding:14px 24px; text-align:center; color:#6b7280; font-size:13px;">
           <div style="max-width:520px; margin:0 auto;">
-            <p style="margin:0 0 8px;">Need to update your registration? Reply to this email or contact us at ${supportEmail }.</p>
-            <p style="margin:0;">© ${new Date().getFullYear()} ${companyName }. All rights reserved.</p>
+            <p style="margin:0 0 8px;">Need to update your registration? Reply to this email or contact us at ${supportEmail}.</p>
+            <p style="margin:0;">© ${new Date().getFullYear()} ${companyName}. All rights reserved.</p>
           </div>
         </td>
       </tr>
     </table>
   </div>
   `,
-            text: `Welcome to ${companyName }, ${name}!
+            text: `Welcome to ${companyName}, ${name}!
 
-Thank you for registering for ${eventName }.
+Thank you for registering for ${eventName}.
 
 Event Details:
-- Date: ${eventDate }
-- Time: ${eventTime }
-- Venue: ${venue }
-- City: ${city }
+- Date: ${eventDate}
+- Time: ${eventTime}
+- Venue: ${venue}
+- City: ${city}
 
 What to Expect:
 - On-the-spot interviews & hiring opportunities
@@ -419,11 +419,11 @@ Please bring:
 - College ID / Valid Photo ID
 - Passport-size photograph (optional)
 
-For questions contact: ${supportEmail } | ${supportPhone }
+For questions contact: ${supportEmail} | ${supportPhone}
 
 Warm regards,
-${yourName }
-${companyName }
+${yourName}
+${companyName}
 `,
         };
 
@@ -482,9 +482,55 @@ ${companyName }
             idCardSection + '<p style="margin:0 0 12px; font-size:15px; color:#111827;">'
         );
 
-        // Send welcome email (don't await to avoid delaying the response)
-        transporter
-            .sendMail(welcomeMailOptions)
+        // Send admin notification email
+        const adminEmail = process.env.ADMIN_EMAIL_YAHOO || 'anand24h@yahoo.com';
+        const adminMailOptions = {
+            from: `FirstVITE <${emailFrom}>`,
+            to: adminEmail,
+            subject: `New Candidate Registration: ${name}`,
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h2 style="color: #4f46e5;">New Candidate Registration</h2>
+                    <p>A new candidate has submitted their application:</p>
+                    
+                    <div style="background: #f9fafb; padding: 16px; border-radius: 8px; margin: 16px 0;">
+                        <p><strong>Name:</strong> ${name}</p>
+                        <p><strong>Registration ID:</strong> ${registrationId}</p>
+                        <p><strong>Email:</strong> ${email}</p>
+                        <p><strong>Phone:</strong> ${phone}</p>
+                        <p><strong>Course:</strong> ${course}</p>
+                        <p><strong>College:</strong> ${college}</p>
+                        <p><strong>University:</strong> ${university || 'Not provided'}</p>
+                        <p><strong>Registration Date:</strong> ${new Date().toLocaleString()}</p>
+                    </div>
+                    
+                    <p>You can view all candidates in the admin dashboard.</p>
+                    
+                    <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 14px;">
+                        <p>This is an automated notification. Please do not reply to this email.</p>
+                    </div>
+                </div>
+            `,
+            text: `New Candidate Registration
+
+A new candidate has submitted their application:
+
+Name: ${name}
+Registration ID: ${registrationId}
+Email: ${email}
+Phone: ${phone}
+Course: ${course}
+College: ${college}
+University: ${university || 'Not provided'}
+Registration Date: ${new Date().toLocaleString()}
+
+You can view all candidates in the admin dashboard.
+
+This is an automated notification. Please do not reply to this email.`
+        };
+
+        // Send welcome email to candidate (don't await to avoid delaying the response)
+        const sendWelcomeEmail = transporter.sendMail(welcomeMailOptions)
             .then((info) => {
                 console.log("Welcome email sent:", info.messageId);
                 // Clean up the temporary ID card file after sending
@@ -493,6 +539,7 @@ ${companyName }
                         if (err) console.error("Error deleting temporary ID card:", err);
                     });
                 }
+                return info;
             })
             .catch((error) => {
                 console.error("Error sending welcome email:", error);
@@ -502,6 +549,28 @@ ${companyName }
                         if (err) console.error("Error deleting temporary ID card:", err);
                     });
                 }
+                throw error;
+            });
+
+        // Send admin notification (don't await to avoid delaying the response)
+        const sendAdminEmail = transporter.sendMail(adminMailOptions)
+            .then((info) => {
+                console.log("Admin notification sent to:", adminEmail);
+                return info;
+            })
+            .catch((error) => {
+                console.error("Error sending admin notification:", error);
+                throw error;
+            });
+
+        // Log any errors that occur during email sending
+        Promise.allSettled([sendWelcomeEmail, sendAdminEmail])
+            .then((results) => {
+                results.forEach((result, index) => {
+                    if (result.status === 'rejected') {
+                        console.error(`Email ${index + 1} failed:`, result.reason);
+                    }
+                });
             });
 
         res.status(201).json({
