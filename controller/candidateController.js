@@ -458,10 +458,25 @@ ${companyName}
 
         // Add ID card as PDF attachment
         welcomeMailOptions.attachments = [{
-            filename: idCard.fileName,
-            path: idCard.filePath,
+            filename: idCard.filename,
+            content: idCard.buffer,
             contentType: 'application/pdf'
         }];
+
+        // Extract registration ID from the filename (removing 'ID_Card_' and '.pdf')
+        const registrationId = idCard.filename.replace('ID_Card_', '').replace('.pdf', '');
+
+        // Save registration ID to the candidate document
+        try {
+            await Candidate.findByIdAndUpdate(
+                candidate._id,
+                { registrationId },
+                { new: true, runValidators: true }
+            );
+        } catch (error) {
+            console.error('Error saving registration ID to candidate:', error);
+            throw new Error('Failed to save registration ID');
+        }
 
         // Add ID card download link in email body
         const idCardSection = `
@@ -471,7 +486,7 @@ ${companyName}
                     Your personalized event ID card is attached to this email. Please download and carry a printed copy to the event for verification.
                 </p>
                 <p style="margin: 0; font-size: 13px; color: #3b82f6;">
-                    <strong>ID Number:</strong> ${idCard.registrationId}
+                    <strong>ID Number:</strong> ${registrationId}
                 </p>
             </div>
         `;

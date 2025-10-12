@@ -65,15 +65,25 @@ router.get('/test-id-card', (req, res) => {
         logoUrl: 'https://firstvite.com/logo.png'
     };
     
+    // Add _id to test candidate as it's required by the generateIdCard function
+    testCandidate._id = 'test123';
+    
     // Import the generateIdCard function directly
     import('../utils/idCardGenerator.js').then(({ default: generateIdCard }) => {
         generateIdCard(testCandidate, eventDetails)
-            .then(({ html }) => {
-                res.send(html);
+            .then(({ buffer, filename }) => {
+                // Set headers to display PDF in browser
+                res.setHeader('Content-Type', 'application/pdf');
+                res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+                res.send(buffer);
             })
             .catch(error => {
                 console.error('Error generating ID card:', error);
-                res.status(500).send('Error generating ID card');
+                res.status(500).json({ 
+                    success: false, 
+                    message: 'Error generating ID card',
+                    error: error.message 
+                });
             });
     });
 });
