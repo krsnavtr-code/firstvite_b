@@ -134,13 +134,6 @@ export const sendBrochure = async (req, res) => {
             html: `
                 <div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto;">
                     ${formattedMessage}
-                    <p style="margin-top: 20px;">
-                        Warm Regards,<br>
-                        <strong>Akansh Tyagi</strong><br>
-                        Career Advisor – FirstVite E-Learning<br>
-                        📧 info@firstvite.com<br>
-                        📱 +91-9582244812
-                    </p>
                 </div>
             `,
             attachments
