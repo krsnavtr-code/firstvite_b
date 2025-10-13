@@ -65,8 +65,8 @@ export const sendProposalEmails = catchAsync(async (req, res, next) => {
   // Create HTML content with a professional template
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto;">
-      <div style="background-color: #f8f9fa; color:blue; padding: 20px; border-radius: 5px;">
-        <div style="margin-bottom: 20px; white-space: pre-line;">
+      <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px;">
+        <div style="margin-bottom: 20px; white-space: pre-line; color:#007BFF font-size:18px">
           ${message.replace(/\n/g, '<br>')}
         </div>
       </div>
