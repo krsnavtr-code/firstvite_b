@@ -103,7 +103,6 @@ export const sendProposalEmails = catchAsync(async (req, res, next) => {
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto;">
       <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px;">
-        <h2 style="color: #2c3e50; margin-bottom: 20px;">${subject}</h2>
         
         <div style="margin-bottom: 20px; white-space: pre-line;">
           ${message.replace(/\n/g, '<br>')}
