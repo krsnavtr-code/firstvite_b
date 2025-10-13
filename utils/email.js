@@ -73,20 +73,41 @@ export const sendEmail = async ({
       throw new Error('Sender email address is not configured');
     }
 
+    // Process attachments to ensure they're in the correct format
+    const processedAttachments = (Array.isArray(attachments) ? attachments : []).map(attachment => {
+      // If content is a buffer, convert it to base64
+      if (Buffer.isBuffer(attachment.content)) {
+        return {
+          ...attachment,
+          content: attachment.content.toString('base64'),
+          encoding: 'base64'
+        };
+      }
+      return attachment;
+    });
+
+    console.log('Processed attachments:', processedAttachments.map(a => ({
+      filename: a.filename,
+      type: a.contentType,
+      size: typeof a.content === 'string' ? a.content.length : 'unknown'
+    })));
+
     const mailOptions = {
-      from: `"${process.env.EMAIL_FROM_NAME || 'FirstVite Admin'}" <${fromEmail}>`,
+      from: `"${process.env.EMAIL_FROM_NAME || 'FirstVITE E-Learning'}" <${fromEmail}>`,
       to: to,
       subject: subject,
       text: text,
       html: html || text.replace(/\n/g, '<br>'),
-      attachments: Array.isArray(attachments) ? attachments : [],
+      attachments: processedAttachments,
     };
 
     console.log('Mail options prepared:', {
       from: mailOptions.from,
       to: mailOptions.to,
       subject: mailOptions.subject,
-      hasAttachments: mailOptions.attachments ? mailOptions.attachments.length : 0
+      hasAttachments: processedAttachments.length,
+      attachmentCount: processedAttachments.length,
+      attachmentNames: processedAttachments.map(a => a.filename)
     });
 
     // Test connection first
