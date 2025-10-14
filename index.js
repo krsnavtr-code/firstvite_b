@@ -37,6 +37,7 @@ import applicationRoutes from "./routes/applicationRoutes.js";
 import externalContactRoutes from "./routes/externalContactRoutes.js";
 import candidateRoutes from "./routes/candidateRoutes.js";
 import adminEmailRoutes from "./routes/adminEmailRoutes.js";
+import emailRecordRoutes from "./routes/emailRecordRoutes.js";
 
 // Initialize express app
 const app = express();
@@ -367,6 +368,9 @@ app.use("/api/applications", applicationRoutes);
 
 // Admin email routes
 app.use('/api/v1/admin/emails', adminEmailRoutes);
+
+// Email record routes
+app.use('/api/emails', emailRecordRoutes);
 
 // External API Routes
 app.use("/api/outcontact", externalContactRoutes);
