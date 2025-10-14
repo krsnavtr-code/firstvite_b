@@ -17,7 +17,7 @@ const getFilesFromDir = (dir, basePath) => {
         .map(file => {
             const filePath = path.join(dir, file);
             const stats = fs.statSync(filePath);
-            
+
             return {
                 name: file,
                 path: `${basePath}/${file}`,
@@ -35,17 +35,17 @@ export const getAvailablePdfs = async (req, res) => {
     try {
         // Path to generated PDFs (in backend)
         const pdfsDir = path.join(__dirname, '..', 'public', 'pdfs');
-        
+
         // Path to uploaded brochures (in backend)
         const uploadedBrochuresDir = path.join(__dirname, '..', 'public', 'uploaded_brochure');
-        
+
         // Get both generated and uploaded PDFs
         const generatedPdfs = getFilesFromDir(pdfsDir, '/pdfs');
         const uploadedBrochures = getFilesFromDir(uploadedBrochuresDir, '/uploaded_brochure');
 
         // Combine both lists
         const allPdfs = [...generatedPdfs, ...uploadedBrochures];
-        
+
         console.log('Found PDFs:', {
             generated: generatedPdfs.length,
             uploaded: uploadedBrochures.length,
@@ -117,14 +117,14 @@ export const sendBrochure = async (req, res) => {
             });
         }
 
-        console.log('Sending email with attachments:', { to: email, subject, attachments: attachments.map(a => a.filename) });
+        // console.log('Sending email with attachments:', { to: email, subject, attachments: attachments.map(a => a.filename) });
 
-        // Format the message with proper HTML line breaks and styling
-        const formattedMessage = message
-            ? message.split('\n').map(paragraph =>
-                paragraph.trim() === '' ? '<br>' : `<p style="margin: 10px 0;">${paragraph}</p>`
-            ).join('\n')
-            : 'Please find attached the course brochure you requested.';
+        // Use the message as-is if it's HTML, otherwise convert line breaks to <br>
+        // const formattedMessage = message
+        //     ? message.includes('')
+        //         ? message // If it's already HTML, use as-is
+        //         : message.replace(/\n/g, '') // Convert line breaks to <br> for plain text
+        //     : 'Please find attached the course brochure you requested.';
 
         // Send the email with all PDF attachments
         await sendEmail({
@@ -132,14 +132,14 @@ export const sendBrochure = async (req, res) => {
             subject: subject || 'Course Brochure',
             text: message || 'Please find attached the course brochure you requested.',
             html: `
-                <div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto;">
-                    ${formattedMessage}
+                <div style="font-family: Arial, sans-serif; line-height: 1.4; margin: 0; padding: 0;">
+                    ${message}
                 </div>
             `,
             attachments
         });
 
-        console.log('Email sent successfully to:', email);
+        // console.log('Email sent successfully to:', email);
 
         const response = {
             success: true,
