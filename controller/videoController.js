@@ -108,26 +108,58 @@ export const getVideo = (req, res) => {
 export const uploadVideo = async (req, res) => {
     try {
         if (!req.file) {
-            return res.status(400).json({
-                status: 'error',
-                message: 'No video file provided'
+            return res.status(400).json({ 
+                status: 'error', 
+                message: 'No file was uploaded.' 
             });
         }
 
-        const fileInfo = {
-            name: req.file.originalname,
-            path: `/uploaded_videos/${req.file.filename}`,
-            size: req.file.size,
-            type: 'video',
-            uploadedAt: new Date()
-        };
+        const tempPath = req.file.path;
+        const targetPath = path.join(VIDEOS_DIR, req.file.originalname);
+        
+        // Ensure the videos directory exists
+        if (!fs.existsSync(VIDEOS_DIR)) {
+            fs.mkdirSync(VIDEOS_DIR, { recursive: true });
+        }
+
+        // Check if file already exists
+        if (fs.existsSync(targetPath)) {
+            // Delete the temp file
+            fs.unlinkSync(tempPath);
+            return res.status(400).json({
+                status: 'error',
+                message: 'A file with this name already exists.'
+            });
+        }
+
+        // Move the file from temp to final location
+        fs.renameSync(tempPath, targetPath);
+
+        // Get file stats for response
+        const stats = fs.statSync(targetPath);
 
         res.status(201).json({
             status: 'success',
-            data: fileInfo
+            message: 'Video uploaded successfully',
+            data: {
+                name: videoName,
+                path: `/uploaded_videos/${videoName}`,
+                size: stats.size,
+                uploadedAt: stats.birthtime,
+                type: 'video'
+            }
         });
     } catch (error) {
         console.error('Error uploading video:', error);
+        
+        // Clean up partially uploaded file if it exists
+        if (req.files?.video) {
+            const tempPath = path.join(VIDEOS_DIR, req.files.video.name);
+            if (fs.existsSync(tempPath)) {
+                fs.unlinkSync(tempPath);
+            }
+        }
+        
         res.status(500).json({
             status: 'error',
             message: 'Failed to upload video',
