@@ -7,16 +7,21 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Helper function to get files from a directory
-const getFilesFromDir = (dir, basePath) => {
+const getFilesFromDir = (dir, basePath, extensions = ['.pdf']) => {
     if (!fs.existsSync(dir)) {
         return [];
     }
 
     return fs.readdirSync(dir)
-        .filter(file => file.toLowerCase().endsWith('.pdf'))
+        .filter(file => {
+            const ext = path.extname(file).toLowerCase();
+            return extensions.some(e => ext === e);
+        })
         .map(file => {
             const filePath = path.join(dir, file);
             const stats = fs.statSync(filePath);
+            const ext = path.extname(file).toLowerCase();
+            const isPdf = ext === '.pdf';
 
             return {
                 name: file,
@@ -25,9 +30,24 @@ const getFilesFromDir = (dir, basePath) => {
                 size: stats.size,
                 createdAt: stats.birthtime,
                 modifiedAt: stats.mtime,
-                type: basePath.includes('uploaded_brochure') ? 'uploaded' : 'generated'
+                type: isPdf ?
+                    (basePath.includes('uploaded_brochure') ? 'uploaded' : 'generated') :
+                    'video',
+                contentType: getContentType(file)
             };
         });
+};
+
+const getContentType = (filename) => {
+    const ext = path.extname(filename).toLowerCase();
+    switch (ext) {
+        case '.mp4': return 'video/mp4';
+        case '.webm': return 'video/webm';
+        case '.mov': return 'video/quicktime';
+        case '.avi': return 'video/x-msvideo';
+        case '.pdf': return 'application/pdf';
+        default: return 'application/octet-stream';
+    }
 };
 
 // Get list of available PDFs
@@ -67,105 +87,108 @@ export const getAvailablePdfs = async (req, res) => {
 // Send multiple brochures via email
 export const sendBrochure = async (req, res) => {
     try {
-        const { pdfPaths, email, subject, message } = req.body;
-        console.log('Received send brochure request:', { pdfPaths, email, subject });
+        const { pdfPaths = [], videoPaths = [], email, subject, message } = req.body;
 
-        // Basic validation
-        if (!pdfPaths || !email) {
-            console.error('Validation failed: pdfPaths or email is missing');
+        if ((!pdfPaths || pdfPaths.length === 0) && (!videoPaths || videoPaths.length === 0)) {
             return res.status(400).json({
                 success: false,
-                message: 'PDF paths and email are required'
+                message: 'No files selected for sending'
             });
         }
 
-        // Ensure pdfPaths is an array
-        const pdfsToSend = Array.isArray(pdfPaths) ? pdfPaths : [pdfPaths];
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: 'Recipient email is required'
+            });
+        }
 
-        // Validate each PDF path
         const attachments = [];
         const errors = [];
 
-        for (const pdfPath of pdfsToSend) {
-            let fullPath;
-            if (pdfPath.includes('uploaded_brochure')) {
-                fullPath = path.join(__dirname, '..', 'public', 'uploaded_brochure', path.basename(pdfPath));
-            } else if (pdfPath.includes('pdfs')) {
-                fullPath = path.join(__dirname, '..', 'public', 'pdfs', path.basename(pdfPath));
-            } else {
-                errors.push(`Invalid PDF path format: ${pdfPath}`);
-                continue;
+        // Process PDF attachments
+        for (const pdfPath of pdfPaths) {
+            try {
+                const fullPath = path.join(__dirname, '..', 'public', pdfPath);
+                if (fs.existsSync(fullPath)) {
+                    attachments.push({
+                        filename: path.basename(pdfPath),
+                        path: fullPath,
+                        contentType: 'application/pdf'
+                    });
+                } else {
+                    errors.push(`File not found: ${pdfPath}`);
+                }
+            } catch (error) {
+                console.error(`Error processing PDF ${pdfPath}:`, error);
+                errors.push(`Error processing ${pdfPath}: ${error.message}`);
             }
+        }
 
-            if (!fs.existsSync(fullPath)) {
-                errors.push(`PDF not found: ${pdfPath}`);
-                continue;
+        // Process video attachments
+        for (const videoPath of videoPaths) {
+            try {
+                const fullPath = path.join(__dirname, '..', 'public', videoPath);
+                if (fs.existsSync(fullPath)) {
+                    const ext = path.extname(videoPath).toLowerCase();
+                    attachments.push({
+                        filename: path.basename(videoPath),
+                        path: fullPath,
+                        contentType: getContentType(videoPath),
+                        encoding: 'base64' // Important for binary files
+                    });
+                } else {
+                    errors.push(`File not found: ${videoPath}`);
+                }
+            } catch (error) {
+                console.error(`Error processing video ${videoPath}:`, error);
+                errors.push(`Error processing ${videoPath}: ${error.message}`);
             }
-
-            attachments.push({
-                filename: path.basename(pdfPath),
-                path: fullPath,
-                contentType: 'application/pdf'
-            });
         }
 
         if (attachments.length === 0) {
             return res.status(400).json({
                 success: false,
-                message: 'No valid PDFs found to send',
+                message: 'No valid files found to send',
                 errors
             });
         }
 
-        // console.log('Sending email with attachments:', { to: email, subject, attachments: attachments.map(a => a.filename) });
-
-        // Use the message as-is if it's HTML, otherwise convert line breaks to <br>
-        // const formattedMessage = message
-        //     ? message.includes('')
-        //         ? message // If it's already HTML, use as-is
-        //         : message.replace(/\n/g, '') // Convert line breaks to <br> for plain text
-        //     : 'Please find attached the course brochure you requested.';
-
-        // Send the email with all PDF attachments
+        // Send the email with all attachments
         await sendEmail({
             to: email,
-            subject: subject || 'Course Brochure',
-            text: message || 'Please find attached the course brochure you requested.',
+            subject: subject || 'Course Materials',
+            text: message || 'Please find attached the requested materials.',
             html: `
                 <div style="font-family: Arial, sans-serif; line-height: 1.4; margin: 0; padding: 0;">
-                    ${message}
+                    ${message || 'Please find attached the requested materials.'}
                 </div>
             `,
             attachments
         });
 
-        // console.log('Email sent successfully to:', email);
-
         const response = {
             success: true,
-            message: 'Brochure(s) sent successfully',
+            message: 'Files sent successfully',
             data: {
                 to: email,
-                subject: subject || 'Course Brochure',
-                pdfs: attachments.map(a => a.filename)
+                subject: subject || 'Course Materials',
+                files: attachments.map(a => a.filename)
             }
         };
 
-        // If there were any errors with some PDFs, include them in the response
         if (errors.length > 0) {
-            response.partialSuccess = true;
-            response.errors = errors;
+            response.warnings = errors;
         }
 
         res.status(200).json(response);
 
     } catch (error) {
-        console.error('Error in sendBrochure:', error);
-
+        console.error('Error sending files:', error);
         res.status(500).json({
             success: false,
-            message: 'Failed to send brochure(s)',
-            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+            message: 'Failed to send files',
+            error: error.message
         });
     }
 };

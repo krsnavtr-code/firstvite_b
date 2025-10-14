@@ -9,6 +9,7 @@ import {
   getCandidate,
   updateCandidateStatus
 } from '../controller/adminController.js';
+import { getVideos, getVideo } from '../controller/videoController.js';
 
 const router = express.Router();
 
@@ -29,5 +30,9 @@ router.delete('/reject-user/:id', rejectUser);
 router.get('/candidates', getAllCandidates);
 router.get('/candidates/:id', getCandidate);
 router.patch('/candidates/:id/status', updateCandidateStatus);
+
+// Video management routes
+router.get('/videos', getVideos);
+router.get('/videos/:filename', getVideo);
 
 export default router;
