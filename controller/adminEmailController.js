@@ -1,6 +1,13 @@
 import { sendBulkEmails } from '../utils/email.js';
 import AppError from '../utils/appError.js';
 import catchAsync from '../utils/catchAsync.js';
+import EmailRecord from '../model/EmailRecord.js';
+import path from 'path';
+import fs from 'fs';
+import { promisify } from 'util';
+
+const writeFileAsync = promisify(fs.writeFile);
+const unlinkAsync = promisify(fs.unlink);
 
 /**
  * @desc    Send proposal emails to multiple colleges
@@ -32,27 +39,45 @@ export const sendProposalEmails = catchAsync(async (req, res, next) => {
 
   // Process file attachments if any
   const attachments = [];
+  const savedAttachments = [];
+  const uploadDir = path.join(process.cwd(), 'uploads', 'email-attachments');
+
+  // Create uploads directory if it doesn't exist
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
 
   if (files && files.length > 0) {
-
     for (const file of files) {
       try {
-        if (!file) {
+        if (!file || !file.buffer) {
           continue;
         }
 
-        if (!file.buffer) {
-          continue;
-        }
+        // Generate a unique filename
+        const timestamp = Date.now();
+        const fileExt = path.extname(file.originalname);
+        const filename = `${timestamp}-${Math.round(Math.random() * 1e9)}${fileExt}`;
+        const filepath = path.join(uploadDir, filename);
+
+        // Save file to disk
+        await writeFileAsync(filepath, file.buffer);
 
         const attachment = {
           filename: file.originalname,
-          content: file.buffer,
-          contentType: file.mimetype || 'application/octet-stream',
-          encoding: 'base64'
+          path: filepath,  // Store the server path
+          type: file.mimetype || 'application/octet-stream',
+          size: file.size
         };
 
-        attachments.push(attachment);
+        savedAttachments.push(attachment);
+
+        // For email sending
+        attachments.push({
+          filename: file.originalname,
+          path: filepath,
+          contentType: file.mimetype || 'application/octet-stream'
+        });
       } catch (error) {
         console.error('Error processing file:', {
           name: file?.originalname,
@@ -77,18 +102,59 @@ export const sendProposalEmails = catchAsync(async (req, res, next) => {
     // Send emails to all recipients
     const results = await sendBulkEmails(emails, subject, htmlContent, attachments);
 
+    // Save email records to database
+    const emailRecords = [];
+    const now = new Date();
+
+    for (let i = 0; i < emails.length; i++) {
+      const email = emails[i];
+      const result = results.find(r => r.email === email) || { status: 'failed', error: 'Unknown error' };
+
+      try {
+        const emailRecord = new EmailRecord({
+          to: email,
+          subject,
+          message: htmlContent,
+          attachments: savedAttachments,
+          status: result.status === 'success' ? 'sent' : 'failed',
+          error: result.error,
+          sentBy: req.user._id,
+          sentAt: now
+        });
+
+        await emailRecord.save();
+        emailRecords.push(emailRecord);
+      } catch (dbError) {
+        console.error('Error saving email record:', dbError);
+        // Continue with other emails even if one fails to save
+      }
+    }
+
     // Count successful and failed emails
     const successCount = results.filter(r => r.status === 'success').length;
     const failedCount = results.length - successCount;
 
     res.status(200).json({
       status: 'success',
-      message: `Emails sent successfully to ${ successCount } recipients${ failedCount > 0 ? `, failed to send to ${failedCount} recipients` : '' } `,
-      results
+      message: `Emails sent successfully to ${successCount} recipients${failedCount > 0 ? `, failed to send to ${failedCount} recipients` : ''}`,
+      results,
+      emailRecords: emailRecords.map(record => record._id)
     });
   } catch (error) {
     console.error('Error sending proposal emails:', error);
     return next(new AppError('Failed to send one or more emails', 500));
+  } finally {
+    // Clean up: Delete temporary files after sending (optional)
+    // If you want to keep the files, remove this block
+    if (savedAttachments.length > 0 && process.env.NODE_ENV !== 'production') {
+      for (const file of savedAttachments) {
+        try {
+          await unlinkAsync(file.path);
+        } catch (err) {
+          console.error(`Error deleting temporary file ${file.path}:`, err);
+        }
+      }
+    }
   }
 });
 
