@@ -13,20 +13,21 @@ const emailRecordSchema = new mongoose.Schema({
   message: { type: String, required: true },
   studentName: { type: String, default: '' },
   courseName: { type: String, default: '' },
+  videoUrl: { type: String, default: '' },
   templateUsed: { type: String, default: 'custom' },
   attachments: [attachmentSchema],
   sentAt: { type: Date, default: Date.now },
-  status: { 
-    type: String, 
-    required: true, 
+  status: {
+    type: String,
+    required: true,
     enum: ['sent', 'failed'],
     default: 'sent'
   },
   error: { type: String },
-  sentBy: { 
-    type: mongoose.Schema.Types.ObjectId, 
+  sentBy: {
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true 
+    required: true
   }
 }, {
   timestamps: true,
