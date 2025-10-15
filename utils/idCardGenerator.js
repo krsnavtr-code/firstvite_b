@@ -28,6 +28,40 @@ const pdfOptions = {
     }
 };
 
+// Generate a unique registration ID
+const generateUniqueRegistrationId = async (userType) => {
+    const prefix = userType === 'student' ? 'FVS' : 'FVC';
+    let registrationId;
+    let isUnique = false;
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    while (!isUnique && attempts < maxAttempts) {
+        // Generate a new ID
+        registrationId = `${prefix}${Date.now().toString().slice(-4)}`;
+
+        // Check if this ID already exists in the database
+        const existingCandidate = await Candidate.findOne({ registrationId });
+
+        if (!existingCandidate) {
+            isUnique = true;
+        }
+
+        attempts++;
+
+        // Add a small delay to ensure we get a new timestamp
+        if (!isUnique && attempts < maxAttempts) {
+            await new Promise(resolve => setTimeout(resolve, 10));
+        }
+    }
+
+    if (!isUnique) {
+        // Fallback to a random number if we couldn't generate a unique ID
+        registrationId = `${prefix}${Math.floor(1000 + Math.random() * 9000)}`;
+    }
+
+    return registrationId;
+};
 
 // Function to generate ID card as a PDF
 const generateIdCard = async (candidate, eventDetails = {}) => {
@@ -42,12 +76,11 @@ const generateIdCard = async (candidate, eventDetails = {}) => {
     } = candidate;
 
     const {
-        eventName = 'JobFair 2025',  
+        eventName = 'JobFair 2025',
     } = eventDetails;
 
     // Generate a unique ID number
-    const prefix = userType === 'student' ? 'FVS' : 'FVC';
-    const registrationId = `${prefix}${Date.now().toString().slice(-6)}`;
+    const registrationId = await generateUniqueRegistrationId(userType);
 
     // Only try to save to database if this is not a test candidate
     if (candidate._id && typeof candidate._id === 'string' && !candidate._id.startsWith('test')) {
