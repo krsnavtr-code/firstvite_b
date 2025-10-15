@@ -203,7 +203,7 @@ export const createCandidate = async (req, res) => {
     let profilePhotoPath = null;
 
     // Default values for email template
-    const companyName = 'FirstVite E-Learning Pvt.Ltd';
+    const myCompanyName = 'FirstVITE E-Learning Pvt.Ltd';
     const eventName = 'Career Hiring Camp 2025';
     const eventDate = 'November 9, 2025 - Sunday';
     const eventTime = '9:00 AM - 5:00 PM';
@@ -216,7 +216,7 @@ export const createCandidate = async (req, res) => {
     const yourName = 'FirstVITE E-Learning';
 
     try {
-        const { name, email, phone, course, college, university, userType = 'student', companyName: userCompanyName } = req.body;
+        const { name, email, phone, course, college, university, companyName, userType = 'student', companyName: userCompanyName } = req.body;
         // Store the file path for cleanup in case of errors
         if (req.file) {
             profilePhotoPath = req.file.path;
@@ -270,7 +270,7 @@ export const createCandidate = async (req, res) => {
             email,
             phone,
             userType,
-            ...(userType === 'student' ? { course, college, university } : { companyName: userCompanyName })
+            ...(userType === 'student' ? { course, college, university } : { companyName })
         };
 
         // Check if email already exists in the database
@@ -325,7 +325,7 @@ export const createCandidate = async (req, res) => {
         const welcomeMailOptions = {
             from: `FirstVITE <${emailFrom}>`,
             to: email,
-            subject: `Registration Confirmed — Career Hiring Camp 2025`,
+            subject: `Registration Confirmed — JobFair 2025 | FirstVITE E-Learning`,
             html: `
   <div style="font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f5f7fb; padding: 24px;">
     <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%; max-width:600px; margin:0 auto; background:#ffffff; border-radius:10px; overflow:hidden; box-shadow:0 6px 18px rgba(32,33,36,0.08);">
@@ -339,10 +339,13 @@ export const createCandidate = async (req, res) => {
 
       <tr>
         <td style="padding:20px 24px;">
-          <p style="margin:0 0 12px; font-size:15px; color:#111827;">
-            Thank you for registering for <strong>${eventName
-                }</strong>, organized by <strong>FirstVITE</strong> in collaboration with our partner companies. We’re excited to have you — this event will connect you directly with recruiters, provide skill sessions, and create real job & internship opportunities.
-          </p>
+            <p style="margin:0 0 12px; font-size:15px; color:#111827;">
+                Thank you for registering for <strong>${eventName}</strong>, organized by <strong> <span style="color: rgb(244, 124, 38)">First</span><span style="color: rgb(30, 144, 255)">VITE</span> </ strong> in collaboration with our partner companies. We’re excited to have you ${userType === "student"
+                    ? "— this event will connect you directly with recruiters, provide skill sessions, and  create  real job & internship opportunities."
+                    : "— this event will connect you with talented students from multiple colleges, helping     you     discover the right candidates for your hiring needs."
+                }
+            </p>
+
 
           <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%; margin-top:12px;">
             <tr>
@@ -371,46 +374,64 @@ export const createCandidate = async (req, res) => {
 
           <hr style="border:none; border-top:1px solid #eef2ff; margin:18px 0;">
 
-          <p style="margin:0 0 8px; font-weight:600; color:#374151;">💼 What to Expect</p>
-          <ul style="margin:8px 0 0 18px; color:#4b5563; padding:0;">
-            <li>On-the-spot interviews & hiring opportunities</li>
-            <li>Free career and skill-development sessions</li>
-            <li>Interaction with top industry recruiters</li>
-            <li>Participation certificate for all attendees</li>
-          </ul>
+          <p style="margin:0 0 8px; font-weight:600; color:#374151;">
+            ${userType === "student" ? "🎓 What to Expect" : "💼 Event Benefits for Hiring Partners"}
+            </p>
 
-          <p style="margin:14px 0 8px; font-weight:600; color:#374151;">📋 What to Bring</p>
-          <ul style="margin:8px 0 0 18px; color:#4b5563; padding:0;">
-            <li>Updated Resume</li>
-            <li>College ID Card / Valid Photo ID</li>
-            <li>FristVITE Provided Invitation (Find Atteched in this Email)</li>
-            <li>Passport-size photograph (optional)</li>
-          </ul>
+            <ul style="margin:8px 0 0 18px; color:#4b5563; padding:0;">
+                ${userType === "student"
+                    ? `
+        <li>On-the-spot interviews & hiring opportunities</li>
+        <li>Free career and skill-development sessions</li>
+        <li>Interaction with top industry recruiters</li>
+        <li>Participation certificate for all attendees</li>
+      `
+                    : `
+        <li>Dedicated hiring booth with branding visibility</li>
+        <li>Access to 2000+ qualified student profiles</li>
+        <li>On-the-spot interview and selection opportunity</li>
+        <li>Media exposure & recognition as hiring partner</li>
+      `
+                }
+        </ul>
 
-          <p style="margin:18px 0 0; color:#374151; font-weight:600;">🌐 Stay Connected</p>
-          <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:10px;">
-            <tr>
-              <td style="padding-right:18px; vertical-align:top;">
-                <p style="margin:0; font-size:13px; color:#6b7280;"><strong>Email</strong></p>
-                <p style="margin:4px 0 0; font-size:14px; color:#111827;">${supportEmail
-                }</p>
-              </td>
-              <td style="vertical-align:top;">
-                <p style="margin:0; font-size:13px; color:#6b7280;"><strong>Phone / WhatsApp</strong></p>
-                <p style="margin:4px 0 0; font-size:14px; color:#111827;">${supportPhone
-                }</p>
-              </td>
-              <td style="vertical-align:top;">
-                <p style="margin:0; font-size:13px; color:#6b7280;"><strong>Website</strong></p>
-                <p style="margin:4px 0 0; font-size:14px; color:#111827;">${website
-                }</p>
-              </td>
-            </tr>
-          </table>
 
-          <p style="margin:18px 0 0; color:#6b7280; font-size:13px;">
-            We look forward to meeting you at the event and helping you take the next step in your career!
-          </p>
+        ${userType === "student" ? `
+            <p style="margin:14px 0 8px; font-weight:600; color:#374151;">📋 What to Bring</p>
+            <ul style="margin:8px 0 0 18px; color:#4b5563; padding:0;">
+              <li>Updated Resume</li>
+              <li>College ID Card / Valid Photo ID</li>
+              <li>FirstVITE Provided Invitation (Find Attached in this Email)</li>
+              <li>Passport-size photograph (optional)</li>
+            </ul>
+          ` : ""}
+          
+
+         <p style="margin:18px 0 0; color:#374151; font-weight:600;">🌐 Stay Connected</p>
+
+<ul style="margin:10px 0 0; padding:0 0 0 18px; list-style-type:none; color:#111827;">
+  <li style="margin-bottom:8px;">
+    <span style="margin:0; font-size:13px; color:#6b7280;"><strong>Email: </strong></span>
+    <span style="margin:4px 0 0; font-size:14px; color:#111827;">
+      ${supportEmail}
+    </span>
+  </li>
+
+  <li style="margin-bottom:8px;">
+    <span style="margin:0; font-size:13px; color:#6b7280;"><strong>Phone: </strong></span>
+    <span style="margin:4px 0 0; font-size:14px; color:#111827;">
+      ${supportPhone}
+    </span>
+  </li>
+
+  <li>
+    <span style="margin:0; font-size:13px; color:#6b7280;"><strong>Website: </strong></span>
+    <span style="margin:4px 0 0; font-size:14px; color:#111827;">
+      ${website}
+    </span>
+  </li>
+</ul>
+
         </td>
       </tr>
 
@@ -510,7 +531,7 @@ ${companyName}
             <div style="margin: 20px 0; padding: 15px; background: #f0f9ff; border-left: 4px solid #3b82f6; border-radius: 4px;">
                 <h3 style="margin: 0 0 10px 0; color: #1e40af;">📌 Your Event ID Card</h3>
                 <p style="margin: 0 0 10px 0; color: #1e3a8a;">
-                    Your personalized event ID card is attached to this email. Please download and carry a printed copy to the event for verification.
+                    Your personalized event ID card is attached to this email. Please download and carry to the event for verification.
                 </p>
                 <p style="margin: 0; font-size: 13px; color: #3b82f6;">
                     <strong>ID Number:</strong> ${registrationId}
@@ -540,9 +561,17 @@ ${companyName}
                         <p><strong>Registration ID:</strong> ${registrationId}</p>
                         <p><strong>Email:</strong> ${email}</p>
                         <p><strong>Phone:</strong> ${phone}</p>
-                        <p><strong>Course:</strong> ${course}</p>
-                        <p><strong>College:</strong> ${college}</p>
-                        <p><strong>University:</strong> ${university || 'Not provided'}</p>
+                        ${userType === "student"
+                    ? `
+                                <p><strong>Course:</strong> ${course || 'N/A'}</p>
+                                <p><strong>College:</strong> ${college || 'N/A'}</p>
+                                <p><strong>University:</strong> ${university || 'N/A'}</p>
+                              `
+                    : `
+                                <p><strong>Organization:</strong> ${companyName || 'N/A'}</p>
+                              `
+                }
+                          
                         <p><strong>Registration Date:</strong> ${new Date().toLocaleString()}</p>
                     </div>
                     
@@ -561,9 +590,11 @@ Name: ${name}
 Registration ID: ${registrationId}
 Email: ${email}
 Phone: ${phone}
-Course: ${course}
-College: ${college}
-University: ${university || 'Not provided'}
+${userType === "student"
+                    ? `Course: ${course || 'N/A'}
+College: ${college || 'N/A'}
+University: ${university || 'N/A'}`
+                    : `Organization: ${companyName || 'N/A'}`}
 Registration Date: ${new Date().toLocaleString()}
 
 You can view all candidates in the admin dashboard.

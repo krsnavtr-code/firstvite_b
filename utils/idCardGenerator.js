@@ -31,14 +31,23 @@ const pdfOptions = {
 
 // Function to generate ID card as a PDF
 const generateIdCard = async (candidate, eventDetails = {}) => {
-    const { name, email, phone, college, course, graduationYear } = candidate;
+    const {
+        name,
+        email,
+        phone,
+        college,
+        course,
+        userType = 'student',  // Default to 'student' for backward compatibility
+        companyName = ''       // Default to empty string
+    } = candidate;
 
     const {
-        eventName = 'Career Hiring Camp 2025',
+        eventName = 'JobFair 2025',  
     } = eventDetails;
 
     // Generate a unique ID number
-    const registrationId = `FV${Date.now().toString().slice(-6)}`;
+    const prefix = userType === 'student' ? 'FVS' : 'FVC';
+    const registrationId = `${prefix}${Date.now().toString().slice(-6)}`;
 
     // Only try to save to database if this is not a test candidate
     if (candidate._id && typeof candidate._id === 'string' && !candidate._id.startsWith('test')) {
@@ -91,14 +100,14 @@ const generateIdCard = async (candidate, eventDetails = {}) => {
             <div style="display: flex; justify-content: center; padding: 10px 0;">
                 <div style="width: 100px; height: 100px; margin: 10px auto; background: rgba(255, 255, 255, 0.9); border: 3px solid white; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
                     ${candidate.profilePhoto ?
-                        `<img src="data:${candidate.profilePhoto.mimeType || 'image/jpeg'};base64,${candidate.profilePhoto.base64}" 
+            `<img src="data:${candidate.profilePhoto.mimeType || 'image/jpeg'};base64,${candidate.profilePhoto.base64}" 
                               alt="Profile Photo" 
                               style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">` :
-                        `<div style="text-align: center; color: #4f46e5; font-size: 12px; display: flex; flex-direction: column; justify-content: center; height: 100%;">
+            `<div style="text-align: center; color: #4f46e5; font-size: 12px; display: flex; flex-direction: column; justify-content: center; height: 100%;">
                             <div style="font-size: 40px; margin-bottom: 5px; line-height: 1;">👤</div>
                             <div>No Photo</div>
                         </div>`
-                    }
+        }
                 </div>
             </div>
             
@@ -120,14 +129,25 @@ const generateIdCard = async (candidate, eventDetails = {}) => {
                   <td style="font-weight: 600; width: 100px; padding: 4px 0; vertical-align: top;">Phone:</td>
                   <td style="padding: 4px 0;">${phone || 'N/A'}</td>
                 </tr>
-                <tr>
-                  <td style="font-weight: 600; width: 100px; padding: 4px 0; vertical-align: top;">Institution:</td>
-                  <td style="padding: 4px 0;">${college || 'N/A'}</td>
-                </tr>
-                <tr> 
-                  <td style="font-weight: 600; width: 100px; padding: 4px 0; vertical-align: top;">Course:</td>
-                  <td style="padding: 4px 0;">${course || 'N/A'}</td>
-                </tr>
+                ${userType === "student"
+            ? `
+                        <tr>
+                          <td style="font-weight: 600; width: 120px; padding: 4px 0; vertical-align: top;">Institution:</td>
+                          <td style="padding: 4px 0;">${college || 'N/A'}</td>
+                        </tr>
+                        <tr> 
+                          <td style="font-weight: 600; width: 120px; padding: 4px 0; vertical-align: top;">Course:</td>
+                          <td style="padding: 4px 0;">${course || 'N/A'}</td>
+                        </tr>
+                      `
+            : `
+                        <tr>
+                          <td style="font-weight: 600; width: 120px; padding: 4px 0; vertical-align: top;">Organisation:</td>
+                          <td style="padding: 4px 0;">${companyName || 'N/A'}</td>
+                        </tr>
+                      `
+        }
+                  
               </table>
             </div>
         </div>
