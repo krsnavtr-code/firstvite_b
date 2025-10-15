@@ -216,10 +216,33 @@ export const createCandidate = async (req, res) => {
     const yourName = 'FirstVITE E-Learning';
 
     try {
-        const { name, email, phone, course, college, university } = req.body;
+        const { name, email, phone, course, college, university, userType = 'student', companyName: userCompanyName } = req.body;
         // Store the file path for cleanup in case of errors
         if (req.file) {
             profilePhotoPath = req.file.path;
+        }
+        // Validate user type
+        if (!['student', 'company'].includes(userType)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid user type. Must be either 'student' or 'company'.",
+                field: "userType",
+            });
+        }
+        // Validate required fields based on user type
+        if (userType === 'student' && (!course || !college || !university)) {
+            return res.status(400).json({
+                success: false,
+                message: "Course, college, and university are required for students",
+            });
+        }
+
+        if (userType === 'company' && !userCompanyName) {
+            return res.status(400).json({
+                success: false,
+                message: "Company name is required",
+                field: "companyName",
+            });
         }
         // Check if email is verified
         const otpData = otpStore.get(email);
@@ -238,8 +261,17 @@ export const createCandidate = async (req, res) => {
             });
         }
 
-        // Clear the OTP data after successful verification and before saving to database
+        /// Clear the OTP data after successful verification and before saving to database
         otpStore.delete(email);
+
+        // Rest of the existing code remains the same, but update the candidate creation part:
+        const candidateData = {
+            name,
+            email,
+            phone,
+            userType,
+            ...(userType === 'student' ? { course, college, university } : { companyName: userCompanyName })
+        };
 
         // Check if email already exists in the database
         const existingCandidate = await Candidate.findOne({ email });
@@ -285,12 +317,7 @@ export const createCandidate = async (req, res) => {
 
         // Create new candidate
         const candidate = await Candidate.create({
-            name,
-            email,
-            phone,
-            course,
-            college,
-            university,
+            ...candidateData,
             profilePhoto: profilePhotoUrl,
         });
 

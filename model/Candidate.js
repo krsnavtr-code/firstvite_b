@@ -13,31 +13,45 @@ const candidateSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
       match: [/^\S+@\S+\.\S+$/, 'Please enter a valid email address'],
+      unique: true,
     },
     phone: {
       type: String,
       required: [true, 'Phone number is required'],
       trim: true,
     },
+    userType: {
+      type: String,
+      required: [true, 'User type is required'],
+      enum: ['student', 'company'],
+      default: 'student',
+    },
+    // Student specific fields
     course: {
       type: String,
-      required: [true, 'Course is required'],
+      required: function() { return this.userType === 'student'; },
       trim: true,
     },
     college: {
       type: String,
-      required: [true, 'College is required'],
+      required: function() { return this.userType === 'student'; },
+      trim: true,
+    },
+    university: {
+      type: String,
+      required: function() { return this.userType === 'student'; },
+      trim: true,
+    },
+    // Company specific field
+    companyName: {
+      type: String,
+      required: function() { return this.userType === 'company'; },
       trim: true,
     },
     registrationId: {
       type: String,
       unique: true,
       sparse: true,
-      trim: true,
-    },
-    university: {
-      type: String,
-      required: [true, 'University is required'],
       trim: true,
     },
     profilePhoto: {
@@ -57,6 +71,16 @@ const candidateSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+// Add a pre-save hook to generate registration ID
+candidateSchema.pre('save', async function(next) {
+  if (this.isNew) {
+    const prefix = this.userType === 'student' ? 'STU' : 'COMP';
+    const count = await this.constructor.countDocuments({ userType: this.userType });
+    this.registrationId = `${prefix}${(count + 1).toString().padStart(5, '0')}`;
+  }
+  next();
+});
 
 // Create index for faster queries
 candidateSchema.index({ email: 1 });
