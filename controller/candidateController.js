@@ -270,7 +270,12 @@ export const createCandidate = async (req, res) => {
             email,
             phone,
             userType,
-            ...(userType === 'student' ? { course, college, university } : { companyName })
+            ...(userType === 'student' 
+                ? { course, college, university } 
+                : { 
+                    companyName,
+                    isPaymentDone: req.body.isPaymentDone === 'true' || req.body.isPaymentDone === true
+                })
         };
 
         // Check if email already exists in the database

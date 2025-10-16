@@ -66,6 +66,11 @@ const candidateSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    isPaymentDone: {
+      type: Boolean,
+      default: false,
+      required: function() { return this.userType === 'company'; }
+    },
   },
   {
     timestamps: true,
