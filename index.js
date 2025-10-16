@@ -358,6 +358,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/lms", lmsRoutes);
 app.use("/api/sprints", sprintRoutes);
 app.use("/api/sessions", sessionRoutes);
+app.use("/api/payments", paymentRoutes);
 app.use("/api/admin/payments", adminPaymentRoutes);
 app.use("/api/v1/sprints", sprintRoutes);
 app.use("/api/v1/tasks", taskRoutes);
