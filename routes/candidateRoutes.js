@@ -1,5 +1,5 @@
 import express from 'express';
-import { createCandidate, getCandidates, updateCandidateStatus, sendOTP, verifyOTP, checkEmail, checkPhone } from '../controller/candidateController.js';
+import { createCandidate, getCandidates, updateCandidateStatus, sendOTP, verifyOTP, checkEmail, checkPhone, checkCompanyPaymentStatus } from '../controller/candidateController.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 import multer from 'multer';
 import path from 'path';
@@ -43,6 +43,7 @@ const upload = multer({
 // Public routes
 router.get('/check-email', checkEmail);
 router.get('/check-phone', checkPhone);
+router.get('/check-company-payment', checkCompanyPaymentStatus);
 router.post('/', upload.single('profilePhoto'), createCandidate);
 
 // // Test route to view ID card

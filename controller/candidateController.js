@@ -735,6 +735,34 @@ export const checkPhone = async (req, res) => {
     }
 };
 
+export const checkCompanyPaymentStatus = async (req, res) => {
+    try {
+        const { email, phone } = req.query;
+        console.log('Checking company payment status for:', { email, phone });
+
+        const candidate = await Candidate.findOne({
+            email: email.toLowerCase(),
+            phone,
+            userType: 'company'
+        });
+
+        console.log('Found candidate:', {
+            exists: !!candidate,
+            userType: candidate?.userType,
+            isPaymentDone: candidate?.isPaymentDone
+        });
+
+        res.json({
+            exists: !!candidate,
+            userType: candidate?.userType,
+            isPaymentDone: candidate?.isPaymentDone
+        });
+    } catch (error) {
+        console.error('Error checking company payment status:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
 // @desc    Get all candidates (for admin)
 // @route   GET /api/candidates
 // @access  Private/Admin
