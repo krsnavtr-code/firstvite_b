@@ -1,5 +1,5 @@
 import express from 'express';
-import { createCandidate, getCandidates, updateCandidateStatus, sendOTP, verifyOTP } from '../controller/candidateController.js';
+import { createCandidate, getCandidates, updateCandidateStatus, sendOTP, verifyOTP, checkEmail, checkPhone } from '../controller/candidateController.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 import multer from 'multer';
 import path from 'path';
@@ -41,52 +41,54 @@ const upload = multer({
 });
 
 // Public routes
+router.get('/check-email', checkEmail);
+router.get('/check-phone', checkPhone);
 router.post('/', upload.single('profilePhoto'), createCandidate);
 
-// Test route to view ID card
-router.get('/test-id-card', (req, res) => {
-    // Mock candidate data for testing
-    const testCandidate = {
-        name: 'John Doe',
-        email: 'john.doe@example.com',
-        phone: '+1234567890',
-        college: 'Example University',
-        course: 'Computer Science',
-        graduationYear: '2024'
-    };
+// // Test route to view ID card
+// router.get('/test-id-card', (req, res) => {
+//     // Mock candidate data for testing
+//     const testCandidate = {
+//         name: 'John Doe',
+//         email: 'john.doe@example.com',
+//         phone: '+1234567890',
+//         college: 'Example University',
+//         course: 'Computer Science',
+//         graduationYear: '2024'
+//     };
     
-    // Mock event details
-    const eventDetails = {
-        eventName: 'Career Hiring Camp 2025',
-        eventDate: 'November 15, 2025',
-        venue: 'Grand Conference Center',
-        city: 'Mumbai',
-        qrCodeUrl: 'https://firstvite.com/verify/123456',
-        logoUrl: 'https://firstvite.com/logo.png'
-    };
+//     // Mock event details
+//     const eventDetails = {
+//         eventName: 'Career Hiring Camp 2025',
+//         eventDate: 'November 15, 2025',
+//         venue: 'Grand Conference Center',
+//         city: 'Mumbai',
+//         qrCodeUrl: 'https://firstvite.com/verify/123456',
+//         logoUrl: 'https://firstvite.com/logo.png'
+//     };
     
-    // Add _id to test candidate as it's required by the generateIdCard function
-    testCandidate._id = 'test123';
+//     // Add _id to test candidate as it's required by the generateIdCard function
+//     testCandidate._id = 'test123';
     
-    // Import the generateIdCard function directly
-    import('../utils/idCardGenerator.js').then(({ default: generateIdCard }) => {
-        generateIdCard(testCandidate, eventDetails)
-            .then(({ buffer, filename }) => {
-                // Set headers to display PDF in browser
-                res.setHeader('Content-Type', 'application/pdf');
-                res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
-                res.send(buffer);
-            })
-            .catch(error => {
-                console.error('Error generating ID card:', error);
-                res.status(500).json({ 
-                    success: false, 
-                    message: 'Error generating ID card',
-                    error: error.message 
-                });
-            });
-    });
-});
+//     // Import the generateIdCard function directly
+//     import('../utils/idCardGenerator.js').then(({ default: generateIdCard }) => {
+//         generateIdCard(testCandidate, eventDetails)
+//             .then(({ buffer, filename }) => {
+//                 // Set headers to display PDF in browser
+//                 res.setHeader('Content-Type', 'application/pdf');
+//                 res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+//                 res.send(buffer);
+//             })
+//             .catch(error => {
+//                 console.error('Error generating ID card:', error);
+//                 res.status(500).json({ 
+//                     success: false, 
+//                     message: 'Error generating ID card',
+//                     error: error.message 
+//                 });
+//             });
+//     });
+// });
 
 // OTP routes
 router.post('/send-otp', sendOTP);

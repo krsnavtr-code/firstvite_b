@@ -673,6 +673,68 @@ This is an automated notification. Please do not reply to this email.`
     }
 };
 
+// @desc    Check if email exists
+// @route   GET /api/candidates/check-email
+// @access  Public
+export const checkEmail = async (req, res) => {
+    try {
+        const { email } = req.query;
+
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: 'Email is required',
+            });
+        }
+
+        // Check if email exists in the database
+        const existingCandidate = await Candidate.findOne({ email });
+
+        res.status(200).json({
+            success: true,
+            exists: !!existingCandidate,
+        });
+    } catch (error) {
+        console.error('Error checking email:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error checking email',
+            error: error.message,
+        });
+    }
+};
+
+// @desc    Check if phone number exists
+// @route   GET /api/candidates/check-phone
+// @access  Public
+export const checkPhone = async (req, res) => {
+    try {
+        const { phone } = req.query;
+
+        if (!phone) {
+            return res.status(400).json({
+                success: false,
+                message: 'Phone number is required',
+            });
+        }
+
+        // Check if phone exists in the database
+        const existingCandidate = await Candidate.findOne({ phone });
+
+        res.status(200).json({
+            success: true,
+            exists: !!existingCandidate,
+        });
+    } catch (error) {
+        console.error('Error checking phone:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error checking phone number',
+            error: error.message,
+        });
+    }
+};
+
 // @desc    Get all candidates (for admin)
 // @route   GET /api/candidates
 // @access  Private/Admin
@@ -689,6 +751,7 @@ export const getCandidates = async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Error fetching candidates",
+            error: error.message,
         });
     }
 };
