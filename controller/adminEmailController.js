@@ -157,11 +157,19 @@ export const sendProposalEmails = catchAsync(async (req, res, next) => {
       const result = results.find(r => r.email === email) || { status: 'failed', error: 'Unknown error' };
 
       try {
+        // Prepare attachments in the correct format for the model
+        const formattedAttachments = savedAttachments.map(filePath => ({
+          name: path.basename(filePath),
+          path: filePath,
+          type: path.extname(filePath).substring(1) || 'file',
+          size: 0 // We don't have the size, but it's required
+        }));
+
         const emailRecord = new EmailRecord({
           to: email,
           subject,
           message: htmlContent,
-          attachments: savedAttachments,
+          attachments: formattedAttachments,
           videoUrl: data.videoUrl || '',
           studentName: data.studentName || '',
           courseName: data.courseName || '',
@@ -194,17 +202,7 @@ export const sendProposalEmails = catchAsync(async (req, res, next) => {
     console.error('Error sending proposal emails:', error);
     return next(new AppError('Failed to send one or more emails', 500));
   } finally {
-    // Clean up: Delete temporary files after sending (optional)
-    // If you want to keep the files, remove this block
-    if (savedAttachments.length > 0 && process.env.NODE_ENV !== 'production') {
-      for (const file of savedAttachments) {
-        try {
-          await unlinkAsync(file.path);
-        } catch (err) {
-          console.error(`Error deleting temporary file ${file.path}:`, err);
-        }
-      }
-    }
+    
   }
 });
 
