@@ -48,7 +48,7 @@ router.post(
 
 router.get('/proposal-documents', protect, authorize('admin'), async (req, res) => {
     try {
-        const uploadDir = path.join(process.cwd(), 'server', 'public', 'proposal_documents');
+        const uploadDir = path.join(process.cwd(), 'public', 'proposal_documents');
         const files = await fs.readdir(uploadDir);
         res.json({
             success: true,

@@ -11,7 +11,7 @@ const unlinkAsync = promisify(fs.unlink);
 // Configure storage
 const storage = multer.diskStorage({
     destination: async (req, file, cb) => {
-        const uploadDir = path.join(process.cwd(), 'server', 'public', 'proposal_documents');
+        const uploadDir = path.join(process.cwd(), 'public', 'proposal_documents');
         if (!fs.existsSync(uploadDir)) {
             await mkdirAsync(uploadDir, { recursive: true });
         }
@@ -103,9 +103,9 @@ export const deleteProposalDocument = catchAsync(async (req, res, next) => {
   }
 
   // Ensure the file path is within the allowed directory
-  const fullPath = path.join(process.cwd(), 'server', 'public', filePath);
+  const fullPath = path.join(process.cwd(), 'public', filePath);
   const normalizedPath = path.normalize(fullPath);
-  const allowedDir = path.join(process.cwd(), 'server', 'public', 'proposal_documents');
+  const allowedDir = path.join(process.cwd(), 'public', 'proposal_documents');
 
   // Prevent directory traversal
   if (!normalizedPath.startsWith(allowedDir)) {

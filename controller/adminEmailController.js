@@ -25,7 +25,7 @@ export const sendProposalEmails = catchAsync(async (req, res, next) => {
     return next(new AppError('Invalid request data format', 400));
   }
 
-  const { emails, subject, message } = data;
+  const { emails, subject, message, selectedDocuments = [] } = data;
   const files = req.files || [];
 
   // Validate required fields
@@ -41,12 +41,58 @@ export const sendProposalEmails = catchAsync(async (req, res, next) => {
   const attachments = [];
   const savedAttachments = [];
   const uploadDir = path.join(process.cwd(), 'uploads', 'email-attachments');
+  const proposalDocsDir = path.join(process.cwd(), 'public', 'proposal_documents');
 
-  // Create uploads directory if it doesn't exist
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
+  // Create uploads directories if they don't exist
+  [uploadDir, proposalDocsDir].forEach(dir => {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+  });
+
+  // Debug log to check received data
+  console.log('Selected documents from frontend:', selectedDocuments);
+  console.log('Upload directory:', uploadDir);
+  console.log('Proposal docs directory:', proposalDocsDir);
+
+  // Check if proposal docs directory exists and list its contents
+  try {
+    const files = await fs.promises.readdir(proposalDocsDir);
+    console.log('Available files in proposal-documents directory:', files);
+  } catch (err) {
+    console.error('Error reading proposal-documents directory:', err);
   }
 
+  // Process selected documents from server
+  if (selectedDocuments && selectedDocuments.length > 0) {
+    for (const docName of selectedDocuments) {
+      try {
+        const docPath = path.join(proposalDocsDir, docName);
+        console.log('Looking for document at path:', docPath);
+        const exists = fs.existsSync(docPath);
+        console.log(`Document ${docName} exists:`, exists);
+        if (exists) {
+          const fileContent = await fs.promises.readFile(docPath);
+          const tempFilePath = path.join(uploadDir, `selected-${Date.now()}-${docName}`);
+          await writeFileAsync(tempFilePath, fileContent);
+
+          attachments.push({
+            filename: docName,
+            path: tempFilePath,
+            contentType: 'application/octet-stream',
+            cid: `doc-${Date.now()}-${Math.round(Math.random() * 1E9)}`
+          });
+          savedAttachments.push(tempFilePath);
+        } else {
+          console.warn(`Document not found: ${docPath}`);
+        }
+      } catch (error) {
+        console.error(`Error processing document ${docName}:`, error);
+      }
+    }
+  }
+
+  // Process uploaded files
   if (files && files.length > 0) {
     for (const file of files) {
       try {
