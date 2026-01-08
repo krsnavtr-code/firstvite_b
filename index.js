@@ -39,6 +39,7 @@ import candidateRoutes from "./routes/candidateRoutes.js";
 import adminEmailRoutes from "./routes/adminEmailRoutes.js";
 import emailRecordRoutes from "./routes/emailRecordRoutes.js";
 import proposalDocumentRoutes from "./routes/proposalDocumentRoutes.js";
+import testQARoutes from "./routes/testQARoutes.js";
 
 // Initialize express app
 const app = express();
@@ -375,7 +376,8 @@ app.use('/api/v1/admin/emails', adminEmailRoutes);
 app.use('/api/emails', emailRecordRoutes);
 
 // Proposal document routes
-app.use('/api/v1/admin', proposalDocumentRoutes);
+app.use("/api/v1/admin", proposalDocumentRoutes);
+app.use("/api/admin/test-qa", testQARoutes);
 
 // External API Routes
 app.use("/api/outcontact", externalContactRoutes);
