@@ -2,25 +2,54 @@ import TestQA from '../models/testQAModel.js';
 import asyncHandler from 'express-async-handler';
 
 
-const validateQuestionData = (data) => {
-  const { questionType, options, correctAnswer } = data;
+const QUESTION_TYPES = {
+  SHORT_ANSWER: 'short_answer',
+  TRUE_FALSE: 'true_false',
+  MULTIPLE_CHOICE_SINGLE: 'multiple_choice_single',
+  MULTIPLE_CHOICE_MULTIPLE: 'multiple_choice_multiple',
+  ESSAY: 'essay'
+};
 
-  if ([questionType.TRUE_FALSE, questionType.SHORT_ANSWER, questionType.ESSAY].includes(questionType)) {
-    if (!correctAnswer) {
-      throw new Error('Correct answer is required for this question type');
+const validateQuestionData = (data) => {
+  const { questionType = 'short_answer', options, correctAnswer } = data;
+
+  if (!questionType) {
+    throw new Error('Question type is required');
+  }
+
+  // For question types that require a direct correct answer
+  if ([QUESTION_TYPES.TRUE_FALSE, QUESTION_TYPES.SHORT_ANSWER, QUESTION_TYPES.ESSAY].includes(questionType)) {
+    if (correctAnswer === undefined || correctAnswer === null || correctAnswer === '') {
+      // Only throw error for true_false type if it's not a boolean
+      if (questionType === QUESTION_TYPES.TRUE_FALSE && typeof correctAnswer !== 'boolean') {
+        throw new Error('Please select True or False for this question type');
+      }
+      // For other types, only require a non-empty string
+      if (questionType !== QUESTION_TYPES.TRUE_FALSE) {
+        throw new Error('Please provide an answer for this question');
+      }
     }
   }
-  if ([questionType.MULTIPLE_CHOICE_SINGLE, questionType.MULTIPLE_CHOICE_MULTIPLE].includes(questionType)) {
-    if (!options || options.length < 2) {
+
+  // For multiple choice questions
+  if ([QUESTION_TYPES.MULTIPLE_CHOICE_SINGLE, QUESTION_TYPES.MULTIPLE_CHOICE_MULTIPLE].includes(questionType)) {
+    if (!options || !Array.isArray(options) || options.length < 2) {
       throw new Error('At least two options are required for multiple choice questions');
     }
-    if (questionType === questionType.MULTIPLE_CHOICE_SINGLE && options.filter(o => o.isCorrect).length !== 1) {
-      throw new Error('Exactly one correct option is required for single choice questions');
-    }
-    if (questionType === questionType.MULTIPLE_CHOICE_MULTIPLE && options.filter(o => o.isCorrect).length < 1) {
-      throw new Error('At least one correct option is required for multiple choice questions');
+
+    const correctOptions = options.filter(o => o.isCorrect).length;
+
+    if (questionType === QUESTION_TYPES.MULTIPLE_CHOICE_SINGLE) {
+      if (correctOptions !== 1) {
+        throw new Error('Exactly one correct option is required for single choice questions');
+      }
+    } else if (questionType === QUESTION_TYPES.MULTIPLE_CHOICE_MULTIPLE) {
+      if (correctOptions < 1) {
+        throw new Error('At least one correct option is required for multiple choice questions');
+      }
     }
   }
+
   return true;
 };
 
