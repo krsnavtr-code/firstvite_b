@@ -6,16 +6,23 @@ import {
   updateQA,
   deleteQA,
   toggleQAActiveStatus,
+  getTestResults,
+  getTestQuestions,
+  submitTest
 } from '../controller/testQAController.js';
 import { protect, restrictTo } from '../middleware/authMiddleware.js';
-import { getTestQuestions, submitTest } from '../controller/testQAController.js';
 
 
 const router = express.Router();
 
-// Public routes (no protection needed as they're protected by the route in index.js)
+// Public route for getting questions (no auth required)
 router.get('/questions', getTestQuestions);
-router.post('/submit', submitTest);
+
+// Protected route for submitting test (requires authentication)
+router.post('/submit', protect, submitTest);
+
+// Get test results (requires authentication)
+router.get('/results', getTestResults);
 
 // Apply protect and restrictTo('admin') to all admin routes
 router.use(protect);

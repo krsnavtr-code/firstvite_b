@@ -1,4 +1,5 @@
 import TestQA from '../models/testQAModel.js';
+import TestResult from '../models/testResultModel.js';
 import asyncHandler from 'express-async-handler';
 
 
@@ -9,6 +10,25 @@ const QUESTION_TYPES = {
   MULTIPLE_CHOICE_MULTIPLE: 'multiple_choice_multiple',
   ESSAY: 'essay'
 };
+
+// Add this to testQAController.js
+const getTestResults = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+
+  const results = await TestResult.find({ user: userId })
+    .sort({ submittedAt: -1 }) // Most recent first
+    .select('-__v -updatedAt')
+    .populate({
+      path: 'answers.questionId',
+      select: 'questionText questionType'
+    });
+
+  res.json({
+    success: true,
+    count: results.length,
+    results
+  });
+});
 
 // @desc    Get 6 random active test questions
 // @route   GET /api/test-questions/questions
@@ -27,44 +47,89 @@ const getTestQuestions = asyncHandler(async (req, res) => {
 });
 
 const submitTest = asyncHandler(async (req, res) => {
-  const { answers } = req.body;
-  const questions = await TestQA.find({ isActive: true }).lean();
+  const { answers, questionIds } = req.body;
+  const userId = req.user._id;
+
+  if (!questionIds || !Array.isArray(questionIds)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid or missing question IDs'
+    });
+  }
+
+  // Only fetch questions that were shown to the user
+  const questions = await TestQA.find({
+    _id: { $in: questionIds },
+    isActive: true
+  }).lean();
+
   let score = 0;
-  const results = questions.map(question => {
-    const userAnswer = answers[question._id];
-    let isCorrect = false;
-    if (question.questionType === 'multiple_choice_single' ||
-      question.questionType === 'true_false') {
-      const selectedOption = question.options.find(opt => opt.text === userAnswer);
-      isCorrect = selectedOption && selectedOption.isCorrect;
-    } else if (question.questionType === 'multiple_choice_multiple') {
-      const correctAnswers = question.options
-        .filter(opt => opt.isCorrect)
-        .map(opt => opt.text);
-      isCorrect =
-        Array.isArray(userAnswer) &&
-        userAnswer.length === correctAnswers.length &&
-        userAnswer.every(ans => correctAnswers.includes(ans));
-    } else {
-      // For short_answer and essay, you might need manual grading
-      // or implement a more sophisticated checking mechanism
-      isCorrect = false; // Default to false for manual grading
-    }
-    if (isCorrect) score++;
-    return {
-      questionId: question._id,
-      isCorrect,
-      correctAnswer: question.correctAnswer ||
-        question.options?.filter(opt => opt.isCorrect).map(opt => opt.text) ||
-        'Not specified'
-    };
-  });
-  res.json({
-    score,
-    total: questions.length,
-    percentage: Math.round((score / questions.length) * 100),
-    results
-  });
+  const results = [];
+
+  try {
+    questions.forEach(question => {
+      const userAnswer = answers[question._id];
+      let isCorrect = false;
+      let correctAnswer = null;
+
+      if (question.questionType === 'multiple_choice_single' ||
+        question.questionType === 'true_false') {
+        const selectedOption = question.options.find(opt => opt.text === userAnswer);
+        isCorrect = selectedOption && selectedOption.isCorrect;
+        correctAnswer = question.options.find(opt => opt.isCorrect)?.text;
+      } else if (question.questionType === 'multiple_choice_multiple') {
+        const correctAnswers = question.options
+          .filter(opt => opt.isCorrect)
+          .map(opt => opt.text);
+        isCorrect =
+          Array.isArray(userAnswer) &&
+          userAnswer.length === correctAnswers.length &&
+          userAnswer.every(ans => correctAnswers.includes(ans));
+        correctAnswer = correctAnswers;
+      } else {
+        isCorrect = false;
+        correctAnswer = question.correctAnswer || 'Requires manual grading';
+      }
+
+      if (isCorrect) score++;
+
+      results.push({
+        questionId: question._id,
+        userAnswer,
+        isCorrect,
+        correctAnswer
+      });
+    });
+
+    const totalQuestions = questions.length;
+    const percentage = Math.round((score / totalQuestions) * 100);
+
+    const testResult = await TestResult.create({
+      user: userId,
+      test: null,
+      attemptNumber: 1,
+      score,
+      totalQuestions,
+      percentage,
+      answers: results
+    });
+
+    res.status(200).json({
+      success: true,
+      testResultId: testResult._id,
+      score,
+      total: totalQuestions,
+      percentage,
+      results
+    });
+  } catch (error) {
+    console.error('Error in submitTest:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to submit test',
+      error: error.message
+    });
+  }
 });
 
 const validateQuestionData = (data) => {
@@ -244,4 +309,4 @@ export const toggleQAActiveStatus = asyncHandler(async (req, res) => {
   });
 });
 
-export { getTestQuestions, submitTest };
+export { getTestQuestions, submitTest, getTestResults };
