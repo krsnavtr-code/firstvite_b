@@ -26,7 +26,7 @@ router.get('/has-taken-test', protect, checkIfUserHasTakenTest);
 router.post('/submit', protect, submitTest);
 
 // Get test results (requires authentication)
-router.get('/results', getTestResults);
+router.get('/results', protect, getTestResults);
 
 // Apply protect and restrictTo('admin') to all admin routes
 router.use(protect);

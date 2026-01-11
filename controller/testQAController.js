@@ -11,23 +11,66 @@ const QUESTION_TYPES = {
   ESSAY: 'essay'
 };
 
-// Add this to testQAController.js
+// @desc    Get test results for the authenticated user
+// @route   GET /api/test-questions/results
+// @access  Private
 const getTestResults = asyncHandler(async (req, res) => {
-  const userId = req.user._id;
+  try {
+    const userId = req.user._id;
 
-  const results = await TestResult.find({ user: userId })
-    .sort({ submittedAt: -1 }) // Most recent first
-    .select('-__v -updatedAt')
-    .populate({
-      path: 'answers.questionId',
-      select: 'questionText questionType'
+    const results = await TestResult.find({ user: userId })
+      .sort({ submittedAt: -1 }) // Most recent first
+      .select('-__v -updatedAt')
+      .populate({
+        path: 'answers.questionId',
+        select: 'question questionType options correctAnswer explanation',
+        model: 'TestQA'
+      })
+      .lean();
+
+    // If no results found, return empty array
+    if (!results || results.length === 0) {
+      return res.status(200).json({
+        success: true,
+        count: 0,
+        results: []
+      });
+    }
+
+    // Format the results with question details
+    const formattedResults = results.map(result => {
+      // Calculate percentage
+      const percentage = Math.round((result.score / result.totalQuestions) * 100);
+
+      // Map through answers and add question details
+      const answersWithQuestions = result.answers.map(answer => ({
+        ...answer,
+        question: answer.questionId?.question || 'Question not found',
+        questionType: answer.questionId?.questionType || 'unknown',
+        options: answer.questionId?.options || [],
+        explanation: answer.questionId?.explanation || ''
+      }));
+
+      return {
+        ...result,
+        percentage,
+        answers: answersWithQuestions
+      };
     });
 
-  res.json({
-    success: true,
-    count: results.length,
-    results
-  });
+    res.json({
+      success: true,
+      count: formattedResults.length,
+      results: formattedResults
+    });
+  } catch (error) {
+    console.error('Error in getTestResults:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching test results',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
 });
 
 // @desc    Get 6 random active test questions
