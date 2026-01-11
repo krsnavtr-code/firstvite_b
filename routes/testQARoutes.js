@@ -8,7 +8,8 @@ import {
   toggleQAActiveStatus,
   getTestResults,
   getTestQuestions,
-  submitTest
+  submitTest,
+  checkIfUserHasTakenTest
 } from '../controller/testQAController.js';
 import { protect, restrictTo } from '../middleware/authMiddleware.js';
 
@@ -17,6 +18,9 @@ const router = express.Router();
 
 // Public route for getting questions (no auth required)
 router.get('/questions', getTestQuestions);
+
+// Check if user has already taken the test (requires authentication)
+router.get('/has-taken-test', protect, checkIfUserHasTakenTest);
 
 // Protected route for submitting test (requires authentication)
 router.post('/submit', protect, submitTest);

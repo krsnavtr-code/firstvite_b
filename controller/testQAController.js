@@ -309,4 +309,18 @@ export const toggleQAActiveStatus = asyncHandler(async (req, res) => {
   });
 });
 
-export { getTestQuestions, submitTest, getTestResults };
+// @desc    Check if user has already taken the test
+// @route   GET /api/test-questions/has-taken-test
+// @access  Private
+const checkIfUserHasTakenTest = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+
+  const existingResult = await TestResult.findOne({ user: userId });
+
+  res.json({
+    success: true,
+    hasTakenTest: !!existingResult
+  });
+});
+
+export { getTestQuestions, submitTest, getTestResults, checkIfUserHasTakenTest };
