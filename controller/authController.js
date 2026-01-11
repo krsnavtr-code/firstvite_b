@@ -47,7 +47,7 @@ export const register = catchAsync(async (req, res, next) => {
     return next(new AppError('Email already registered. Go to Login page', 409));
   }
 
-  // Create user (initially not approved)
+  // Create user (initially approved)
   const user = await User.create({
     fullname,
     email: normalizedEmail,
@@ -55,7 +55,7 @@ export const register = catchAsync(async (req, res, next) => {
     role: role || 'student',
     department,
     phone,
-    isApproved: false // New users need admin approval
+    isApproved: true // New users are approved by default
   });
 
   if (user) {
@@ -65,7 +65,7 @@ export const register = catchAsync(async (req, res, next) => {
       email: user.email,
       role: user.role,
       isApproved: user.isApproved,
-      message: 'Registration successful. Please wait for admin approval.'
+      message: 'Registration successful. Your account has been approved.'
     });
   } else {
     return next(new AppError('Invalid user data', 400));
