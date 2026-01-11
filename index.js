@@ -378,6 +378,7 @@ app.use('/api/emails', emailRecordRoutes);
 // Proposal document routes
 app.use("/api/v1/admin", proposalDocumentRoutes);
 app.use("/api/admin/test-qa", testQARoutes);
+app.use('/api/test-questions', testQARoutes);
 
 // External API Routes
 app.use("/api/outcontact", externalContactRoutes);

@@ -10,6 +10,63 @@ const QUESTION_TYPES = {
   ESSAY: 'essay'
 };
 
+// @desc    Get 6 random active test questions
+// @route   GET /api/test-questions/questions
+// @access  Private
+const getTestQuestions = asyncHandler(async (req, res) => {
+  // Get all active questions
+  const allQuestions = await TestQA.find({ isActive: true })
+    .select('-__v -createdAt -updatedAt -isActive -createdBy')
+    .lean();
+
+  // Shuffle the questions and pick first 6
+  const shuffled = allQuestions.sort(() => 0.5 - Math.random());
+  const selectedQuestions = shuffled.slice(0, 6);
+
+  res.json(selectedQuestions);
+});
+
+const submitTest = asyncHandler(async (req, res) => {
+  const { answers } = req.body;
+  const questions = await TestQA.find({ isActive: true }).lean();
+  let score = 0;
+  const results = questions.map(question => {
+    const userAnswer = answers[question._id];
+    let isCorrect = false;
+    if (question.questionType === 'multiple_choice_single' ||
+      question.questionType === 'true_false') {
+      const selectedOption = question.options.find(opt => opt.text === userAnswer);
+      isCorrect = selectedOption && selectedOption.isCorrect;
+    } else if (question.questionType === 'multiple_choice_multiple') {
+      const correctAnswers = question.options
+        .filter(opt => opt.isCorrect)
+        .map(opt => opt.text);
+      isCorrect =
+        Array.isArray(userAnswer) &&
+        userAnswer.length === correctAnswers.length &&
+        userAnswer.every(ans => correctAnswers.includes(ans));
+    } else {
+      // For short_answer and essay, you might need manual grading
+      // or implement a more sophisticated checking mechanism
+      isCorrect = false; // Default to false for manual grading
+    }
+    if (isCorrect) score++;
+    return {
+      questionId: question._id,
+      isCorrect,
+      correctAnswer: question.correctAnswer ||
+        question.options?.filter(opt => opt.isCorrect).map(opt => opt.text) ||
+        'Not specified'
+    };
+  });
+  res.json({
+    score,
+    total: questions.length,
+    percentage: Math.round((score / questions.length) * 100),
+    results
+  });
+});
+
 const validateQuestionData = (data) => {
   const { questionType = 'short_answer', options, correctAnswer } = data;
 
@@ -186,3 +243,5 @@ export const toggleQAActiveStatus = asyncHandler(async (req, res) => {
     data: qa,
   });
 });
+
+export { getTestQuestions, submitTest };
