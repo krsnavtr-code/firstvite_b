@@ -119,6 +119,23 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+// Middleware for URL redirection from firstvite.com to eklabya.com
+app.use((req, res, next) => {
+    const host = req.headers.host;
+
+    // Check if the request is coming from firstvite.com
+    if (host && host.includes('firstvite.com')) {
+        // Construct the new URL with eklabya.com
+        const newUrl = `https://eklabya.com${req.originalUrl}`;
+        console.log(`Redirecting ${req.method} ${req.originalUrl} from ${host} to ${newUrl}`);
+
+        // Perform permanent redirect (301)
+        return res.redirect(301, newUrl);
+    }
+
+    next();
+});
+
 // Handle preflight requests
 app.options('*', cors(corsOptions));
 app.use(express.json());
