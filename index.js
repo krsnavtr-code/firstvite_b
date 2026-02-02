@@ -123,9 +123,9 @@ app.use(cors(corsOptions));
 app.use((req, res, next) => {
     const host = req.headers.host;
 
-    // Check if the request is coming from firstvite.com
-    if (host && host.includes('firstvite.com')) {
-        // Construct the new URL with eklabya.com
+    // Check if the request is coming from firstvite.com (including subdomains)
+    if (host && (host.includes('firstvite.com') || host.startsWith('firstvite.com'))) {
+    // Always redirect to HTTPS eklabya.com
         const newUrl = `https://eklabya.com${req.originalUrl}`;
         console.log(`Redirecting ${req.method} ${req.originalUrl} from ${host} to ${newUrl}`);
 
