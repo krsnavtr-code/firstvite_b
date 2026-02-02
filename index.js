@@ -62,8 +62,8 @@ app.timeout = 300000;
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
-  'https://firstvite.com',
-  'https://www.firstvite.com'
+  'https://eklabya.com',
+  'https://www.eklabya.com'
 ];
 
 // CORS configuration
@@ -78,14 +78,14 @@ const corsOptions = {
         const allowedOrigins = [
             'http://localhost:5173',
             'http://localhost:5174',
-            'https://firstvite.com',
-            'https://www.firstvite.com',
-            'https://firstvite.vercel.app',
-            'https://www.firstvite.vercel.app'
+            'https://eklabya.com',
+            'https://www.eklabya.com',
+            'https://eklabya.vercel.app',
+            'https://www.eklabya.vercel.app'
         ];
         
         if (allowedOrigins.includes(origin) || 
-            origin.endsWith('.firstvite.com') || 
+            origin.endsWith('.eklabya.com') || 
             origin.endsWith('.vercel.app')) {
             return callback(null, true);
         }
