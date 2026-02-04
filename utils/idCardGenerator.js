@@ -103,7 +103,7 @@ const generateIdCard = async (candidate, eventDetails = {}) => {
     <html>
     <head>
         <meta charset="UTF-8">
-        <title>FirstVITE - Event ID Card</title>
+        <title>Eklabya - Event ID Card</title>
         <style>
             .center-page {
                 width: 100%;
@@ -125,7 +125,7 @@ const generateIdCard = async (candidate, eventDetails = {}) => {
     <body style="font-size: 18px; font-weight: 500; letter-spacing: 0.5px; line-height: 1.5; font-family: 'Poppins', Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px;">
         <div style="width: 300px; border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); color: black; background: #f5f7ff;">            
             <div style="padding: 10px; text-align: center; background: linear-gradient(135deg, rgb(244, 124, 38) 0%, rgb(244, 124, 38) 100%); color: white; border-bottom: 1px solid rgba(255, 255, 255, 0.2);">
-                <h1 style="font-size: 15px; font-weight: 700; letter-spacing: 1px; margin: 0;">FirstVITE E-Learning Pvt. Ltd.</h1>
+                <h1 style="font-size: 15px; font-weight: 700; letter-spacing: 1px; margin: 0;">Eklabya E-Learning Pvt. Ltd.</h1>
                 <h2 style="font-size: 13px; font-weight: 700; letter-spacing: 1px; margin: 5px 0 0;">${eventName}</h2>
                 <p style="font-size: 10px; font-weight: 600; letter-spacing: 1px; margin: 5px 0 0;">Official Participant ID Card</p>
             </div>

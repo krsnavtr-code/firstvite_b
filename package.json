@@ -1,5 +1,5 @@
 {
-    "name": "FirstVite",
+    "name": "Eklabya",
     "version": "1.0.0",
     "description": "mern project with admin dashboard",
     "main": "index.js",
@@ -16,7 +16,7 @@
     },
     "keywords": [
         "mern",
-        "FirstVite",
+        "Eklabya",
         "admin-dashboard"
     ],
     "author": "Akhil",

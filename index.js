@@ -124,7 +124,7 @@ app.use((req, res, next) => {
     const host = req.headers.host;
 
     // Check if the request is coming from firstvite.com (including subdomains)
-    if (host && (host.includes('firstvite.com') || host.startsWith('firstvite.com'))) {
+    if (host && (host.includes('eklabya.com') || host.startsWith('eklabya.com'))) {
     // Always redirect to HTTPS eklabya.com
         const newUrl = `https://eklabya.com${req.originalUrl}`;
         console.log(`Redirecting ${req.method} ${req.originalUrl} from ${host} to ${newUrl}`);
