@@ -17,7 +17,6 @@ const setupAdmin = async () => {
         const adminExists = await User.findOne({ email: process.env.DEFAULT_ADMIN_EMAIL });
         
         if (adminExists) {
-            console.log('Admin user already exists');
             process.exit(0);
         }
 
@@ -34,7 +33,6 @@ const setupAdmin = async () => {
         });
 
         await admin.save();
-        console.log('Admin user created successfully');
         
     } catch (error) {
         console.error('Error setting up admin user:', error);

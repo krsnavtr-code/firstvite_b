@@ -63,24 +63,6 @@ const handleMulterErrors = (err, req, res, next) => {
 router.use(protect);
 router.use(authorize('admin'));
 
-// Debug middleware
-const debugMiddleware = (req, res, next) => {
-  console.log('Incoming request headers:', req.headers['content-type']);
-  console.log('Request body keys:', Object.keys(req.body));
-  next();
-};
-
-// Debug middleware for files
-const debugFiles = (req, res, next) => {
-  console.log('Multer processed files:', req.files ? req.files.map(f => ({
-    fieldname: f.fieldname,
-    originalname: f.originalname,
-    mimetype: f.mimetype,
-    size: f.size
-  })) : 'No files');
-  next();
-};
-
 // Send proposal emails with file uploads
 router.post('/send-proposal', 
   // First handle the file upload
@@ -90,15 +72,6 @@ router.post('/send-proposal',
         console.error('File upload error:', err);
         return handleMulterErrors(err, req, res, next);
       }
-      
-      // Debug log the files
-      console.log('Files in route handler:', req.files ? req.files.map(f => ({
-        fieldname: f.fieldname,
-        originalname: f.originalname,
-        mimetype: f.mimetype,
-        size: f.size,
-        buffer: f.buffer ? `Buffer(${f.buffer.length} bytes)` : 'No buffer'
-      })) : 'No files');
       
       // Ensure files are properly attached to the request
       if (req.files && req.files.length > 0) {

@@ -30,7 +30,6 @@ transporter.verify(function(error, success) {
   if (error) {
     console.error('SMTP Connection Error:', error);
   } else {
-    console.log('SMTP Server is ready to take our messages');
     console.log('SMTP Config:', {
       host: process.env.SMTP_HOST,
       port: process.env.SMTP_PORT,
@@ -58,7 +57,6 @@ export const sendEmail = async ({
   attachments = [],
 }) => {
   try {
-    console.log('Preparing to send email to:', to);
     
     if (!to) {
       throw new Error('Recipient email is required');
@@ -86,12 +84,6 @@ export const sendEmail = async ({
       return attachment;
     });
 
-    console.log('Processed attachments:', processedAttachments.map(a => ({
-      filename: a.filename,
-      type: a.contentType,
-      size: typeof a.content === 'string' ? a.content.length : 'unknown'
-    })));
-
     const mailOptions = {
       from: `"${process.env.EMAIL_FROM_NAME || 'Eklabya E-Learning'}" <${fromEmail}>`,
       to: to,
@@ -100,15 +92,6 @@ export const sendEmail = async ({
       html: html || text.replace(/\n/g, '<br>'),
       attachments: processedAttachments,
     };
-
-    console.log('Mail options prepared:', {
-      from: mailOptions.from,
-      to: mailOptions.to,
-      subject: mailOptions.subject,
-      hasAttachments: processedAttachments.length,
-      attachmentCount: processedAttachments.length,
-      attachmentNames: processedAttachments.map(a => a.filename)
-    });
 
     // Test connection first
     await new Promise((resolve, reject) => {
@@ -125,7 +108,6 @@ export const sendEmail = async ({
 
     // Send the email
     const info = await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully:', info.messageId);
     return { 
       success: true, 
       messageId: info.messageId,
@@ -199,9 +181,6 @@ export const sendCoursePdfEmail = async (email, course, pdfBuffer, fileName = ''
  */
 export const sendContactNotifications = async (contact) => {
   try {
-    console.log('Sending contact notifications...');
-    console.log('Admin Email:', process.env.ADMIN_EMAIL);
-    console.log('SMTP User:', process.env.SMTP_USER);
     // 1. Send confirmation email to the user
     const userSubject = `Thank you for contacting ${process.env.APP_NAME || 'us'}`;
     const userHtml = `

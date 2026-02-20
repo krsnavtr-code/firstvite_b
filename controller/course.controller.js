@@ -29,10 +29,6 @@ const cleanArrayField = (field, defaultVal = []) => {
 
 // Helper function to clean and format course data
 const prepareCourseData = (data) => {
-  console.log(
-    "Raw data received in prepareCourseData:",
-    JSON.stringify(data, null, 2),
-  );
 
   // Clean array fields
   const arrayFields = [
@@ -97,11 +93,6 @@ const prepareCourseData = (data) => {
 
   // Handle totalHours specifically
   cleanData.totalHours = Math.max(0, Number(data.totalHours) || 0);
-
-  console.log(
-    "Cleaned data before return:",
-    JSON.stringify(cleanData, null, 2),
-  );
 
   // Process curriculum
   if (Array.isArray(data.curriculum)) {
@@ -178,15 +169,12 @@ const prepareCourseData = (data) => {
     prerequisites: cleanData.prerequisites || [],
   };
 
-  console.log("Final prepared course data:", JSON.stringify(result, null, 2));
   return result;
 };
 
 // Create a new course
 export const createCourse = async (req, res) => {
   try {
-    console.log("Received create course request with data:", req.body);
-
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       console.error("Validation errors:", errors.array());
@@ -199,7 +187,6 @@ export const createCourse = async (req, res) => {
 
     // Prepare and clean the course data
     const courseData = prepareCourseData(req.body);
-    console.log("Creating course with data:", courseData);
 
     // Create course with all fields
     const course = new Course({
@@ -274,7 +261,6 @@ export const getAllCourses = async (req, res) => {
       isPublished,
       price,
     } = req.query;
-    // console.log('Getting all courses with params:', { category, status, fields, all, search, showOnHome, limit, sort, isPublished, price, user: req.user?.role });
 
     const query = {};
 
@@ -350,7 +336,6 @@ export const getAllCourses = async (req, res) => {
     }
 
     const courses = await coursesQuery.exec();
-    // console.log(`Found ${courses.length} courses matching query`);
     res.json(courses);
   } catch (error) {
     console.error("Error fetching courses:", error);
@@ -490,7 +475,6 @@ export const updateCourse = async (req, res) => {
     }
 
     const courseId = req.params.id;
-    console.log(`Updating course ${courseId} with data:`, req.body);
 
     // Helper function to clean array fields
     const cleanArrayField = (field) => {
@@ -608,7 +592,6 @@ export const updateCourse = async (req, res) => {
         : [],
     };
 
-    console.log("Processed update data:", updateData);
 
     // Find and update the course
     const course = await Course.findById(courseId);
@@ -630,8 +613,6 @@ export const updateCourse = async (req, res) => {
 
     // Populate the category for the response
     await updatedCourse.populate("category", "name _id");
-
-    console.log("Course updated successfully:", updatedCourse._id);
 
     res.json({
       success: true,
@@ -655,13 +636,9 @@ export const uploadCourseImage = async (req, res) => {
       });
     }
 
-    console.log("Processing uploaded file:", req.file);
-
     // Construct the URL to the uploaded file
     const fileUrl = `/uploads/${req.file.filename}`;
     const fullUrl = `${req.protocol}://${req.get("host")}${fileUrl}`;
-
-    console.log("File uploaded successfully. URL:", fullUrl);
 
     res.status(200).json({
       success: true,

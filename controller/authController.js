@@ -115,16 +115,9 @@ export const login = catchAsync(async (req, res, next) => {
   user.lastLogin = Date.now();
   await user.save();
 
-  console.log("Generating tokens for user:", user._id);
   // Generate tokens
   const token = generateToken(user._id);
   const refreshToken = generateRefreshToken(user._id);
-
-  console.log("Generated token:", token ? "Token exists" : "Token is missing");
-  console.log(
-    "Generated refreshToken:",
-    refreshToken ? "Refresh token exists" : "Refresh token is missing",
-  );
 
   if (!token || !refreshToken) {
     console.error("Token generation failed");
@@ -135,7 +128,6 @@ export const login = catchAsync(async (req, res, next) => {
   user.refreshToken = refreshToken;
   try {
     await user.save();
-    console.log("Refresh token saved to user document");
   } catch (saveError) {
     console.error("Error saving refresh token:", saveError);
     return next(new AppError("Failed to save refresh token", 500));
@@ -152,7 +144,6 @@ export const login = catchAsync(async (req, res, next) => {
     address: user.address || "",
   };
 
-  console.log("Sending login response with user data");
   const responseData = {
     success: true,
     token,
@@ -160,7 +151,6 @@ export const login = catchAsync(async (req, res, next) => {
     user: userData,
   };
 
-  console.log("Login response data:", JSON.stringify(responseData, null, 2));
   res.json(responseData);
 });
 
@@ -202,7 +192,6 @@ export const getUserProfile = catchAsync(async (req, res, next) => {
 export const changePassword = catchAsync(async (req, res, next) => {
   try {
     const { currentPassword, newPassword } = req.body;
-    console.log("Change password request received:", { userId: req.user?.id });
 
     if (!req.user || !req.user.id) {
       console.error("No user ID in request");
@@ -221,7 +210,6 @@ export const changePassword = catchAsync(async (req, res, next) => {
       currentPassword,
       user.password,
     );
-    console.log("Password check result:", isPasswordCorrect);
 
     if (!isPasswordCorrect) {
       return next(new AppError("Your current password is incorrect", 401));
@@ -232,7 +220,6 @@ export const changePassword = catchAsync(async (req, res, next) => {
     // Clear refresh token when password changes
     user.refreshToken = undefined;
     await user.save();
-    console.log("Password updated successfully for user:", user._id);
 
     // 4) Generate new tokens
     const token = generateToken(user._id);
@@ -461,8 +448,6 @@ export const resetPassword = catchAsync(async (req, res, next) => {
     }
 
     user.password = password;
-    console.log("User password after setting:", user.password);
-    console.log("User password type after setting:", typeof user.password);
 
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;

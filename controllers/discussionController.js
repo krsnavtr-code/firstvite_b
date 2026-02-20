@@ -165,9 +165,6 @@ export const deleteDiscussion = async (req, res) => {
 // @access  Private
 export const addComment = async (req, res) => {
   try {
-    console.log('Request body:', req.body);
-    console.log('User:', req.user);
-    
     const { content } = req.body;
     
     if (!content) {
@@ -189,14 +186,11 @@ export const addComment = async (req, res) => {
       dislikes: []
     };
 
-    console.log('Adding comment:', comment);
     discussion.comments.unshift(comment);
     
     try {
       // Save the discussion with the new comment
       const savedDiscussion = await discussion.save();
-      console.log('Comment saved successfully');
-      
       // Get the newly added comment (it's the first one in the array)
       const newComment = savedDiscussion.comments[0];
       
@@ -209,7 +203,6 @@ export const addComment = async (req, res) => {
       // Get the populated comment
       const populatedComment = populatedDiscussion.comments.id(newComment._id);
       
-      console.log('Sending response with new comment');
       res.status(201).json({ 
         success: true, 
         data: populatedComment.toObject()

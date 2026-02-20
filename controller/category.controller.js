@@ -57,11 +57,8 @@ export const getAllCategories = async (filters = {}) => {
 
 export const createCategory = async (req, res) => {
     try {
-        console.log('Received create category request with body:', req.body);
-        
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            console.log('Validation errors:', errors.array());
             return res.status(400).json({ 
                 success: false,
                 message: 'Validation failed',
@@ -70,20 +67,11 @@ export const createCategory = async (req, res) => {
         }
 
         const { name, description, isActive = true, showOnHome = false, master = false, image } = req.body;
-        
-        console.log('Creating category with data:', {
-            name,
-            description,
-            isActive,
-            showOnHome,
-            master,
-            image
-        });
+   
         
         // Check if category with same name already exists
         const existingCategory = await Category.findOne({ name });
         if (existingCategory) {
-            console.log('Category with this name already exists:', existingCategory);
             return res.status(400).json({
                 success: false,
                 message: 'Category with this name already exists'
@@ -101,7 +89,6 @@ export const createCategory = async (req, res) => {
         });
 
         const savedCategory = await category.save();
-        console.log('Category created successfully:', savedCategory);
         
         res.status(201).json({
             success: true,
@@ -120,9 +107,6 @@ export const createCategory = async (req, res) => {
 export const updateCategory = async (req, res) => {
     try {
         const { id } = req.params;
-        console.log('=== UPDATE CATEGORY REQUEST ===');
-        console.log('Category ID:', id);
-        console.log('Request body:', JSON.stringify(req.body, null, 2));
         
         // Check if ID is valid (should be caught by middleware, but just in case)
         if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -161,14 +145,6 @@ export const updateCategory = async (req, res) => {
             }
         }
         
-        console.log('Existing category data:', {
-            _id: existingCategory._id,
-            name: existingCategory.name,
-            isActive: existingCategory.isActive,
-            showOnHome: existingCategory.showOnHome,
-            updatedAt: existingCategory.updatedAt
-        });
-        
         // Build update object with only provided fields
         const updateData = {};
         if (name !== undefined) updateData.name = name;
@@ -176,8 +152,6 @@ export const updateCategory = async (req, res) => {
         if (isActive !== undefined) updateData.isActive = isActive;
         if (showOnHome !== undefined) updateData.showOnHome = showOnHome;
         if (image !== undefined) updateData.image = image;
-        
-        console.log('Updating with data:', updateData);
         
         // Perform the update
         const updatedCategory = await Category.findByIdAndUpdate(
@@ -198,14 +172,6 @@ export const updateCategory = async (req, res) => {
                 error: 'UPDATE_FAILED'
             });
         }
-        
-        console.log('Category updated successfully:', {
-            _id: updatedCategory._id,
-            name: updatedCategory.name,
-            isActive: updatedCategory.isActive,
-            showOnHome: updatedCategory.showOnHome,
-            updatedAt: updatedCategory.updatedAt
-        });
 
         return res.json({
             success: true,
@@ -262,7 +228,6 @@ export const updateCategory = async (req, res) => {
 
 export const deleteCategory = async (req, res) => {
     const { id } = req.params;
-    console.log(`[Category] Delete request received for category ID: ${id}`);
     
     if (!mongoose.Types.ObjectId.isValid(id)) {
         console.error(`[Category] Invalid category ID format: ${id}`);
@@ -277,8 +242,6 @@ export const deleteCategory = async (req, res) => {
     session.startTransaction();
     
     try {
-        console.log(`[Category] Starting transaction for category ID: ${id}`);
-        
         // 1. Check if category exists
         const category = await Category.findById(id).session(session).lean();
         if (!category) {
@@ -292,16 +255,9 @@ export const deleteCategory = async (req, res) => {
             });
         }
         
-        console.log('[Category] Found category to delete:', {
-            _id: category._id,
-            name: category.name,
-            bookCount: category.bookCount
-        });
-        
         // 2. Check if any books are using this category
         try {
             const booksCount = await Book.countDocuments({ category: id }).session(session);
-            console.log(`[Category] Found ${booksCount} books associated with category ${id}`);
             
             if (booksCount > 0) {
                 console.error(`[Category] Cannot delete - ${booksCount} books are associated with this category`);
@@ -329,7 +285,6 @@ export const deleteCategory = async (req, res) => {
         // 3. Delete the category
         let deletedCategory;
         try {
-            console.log(`[Category] Attempting to delete category ${id}`);
             deletedCategory = await Category.findByIdAndDelete(id)
                 .session(session)
                 .lean();
@@ -346,11 +301,8 @@ export const deleteCategory = async (req, res) => {
             }
             
             // 4. If we got here, everything is good - commit the transaction
-            console.log(`[Category] Category ${id} deleted successfully, committing transaction`);
             await session.commitTransaction();
             session.endSession();
-            
-            console.log(`[Category] Successfully deleted category: ${deletedCategory._id} - ${deletedCategory.name}`);
             
             return res.json({ 
                 success: true,
@@ -458,12 +410,10 @@ export const deleteCategory = async (req, res) => {
         // Ensure the session is always properly cleaned up
         try {
             if (session.inTransaction()) {
-                console.log('[Category] Aborting any pending transaction in finally block');
                 await session.abortTransaction();
             }
             
             if (session.id) {
-                console.log('[Category] Ending session in finally block');
                 await session.endSession();
             }
         } catch (cleanupError) {

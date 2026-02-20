@@ -368,7 +368,6 @@ router.put('/profile',
   auth,
   async (req, res) => {
     try {
-      console.log('Profile update request from user:', req.user._id);
       
       const { phone, address, ...otherData } = req.body;
       
@@ -379,7 +378,6 @@ router.put('/profile',
       
       // Prevent updating other fields through this endpoint
       if (Object.keys(otherData).length > 0) {
-        console.log('Attempted to update restricted fields:', Object.keys(otherData));
         return res.status(400).json({ 
           success: false,
           message: 'Only phone and address can be updated through this endpoint' 
@@ -400,7 +398,6 @@ router.put('/profile',
         });
       }
       
-      console.log('Profile updated successfully for user:', user._id);
       res.json({
         success: true,
         message: 'Profile updated successfully',

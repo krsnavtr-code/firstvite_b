@@ -19,27 +19,21 @@ async function listAllData() {
             useUnifiedTopology: true,
         });
         
-        console.log('Connected to MongoDB');
-        
         // List all databases (admin access required)
         const adminDb = mongoose.connection.db.admin();
         const dbs = await adminDb.listDatabases();
-        console.log('\nAvailable databases:');
         dbs.databases.forEach(db => console.log(`- ${db.name}`));
         
         // Get current database name from connection
         const dbName = mongoose.connection.name;
-        console.log(`\nCurrent database: ${dbName}`);
         
         // List collections in the current database
         const collections = await mongoose.connection.db.listCollections().toArray();
-        console.log('\nCollections:');
         collections.forEach(collection => console.log(`- ${collection.name}`));
         
         // Get data from each collection
         for (const collection of collections) {
             const collectionName = collection.name;
-            console.log(`\nData in collection: ${collectionName}`);
             
             try {
                 const data = await mongoose.connection.db.collection(collectionName).find({}).toArray();

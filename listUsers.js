@@ -13,12 +13,8 @@ async function listUsers() {
             useUnifiedTopology: true,
         });
         
-        console.log('Connected to MongoDB');
-        
         // Get all users (excluding password hashes for security)
         const users = await User.find({}, { password: 0 });
-        console.log('\nUsers in database:');
-        console.log(JSON.stringify(users, null, 2));
         
         await mongoose.connection.close();
     } catch (error) {

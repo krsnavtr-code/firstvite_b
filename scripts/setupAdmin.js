@@ -19,13 +19,10 @@ const createAdminUser = async () => {
       useUnifiedTopology: true,
     });
 
-    console.log('DB connection successful!');
-
     // Check if admin already exists
     const adminExists = await User.findOne({ email: 'admin@lms.com' });
 
     if (adminExists) {
-      console.log('Admin user already exists');
       process.exit(0);
     }
 
@@ -43,10 +40,6 @@ const createAdminUser = async () => {
       isApproved: true, // Auto-approve the admin user
     });
 
-    console.log('Admin user created successfully!');
-    console.log('Email: admin@lms.com');
-    console.log('Password: admin123');
-    
     process.exit(0);
   } catch (error) {
     console.error('Error creating admin user:', error);

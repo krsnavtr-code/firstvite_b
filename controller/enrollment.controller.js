@@ -173,19 +173,6 @@ export const adminEnrollUser = asyncHandler(async (req, res) => {
 // @access  Private
 export const getMyEnrollments = asyncHandler(async (req, res) => {
   try {
-    console.log('=== START getMyEnrollments ===');
-    console.log('Request user object:', JSON.stringify(req.user, null, 2));
-    console.log('Request user details:', {
-      id: req.user?._id,
-      idType: req.user?._id ? typeof req.user._id : 'undefined',
-      stringId: req.user?._id?.toString(),
-      email: req.user?.email,
-      role: req.user?.role,
-      isAuthenticated: !!req.user,
-      hasUser: !!req.user
-    });
-    console.log('Request query:', req.query);
-
     if (!req.user) {
       console.error('No authenticated user found');
       return res.status(401).json({
@@ -210,51 +197,25 @@ export const getMyEnrollments = asyncHandler(async (req, res) => {
     // If userId is provided and user is admin, use that userId
     if (req.query.userId && req.user.role === 'admin') {
       query.user = req.query.userId;
-      console.log('Admin viewing enrollments for user:', req.query.userId);
     } else {
       // For regular users, only return their non-guest enrollments
       query.user = userId; // Use the user ID directly
       query.isGuestEnrollment = { $ne: true }; // Explicitly exclude guest enrollments
-      console.log('User viewing their own non-guest enrollments for user ID:', userId);
     }
-
-    console.log('MongoDB query:', JSON.stringify(query, null, 2));
 
     const enrollments = await Enrollment.find(query)
       .populate('course', 'title thumbnail price')
       .sort('-createdAt')
       .lean(); // Convert to plain JS objects for logging
 
-    console.log(`Found ${enrollments.length} enrollments`);
     
-    if (enrollments.length > 0) {
-      console.log('Sample enrollment:', {
-        _id: enrollments[0]._id,
-        user: enrollments[0].user,
-        course: enrollments[0].course ? {
-          _id: enrollments[0].course._id,
-          title: enrollments[0].course.title
-        } : 'No course data',
-        status: enrollments[0].status,
-        progress: enrollments[0].progress,
-        isGuestEnrollment: enrollments[0].isGuestEnrollment
-      });
-    } else {
-      console.log('No enrollments found for query');
-      // Verify if the user exists
-      const user = await User.findById(query.user);
-      console.log('User exists in database:', !!user);
-      if (!user) {
-        console.error('User not found in database');
-      }
-    }
+ 
 
     res.json({
       success: true,
       data: enrollments
     });
     
-    console.log('=== END getMyEnrollments ===');
   } catch (error) {
     console.error('Error in getMyEnrollments:', error);
     res.status(500).json({

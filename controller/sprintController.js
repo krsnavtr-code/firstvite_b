@@ -7,9 +7,6 @@ import catchAsync from '../utils/catchAsync.js';
 // @route   POST /api/sprints
 // @access  Private/Admin
 export const createSprint = catchAsync(async (req, res, next) => {
-  console.log('Received sprint data:', req.body);
-  console.log('Authenticated user:', req.user);
-  
   try {
     if (!req.user?.id) {
       console.error('No user ID in request');
@@ -28,11 +25,8 @@ export const createSprint = catchAsync(async (req, res, next) => {
       createdBy: req.user._id || req.user.id // Use _id if available, fallback to id
     };
 
-    console.log('Creating sprint with data:', sprintData);
     const sprint = await Sprint.create(sprintData);
 
-    console.log('Created sprint:', sprint);
-    
     res.status(201).json({
       status: 'success',
       data: {
@@ -120,9 +114,7 @@ export const getSprint = catchAsync(async (req, res, next) => {
 // @route   PATCH /api/sprints/:id
 // @access  Private/Admin
 export const updateSprint = catchAsync(async (req, res, next) => {
-  // console.log('Update sprint request body:', req.body);
   const { name, description, startDate, endDate, goal, whatsappGroupLink, isActive } = req.body;
-  // console.log('whatsappGroupLink from request:', whatsappGroupLink);
 
   const sprint = await Sprint.findByIdAndUpdate(
     req.params.id,

@@ -42,13 +42,6 @@ const emailConfig = {
 // Use EMAIL_FROM if available, otherwise fall back to SMTP user
 const emailFrom = process.env.EMAIL_FROM || emailConfig.auth.user;
 
-console.log("SMTP Config:", {
-    host: emailConfig.host,
-    port: emailConfig.port,
-    user: emailConfig.auth.user,
-    from: emailFrom,
-});
-
 const transporter = nodemailer.createTransport(emailConfig);
 
 // Verify SMTP connection
@@ -111,15 +104,9 @@ export const sendOTP = async (req, res) => {
         </div>
       `,
         };
-        console.log("Sending email with options:", {
-            from: mailOptions.from,
-            to: mailOptions.to,
-            subject: mailOptions.subject,
-        });
 
         try {
             const info = await transporter.sendMail(mailOptions);
-            console.log("Email sent:", info.messageId);
         } catch (error) {
             console.error("Error sending email:", error);
             throw error; // Re-throw to be caught by the outer try-catch
@@ -610,7 +597,6 @@ This is an automated notification. Please do not reply to this email.`
         // Send welcome email to candidate (don't await to avoid delaying the response)
         const sendWelcomeEmail = transporter.sendMail(welcomeMailOptions)
             .then((info) => {
-                console.log("Welcome email sent:", info.messageId);
                 // Clean up the temporary ID card file after sending
                 if (fs.existsSync(idCard.filePath)) {
                     fs.unlink(idCard.filePath, (err) => {
@@ -633,11 +619,9 @@ This is an automated notification. Please do not reply to this email.`
         // Send admin notification (don't await to avoid delaying the response)
         const sendAdminEmail = transporter.sendMail(adminMailOptions)
             .then((info) => {
-                console.log("Admin notification sent to:", adminEmail);
                 return info;
             })
             .catch((error) => {
-                console.error("Error sending admin notification:", error);
                 throw error;
             });
 
@@ -738,18 +722,11 @@ export const checkPhone = async (req, res) => {
 export const checkCompanyPaymentStatus = async (req, res) => {
     try {
         const { email, phone } = req.query;
-        console.log('Checking company payment status for:', { email, phone });
 
         const candidate = await Candidate.findOne({
             email: email.toLowerCase(),
             phone,
             userType: 'company'
-        });
-
-        console.log('Found candidate:', {
-            exists: !!candidate,
-            userType: candidate?.userType,
-            isPaymentDone: candidate?.isPaymentDone
         });
 
         res.json({

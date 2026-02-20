@@ -3,13 +3,9 @@ import User from "../model/User.js";
 
 export const isAdmin = async (req, res, next) => {
     try {
-        console.log('Admin middleware - Checking authorization...');
-        
         const authHeader = req.header('Authorization');
-        console.log('Authorization header:', authHeader);
         
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            console.log('No Bearer token found in Authorization header');
             return res.status(401).json({ 
                 success: false,
                 message: 'Authentication required' 
@@ -17,10 +13,8 @@ export const isAdmin = async (req, res, next) => {
         }
         
         const token = authHeader.replace('Bearer ', '');
-        console.log('Extracted token:', token ? 'Token exists' : 'No token');
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
-        console.log('Decoded token:', JSON.stringify(decoded, null, 2));
         
         // Check for both 'id' and 'userId' in the token
         const userId = decoded.id || decoded.userId;
@@ -34,7 +28,6 @@ export const isAdmin = async (req, res, next) => {
         }
 
         const user = await User.findById(userId);
-        console.log('Found user:', user ? `ID: ${user._id}, Role: ${user.role}` : 'No user found');
 
         if (!user) {
             return res.status(401).json({ 
@@ -44,14 +37,12 @@ export const isAdmin = async (req, res, next) => {
         }
 
         if (user.role !== 'admin') {
-            console.log(`Access denied: User ${user._id} is not an admin`);
             return res.status(403).json({ 
                 success: false,
                 message: 'Admin access required' 
             });
         }
 
-        console.log(`User ${user._id} granted admin access`);
         req.user = user;
         next();
     } catch (error) {

@@ -4,28 +4,20 @@ import AppError from '../utils/appError.js';
 
 export const protect = async (req, res, next) => {
     try {
-        console.log('=== New Request ===');
-        console.log('URL:', req.originalUrl);
-        console.log('Method:', req.method);
-        console.log('Headers:', JSON.stringify(req.headers, null, 2));
-        
         let token;
         const authHeader = req.headers.authorization;
         
         // Check for token in Authorization header
         if (authHeader && authHeader.startsWith('Bearer ')) {
             token = authHeader.split(' ')[1];
-            console.log('Token found in Authorization header');
         }
         
         // If no token, check cookies
         if (!token && req.cookies && req.cookies.token) {
             token = req.cookies.token;
-            console.log('Token found in cookies');
         }
         
         if (!token) {
-            console.log('No token found in request');
             return res.status(401).json({ 
                 success: false,
                 message: 'Not authorized, no token provided' 
@@ -35,17 +27,10 @@ export const protect = async (req, res, next) => {
         try {
             // Trim and verify the token
             const trimmedToken = token.trim();
-            console.log('Token received (first 20 chars):', trimmedToken.substring(0, 20) + '...');
-            
-            // Log the token and environment for debugging
-            console.log('Verifying token. Environment:', process.env.NODE_ENV);
-            console.log('Token length:', trimmedToken.length);
-            console.log('Token prefix:', trimmedToken.substring(0, 10) + '...');
             
             // Try to decode without verification first to see the token structure
             try {
                 const unverified = jwt.decode(trimmedToken);
-                console.log('Unverified token content:', JSON.stringify(unverified, null, 2));
             } catch (decodeError) {
                 console.error('Failed to decode token:', decodeError);
             }
@@ -54,14 +39,9 @@ export const protect = async (req, res, next) => {
             const jwtSecret = process.env.JWT_SECRET || 'your_jwt_secret';
             const refreshSecret = process.env.JWT_REFRESH_SECRET || 'your_jwt_refresh_secret';
             
-            console.log('Using JWT_SECRET:', jwtSecret ? '***' : 'Not set');
-            console.log('Using JWT_REFRESH_SECRET:', refreshSecret ? '***' : 'Not set');
-            
             // First, try to verify with the access token secret
             try {
-                console.log('Attempting to verify with JWT_SECRET...');
                 decoded = jwt.verify(trimmedToken, jwtSecret, { ignoreExpiration: true });
-                console.log('Token verified with JWT_SECRET');
                 
                 // Verify it's an access token
                 if (decoded.type !== 'access') {
@@ -83,13 +63,9 @@ export const protect = async (req, res, next) => {
                 }
                 
             } catch (accessError) {
-                console.log('Failed to verify with JWT_SECRET:', accessError.message);
-                
                 // If access token verification fails, try with refresh token secret
                 try {
-                    console.log('Attempting to verify with JWT_REFRESH_SECRET...');
                     decoded = jwt.verify(trimmedToken, refreshSecret, { ignoreExpiration: true });
-                    console.log('Token verified with JWT_REFRESH_SECRET');
                     
                     // If we get here with a refresh token, it's the wrong token type
                     if (decoded.type === 'refresh') {
@@ -134,8 +110,6 @@ export const protect = async (req, res, next) => {
                 }
             }
             
-            console.log('Token decoded successfully:', JSON.stringify(decoded, null, 2));
-            
             if (!decoded) {
                 console.error('Token could not be decoded');
                 return res.status(401).json({
@@ -143,8 +117,6 @@ export const protect = async (req, res, next) => {
                     message: 'Invalid token format: Token could not be decoded'
                 });
             }
-            
-            console.log('Token verified for user ID:', decoded.id);
 
             // Get user from the token
             const currentUser = await User.findById(decoded.id).select('-password');
@@ -176,7 +148,6 @@ export const protect = async (req, res, next) => {
             
             // Attach user to request object
             req.user = currentUser;
-            console.log('User authenticated successfully:', currentUser.email);
             next();
         } catch (error) {
             console.error('Token verification error:', error);

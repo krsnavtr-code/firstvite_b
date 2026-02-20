@@ -92,7 +92,6 @@ router.post('/',
     (req, res, next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            console.log('Validation errors:', errors.array());
             return res.status(400).json({ 
                 success: false,
                 message: 'Validation failed',
@@ -108,7 +107,6 @@ router.post('/',
             req.body.showOnHome = String(req.body.showOnHome).toLowerCase() === 'true';
         }
         
-        console.log('Processed create data:', req.body);
         next();
     },
     createCategory
@@ -121,7 +119,6 @@ router.put('/:id',
     (req, res, next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            console.log('Validation errors:', errors.array());
             return res.status(400).json({ 
                 success: false,
                 message: 'Validation failed',
@@ -137,7 +134,6 @@ router.put('/:id',
             req.body.showOnHome = String(req.body.showOnHome).toLowerCase() === 'true';
         }
         
-        console.log('Processed update data:', req.body);
         next();
     },
     updateCategory

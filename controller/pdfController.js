@@ -66,13 +66,6 @@ export const getAvailablePdfs = async (req, res) => {
         // Combine both lists
         const allPdfs = [...generatedPdfs, ...uploadedBrochures];
 
-        console.log('Found PDFs:', {
-            generated: generatedPdfs.length,
-            uploaded: uploadedBrochures.length,
-            generatedPath: pdfsDir,
-            uploadedPath: uploadedBrochuresDir
-        });
-
         res.status(200).json(allPdfs);
     } catch (error) {
         console.error('Error fetching PDFs:', error);

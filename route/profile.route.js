@@ -9,7 +9,6 @@ const router = express.Router();
 // @access  Private (any authenticated user)
 router.put('/', protect, async (req, res) => {
   try {
-    console.log('Profile update request from user:', req.user._id);
     
     const { phone, address, ...otherData } = req.body;
     
@@ -20,7 +19,6 @@ router.put('/', protect, async (req, res) => {
     
     // Prevent updating other fields through this endpoint
     if (Object.keys(otherData).length > 0) {
-      console.log('Attempted to update restricted fields:', Object.keys(otherData));
       return res.status(400).json({ 
         success: false,
         message: 'Only phone and address can be updated through this endpoint' 
@@ -41,7 +39,6 @@ router.put('/', protect, async (req, res) => {
       });
     }
     
-    console.log('Profile updated successfully for user:', user._id);
     res.json({
       success: true,
       message: 'Profile updated successfully',

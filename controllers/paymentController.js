@@ -24,7 +24,6 @@ const initializeRazorpay = () => {
       key_secret: process.env.RAZORPAY_KEY_SECRET,
     });
 
-    console.log('Razorpay initialized successfully');
     return true;
   } catch (error) {
     console.error('Failed to initialize Razorpay:', error.message);
@@ -164,17 +163,8 @@ export const verifyPayment = async (req, res) => {
       }
     }
 
-    console.log('Raw request body:', JSON.stringify(req.body, null, 2));
 
     const { orderId, paymentId, signature, isCompanyRegistration = false, ...paymentData } = req.body;
-
-    console.log('Processing payment verification:', {
-      orderId,
-      paymentId,
-      isCompanyRegistration,
-      email: paymentData.email,
-      userType: paymentData.userType
-    });
 
     // Validate required fields
     if (!orderId || !paymentId || !signature) {
@@ -243,16 +233,10 @@ export const verifyPayment = async (req, res) => {
 
     await payment.save();
 
-    // Log before attempting to update candidate
-    console.log('Before updating candidate - isCompanyRegistration:', isCompanyRegistration);
-
     // Always try to update the candidate if we have an email, but handle differently based on user type
     if (paymentData.email) {
       const email = paymentData.email.toLowerCase().trim();
       const userType = paymentData.userType || 'student'; // Default to student if not specified
-
-      console.log(`Attempting to update payment status for ${userType} with email: ${email}`);
-      console.log('isCompanyRegistration flag:', isCompanyRegistration);
 
       try {
         const updateData = {
@@ -269,18 +253,8 @@ export const verifyPayment = async (req, res) => {
           }
         };
         
-        console.log('Saving payment record ID:', payment._id);
-
-        console.log('Update data:', JSON.stringify(updateData, null, 2));
-
         // First, find the candidate to see what we're working with
         const existingCandidate = await Candidate.findOne({ email: email });
-        console.log('Existing candidate data:', existingCandidate ? {
-          _id: existingCandidate._id,
-          email: existingCandidate.email,
-          userType: existingCandidate.userType,
-          isPaymentDone: existingCandidate.isPaymentDone
-        } : 'No candidate found');
 
         // Update based on the actual userType in the database
         const result = await Candidate.findOneAndUpdate(
@@ -309,12 +283,7 @@ export const verifyPayment = async (req, res) => {
             console.error('No candidate found with email at all:', email);
           }
         } else {
-          console.log('Successfully updated candidate payment status:', {
-            _id: result._id,
-            email: result.email,
-            isPaymentDone: result.isPaymentDone,
-            paymentId: result.paymentId
-          });
+          
         }
       } catch (error) {
         console.error('Error updating candidate payment status:', error);

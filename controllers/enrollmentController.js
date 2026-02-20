@@ -82,12 +82,8 @@ export const enrollInCourse = async (req, res) => {
     // Force status to be 'active' to ensure it shows in My Learning
     enrollmentData.status = 'active';
 
-    console.log('Creating enrollment with data:', JSON.stringify(enrollmentData, null, 2));
-    
     const enrollment = new Enrollment(enrollmentData);
     const savedEnrollment = await enrollment.save();
-    
-    console.log('Enrollment created successfully:', savedEnrollment);
 
     // Populate course details for the response
     await enrollment.populate('course', 'title description thumbnail instructor price');
@@ -113,10 +109,6 @@ export const enrollInCourse = async (req, res) => {
 // @access  Private
 export const getMyEnrollments = async (req, res) => {
   try {
-    console.log('getMyEnrollments - Request received');
-    console.log('Query params:', req.query);
-    console.log('Authenticated user ID:', req.user?.id);
-    
     // Get user ID from query params or auth token
     const userId = req.query.userId || req.user?.id;
     const { status } = req.query;
@@ -130,16 +122,12 @@ export const getMyEnrollments = async (req, res) => {
       });
     }
 
-    console.log(`Fetching enrollments for user: ${userId}`);
     
     // Build query - use completionStatus instead of status to match schema
     const query = { user: userId };
     if (status) {
       query.completionStatus = status;
     }
-
-    // Log the query being executed
-    console.log('Executing query:', JSON.stringify(query));
 
     // Find enrollments with detailed course population
     const enrollments = await Enrollment.find(query)
@@ -155,8 +143,6 @@ export const getMyEnrollments = async (req, res) => {
       .sort({ enrolledAt: -1 })
       .lean(); // Convert to plain JavaScript objects for better performance
 
-    console.log(`Found ${enrollments.length} enrollments for user ${userId}`);
-    
     // Format the response
     const formattedEnrollments = enrollments.map(enrollment => ({
       _id: enrollment._id,
@@ -180,8 +166,6 @@ export const getMyEnrollments = async (req, res) => {
       lastAccessed: enrollment.lastAccessed
     }));
 
-    console.log('Formatted enrollments:', formattedEnrollments);
-    
     return res.status(200).json({
       success: true,
       count: formattedEnrollments.length,

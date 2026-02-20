@@ -19,7 +19,6 @@ export const sendProposalEmails = catchAsync(async (req, res, next) => {
   let data;
   try {
     data = JSON.parse(req.body.data);
-    // console.log('Parsed request data:', data);
   } catch (err) {
     console.error('Error parsing request data:', err);
     return next(new AppError('Invalid request data format', 400));
@@ -50,15 +49,9 @@ export const sendProposalEmails = catchAsync(async (req, res, next) => {
     }
   });
 
-  // Debug log to check received data
-  console.log('Selected documents from frontend:', selectedDocuments);
-  console.log('Upload directory:', uploadDir);
-  console.log('Proposal docs directory:', proposalDocsDir);
-
   // Check if proposal docs directory exists and list its contents
   try {
     const files = await fs.promises.readdir(proposalDocsDir);
-    console.log('Available files in proposal-documents directory:', files);
   } catch (err) {
     console.error('Error reading proposal-documents directory:', err);
   }
@@ -68,9 +61,7 @@ export const sendProposalEmails = catchAsync(async (req, res, next) => {
     for (const docName of selectedDocuments) {
       try {
         const docPath = path.join(proposalDocsDir, docName);
-        console.log('Looking for document at path:', docPath);
         const exists = fs.existsSync(docPath);
-        console.log(`Document ${docName} exists:`, exists);
         if (exists) {
           const fileContent = await fs.promises.readFile(docPath);
           const tempFilePath = path.join(uploadDir, `selected-${Date.now()}-${docName}`);

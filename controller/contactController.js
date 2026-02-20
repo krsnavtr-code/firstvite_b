@@ -91,7 +91,6 @@ export const submitContactForm = async (req, res) => {
     };
 
     // Send response
-    console.log('Sending success response:', responseData);
     return res.status(201).json(responseData);
     
   } catch (error) {
@@ -143,13 +142,10 @@ export const getAllContacts = async (req, res) => {
     }
     
     if (date) {
-      console.log('Filtering by date:', date);
       // Create a date range for the selected date (from start to end of day)
       const startDate = new Date(date);
       const endDate = new Date(date);
       endDate.setHours(23, 59, 59, 999);
-      
-      console.log('Date range:', { startDate, endDate });
       
       query.submittedAt = {
         $gte: startDate,
@@ -158,7 +154,6 @@ export const getAllContacts = async (req, res) => {
     }
     
     if (course) {
-      console.log('Filtering by course:', course);
       query.courseTitle = { $regex: course, $options: 'i' }; // Case-insensitive partial match
     }
     
@@ -173,14 +168,6 @@ export const getAllContacts = async (req, res) => {
       
     const totalItems = await Contact.countDocuments(query);
     const totalPages = Math.ceil(totalItems / limitNum);
-    
-    console.log('Pagination info:', {
-      totalItems,
-      totalPages,
-      currentPage: pageNum,
-      itemsPerPage: limitNum,
-      itemsInResponse: contacts.length
-    });
     
     res.json({
       success: true,

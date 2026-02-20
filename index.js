@@ -134,7 +134,6 @@ app.use((req, res, next) => {
     if (host && (host.includes('firstvite.com') || host.startsWith('firstvite.com'))) {
     // Always redirect to HTTPS eklabya.com
         const newUrl = `https://eklabya.com${req.originalUrl}`;
-        console.log(`Redirecting ${req.method} ${req.originalUrl} from ${host} to ${newUrl}`);
 
         // Perform permanent redirect (301)
         return res.redirect(301, newUrl);
@@ -156,37 +155,20 @@ const pdfsDir = path.join(publicDir, 'pdfs');
 // Ensure PDFs directory exists
 if (!fs.existsSync(pdfsDir)) {
     fs.mkdirSync(pdfsDir, { recursive: true });
-    console.log(`Created PDFs directory at: ${pdfsDir}`);
 }
 import fs from 'fs';
 
 // Ensure uploads directory exists
 if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
-    console.log('Created uploads directory:', uploadsDir);
 } else {
-    // console.log('Uploads directory exists at:', uploadsDir);
-    // List files in the uploads directory for debugging
-    // fs.readdir(uploadsDir, (err, files) => {
-    //     if (err) {
-    //         console.error('Error reading uploads directory:', err);
-    //     } else {
-    //         console.log('Files in uploads directory:', files);
-    //     }
-    // });
+    
 }
-
-// Debug: Log the current working directory and paths
-// console.log('Current working directory:', process.cwd());
-// console.log('__dirname:', __dirname);
-// console.log('Public directory path:', path.join(__dirname, 'public'));
-// console.log('Uploads directory path:', uploadsDir);
 
 // List all files in the public directory
 const listPublicFiles = (dir) => {
     try {
         const files = fs.readdirSync(dir);
-        // console.log(`Files in ${dir}:`, files);
         return files;
     } catch (err) {
         console.error(`Error reading directory ${dir}:`, err);
@@ -240,11 +222,9 @@ app.use('/candidate_profile', express.static(candidateProfileDir, {
 
 // Serve uploads with specific headers
 app.use('/uploads', (req, res, next) => {
-    console.log('Request for upload file:', req.path);
     next();
 }, express.static(uploadsDir, {
   setHeaders: (res, filePath) => {
-    console.log('Serving file:', filePath);
     const ext = path.extname(filePath).toLowerCase().substring(1);
     const mimeTypes = {
       'jpg': 'image/jpeg',
@@ -267,10 +247,8 @@ app.get('/test-upload/:filename', (req, res) => {
   const filePath = path.join(uploadsDir, filename);
   
   if (fs.existsSync(filePath)) {
-    console.log(`Serving test file: ${filePath}`);
     res.sendFile(filePath);
   } else {
-    console.error(`File not found: ${filePath}`);
     res.status(404).json({
       success: false,
       message: 'File not found',
@@ -280,8 +258,6 @@ app.get('/test-upload/:filename', (req, res) => {
   }
 });
 
-// console.log('Serving static files from:', publicDir);
-// console.log('Uploads directory at:', uploadsDir);
 
 // Database connection
 const PORT = process.env.PORT || 4002;
@@ -289,9 +265,6 @@ const URI = process.env.MongoDBURI;
 
 const connectDB = async () => {
     try {
-        console.log('Attempting to connect to MongoDB...');
-        console.log('Connection string:', URI ? 'Provided' : 'Missing');
-        
         await mongoose.connect(URI, {
             useNewUrlParser: true,
             useUnifiedTopology: true,

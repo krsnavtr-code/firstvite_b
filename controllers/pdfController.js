@@ -238,7 +238,6 @@ const generateCoursePDFBuffer = async (course) => {
 };
 
 export const generateCoursePDF = async (req, res) => {
-  console.log('PDF Generation - Starting for course ID:', req.params.id);
 
   try {
     const course = await Course.findById(req.params.id).lean();
@@ -646,7 +645,6 @@ export const generateCoursePDF = async (req, res) => {
     res.setHeader('Content-Length', pdfBytes.length);
     res.end(Buffer.from(pdfBytes));
 
-    console.log('PDF Generation - Successfully generated PDF');
   } catch (error) {
     console.error('PDF generation failed:', error);
     return res.status(500).json({

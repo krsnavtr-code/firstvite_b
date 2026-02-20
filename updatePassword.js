@@ -12,7 +12,6 @@ const updatePassword = async () => {
             useNewUrlParser: true,
             useUnifiedTopology: true
         });
-        console.log('Connected to MongoDB');
 
         const email = 'krishnaavtar1211@gmail.com';
         const newPassword = 'KRSn@1234'; // The password you want to set

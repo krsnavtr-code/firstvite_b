@@ -110,7 +110,6 @@ router.post('/video', protect, (req, res, next) => {
             }
 
             const fileSizeInMB = (req.file.size / (1024 * 1024)).toFixed(2);
-            console.log(`Video uploaded: ${req.file.filename} (${fileSizeInMB}MB)`);
             
             // Return success response with file details
             res.status(200).json({
@@ -151,7 +150,6 @@ router.post('/video', protect, (req, res, next) => {
 
 // Test endpoint to check if upload route is working
 router.get('/test', (req, res) => {
-    console.log('Test endpoint hit!');
     try {
         const publicPath = path.join(process.cwd(), 'public');
         const uploadsPath = path.join(publicPath, 'uploads');
@@ -202,7 +200,6 @@ const __dirname = path.dirname(__filename);
 router.get('/file/:filename', async (req, res) => {
     try {
         let { filename } = req.params;
-        console.log('Request for file:', filename);
         
         // Decode URI component to handle special characters
         filename = decodeURIComponent(filename);
@@ -219,12 +216,10 @@ router.get('/file/:filename', async (req, res) => {
         const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
         const filePath = path.join(uploadsDir, filename);
         
-        console.log('Looking for file at path:', filePath);
         
         // Check if file exists
         try {
             await fs.access(filePath);
-            console.log('File found, sending:', filePath);
             
             // Set appropriate content type based on file extension
             const ext = path.extname(filename).toLowerCase().substring(1);
@@ -279,7 +274,6 @@ router.get('/file/:filename', async (req, res) => {
 // @access  Private
 router.get('/files', protect, async (req, res) => {
     try {
-        console.log('Fetching list of uploaded media files');
         const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
         const files = await fs.readdir(uploadsDir);
         
@@ -318,8 +312,6 @@ router.get('/files', protect, async (req, res) => {
         // Sort by upload date (newest first)
         validFiles.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
         
-        console.log(`Found ${validFiles.length} valid media files`);
-        
         res.json({
             success: true,
             count: validFiles.length,
@@ -350,14 +342,6 @@ router.post('/video', protect, videoUpload.single('file'), async (req, res) => {
         const fileUrl = `/api/upload/file/${encodeURIComponent(req.file.filename)}`;
         const fullUrl = `${req.protocol}://${req.get('host')}${fileUrl}`;
 
-        console.log('Video uploaded successfully:', {
-            filename: req.file.filename,
-            size: req.file.size,
-            mimetype: req.file.mimetype,
-            path: filePath,
-            url: fullUrl
-        });
-
         res.status(201).json({
             success: true,
             data: {
@@ -384,7 +368,6 @@ router.post('/video', protect, videoUpload.single('file'), async (req, res) => {
 // Get all uploaded files (images and videos)
 router.get('/files', protect, async (req, res) => {
     try {
-        console.log('Fetching list of uploaded files');
         const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
         const files = await fs.readdir(uploadsDir);
         
@@ -412,8 +395,6 @@ router.get('/files', protect, async (req, res) => {
         // Filter out any null values from failed file processing
         const validFiles = filesList.filter(file => file !== null);
         
-        console.log(`Found ${validFiles.length} valid files`);
-        
         res.json({
             success: true,
             count: validFiles.length,
@@ -434,8 +415,6 @@ router.get('/files', protect, async (req, res) => {
 // @access  Private
 router.post('/image', protect, imageUpload.single('file'), async (req, res) => {
     try {
-        console.log('Upload request received:', req.file);
-        
         if (!req.file) {
             console.error('No file in request');
             return res.status(400).json({
@@ -448,14 +427,6 @@ router.post('/image', protect, imageUpload.single('file'), async (req, res) => {
         const filePath = path.join('uploads', req.file.filename);
         const fileUrl = `/api/upload/file/${encodeURIComponent(req.file.filename)}`;
         const fullUrl = `${req.protocol}://${req.get('host')}${fileUrl}`;
-
-        console.log('File uploaded successfully:', {
-            filename: req.file.filename,
-            size: req.file.size,
-            mimetype: req.file.mimetype,
-            path: filePath,
-            url: fullUrl
-        });
 
         res.status(201).json({
             success: true,

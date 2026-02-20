@@ -61,7 +61,6 @@ export const signup = async(req, res) => {
             message: "User registered successfully"
         });
     } catch (error) {
-        console.log("Error: " + error.message);
         res.status(500).json({ message: "Internal server error" });
     }
 };
@@ -147,20 +146,16 @@ export const login = async(req, res) => {
         
         // Input validation
         if (!email || !password) {
-            console.log('Login attempt with missing credentials');
             return res.status(400).json({ 
                 success: false,
                 message: 'Please provide both email and password' 
             });
         }
 
-        console.log(`Login attempt for email: ${email}`);
-        
         // Find user by email and include password field
         const user = await User.findOne({ email }).select('+password');
         
         if (!user) {
-            console.log('No user found with email:', email);
             return res.status(400).json({ 
                 success: false,
                 message: 'Invalid email or password' 
@@ -171,7 +166,6 @@ export const login = async(req, res) => {
         const isMatch = await bcryptjs.compare(password, user.password);
         
         if (!isMatch) {
-            console.log('Invalid password for user:', email);
             return res.status(400).json({ 
                 success: false,
                 message: 'Invalid email or password' 
@@ -191,8 +185,6 @@ export const login = async(req, res) => {
             }
         );
 
-        console.log('Login successful for user:', user.email);
-        
         // Set cookie with token
         res.cookie('jwt', token, {
             httpOnly: true,
@@ -217,7 +209,6 @@ export const login = async(req, res) => {
             user: userData
         });
     } catch (error) {
-        console.log("Error: " + error.message);
         res.status(500).json({ message: "Internal server error" });
     }
 };

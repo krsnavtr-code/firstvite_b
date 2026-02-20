@@ -14,7 +14,6 @@ if (!fs.existsSync(uploadDir)) {
 
 // Function to generate a unique filename
 const getUniqueFilename = (dir, originalName) => {
-    console.log('Original filename:', originalName);
     const ext = path.extname(originalName).toLowerCase();
     const baseName = path.basename(originalName, ext)
         .replace(/[^\w\d-]/g, '-')
@@ -25,17 +24,14 @@ const getUniqueFilename = (dir, originalName) => {
     let counter = 1;
     let fullPath = path.join(dir, filename);
 
-    console.log('Checking file:', fullPath);
     
     // Check if file exists, if yes, append a number
     while (fs.existsSync(fullPath)) {
         filename = `${baseName}-${counter}${ext}`;
         fullPath = path.join(dir, filename);
-        console.log('File exists, trying:', fullPath);
         counter++;
     }
     
-    console.log('Final filename:', filename);
     return filename;
 };
 
@@ -82,8 +78,6 @@ const uploadImage = upload.single('file'); // Changed from 'image' to 'file' to 
 
 // Handle file upload
 const handleFileUpload = (req, res, next) => {
-    console.log('File upload request received');
-    
     uploadImage(req, res, function (err) {
         if (err) {
             console.error('File upload error:', err);
@@ -110,14 +104,12 @@ const handleFileUpload = (req, res, next) => {
         }
         
         if (!req.file) {
-            console.log('No file was uploaded');
             return res.status(400).json({
                 success: false,
                 message: 'No file was uploaded'
             });
         }
         
-        console.log('File uploaded successfully:', req.file);
         next();
     });
 };
