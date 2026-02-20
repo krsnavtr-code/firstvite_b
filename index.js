@@ -41,6 +41,13 @@ import emailRecordRoutes from "./routes/emailRecordRoutes.js";
 import proposalDocumentRoutes from "./routes/proposalDocumentRoutes.js";
 import testQARoutes from "./routes/testQARoutes.js";
 
+import dns from "dns";
+
+// Only set DNS in development/local environment
+if (process.env.NODE_ENV !== 'production') {
+    dns.setServers(['8.8.8.8', '8.8.4.4']);
+}
+
 // Initialize express app
 const app = express();
 
