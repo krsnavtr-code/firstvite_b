@@ -2,10 +2,9 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
-import path from 'path';
+import path from "path";
 import Category from "./model/category.model.js";
-import { fileURLToPath } from 'url';
-
+import { fileURLToPath } from "url";
 
 // Import routes
 import bookRoute from "./route/book.route.js";
@@ -40,12 +39,13 @@ import adminEmailRoutes from "./routes/adminEmailRoutes.js";
 import emailRecordRoutes from "./routes/emailRecordRoutes.js";
 import proposalDocumentRoutes from "./routes/proposalDocumentRoutes.js";
 import testQARoutes from "./routes/testQARoutes.js";
+import sitemapRoute from "./route/sitemap.route.js";
 
 import dns from "dns";
 
 // Only set DNS in development/local environment
-if (process.env.NODE_ENV !== 'production') {
-    dns.setServers(['8.8.8.8', '8.8.4.4']);
+if (process.env.NODE_ENV !== "production") {
+  dns.setServers(["8.8.8.8", "8.8.4.4"]);
 }
 
 // Initialize express app
@@ -59,121 +59,125 @@ const __dirname = path.dirname(__filename);
 dotenv.config();
 
 // Configure express to handle larger payloads
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 // Increase the HTTP request timeout to 5 minutes (300000ms)
 app.timeout = 300000;
 
 // Middleware
 const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:5174',
-  'https://eklabya.com',
-  'https://www.eklabya.com'
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "https://eklabya.com",
+  "https://www.eklabya.com",
 ];
 
 // CORS configuration
 const corsOptions = {
-    origin: function (origin, callback) {
-        // In development or if no origin, allow all
-        if (process.env.NODE_ENV !== 'production' || !origin) {
-            return callback(null, true);
-        }
-        
-        // Check if the origin is in the allowed list
-        const allowedOrigins = [
-            'http://localhost:5173',
-            'http://localhost:5174',
-            'https://eklabya.com',
-            'https://www.eklabya.com',
-            'https://eklabya.vercel.app',
-            'https://www.eklabya.vercel.app'
-        ];
-        
-        if (allowedOrigins.includes(origin) || 
-            origin.endsWith('.eklabya.com') || 
-            origin.endsWith('.vercel.app')) {
-            return callback(null, true);
-        }
-        
-        console.warn('CORS blocked request from origin:', origin);
-        return callback(new Error('Not allowed by CORS'));
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: [
-        'Content-Type', 
-        'Authorization',
-        'x-auth-token', 
-        'x-user-agent', 
-        'x-client-ip',
-        'Cache-Control',
-        'Pragma',
-        'Expires',
-        'Accept',
-        'Access-Control-Allow-Origin'
-    ],
-    exposedHeaders: [
-        'Content-Length',
-        'Content-Type',
-        'Content-Disposition',
-        'x-auth-token',
-        'x-user-agent',
-        'x-client-ip'
-    ]
+  origin: function (origin, callback) {
+    // In development or if no origin, allow all
+    if (process.env.NODE_ENV !== "production" || !origin) {
+      return callback(null, true);
+    }
+
+    // Check if the origin is in the allowed list
+    const allowedOrigins = [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "https://eklabya.com",
+      "https://www.eklabya.com",
+      "https://eklabya.vercel.app",
+      "https://www.eklabya.vercel.app",
+    ];
+
+    if (
+      allowedOrigins.includes(origin) ||
+      origin.endsWith(".eklabya.com") ||
+      origin.endsWith(".vercel.app")
+    ) {
+      return callback(null, true);
+    }
+
+    console.warn("CORS blocked request from origin:", origin);
+    return callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "x-auth-token",
+    "x-user-agent",
+    "x-client-ip",
+    "Cache-Control",
+    "Pragma",
+    "Expires",
+    "Accept",
+    "Access-Control-Allow-Origin",
+  ],
+  exposedHeaders: [
+    "Content-Length",
+    "Content-Type",
+    "Content-Disposition",
+    "x-auth-token",
+    "x-user-agent",
+    "x-client-ip",
+  ],
 };
 
 app.use(cors(corsOptions));
 
 // Middleware for URL redirection from firstvite.com to eklabya.com
 app.use((req, res, next) => {
-    const host = req.headers.host;
+  const host = req.headers.host;
 
-    // Check if the request is coming from firstvite.com (including subdomains)
-    if (host && (host.includes('firstvite.com') || host.startsWith('firstvite.com'))) {
+  // Check if the request is coming from firstvite.com (including subdomains)
+  if (
+    host &&
+    (host.includes("firstvite.com") || host.startsWith("firstvite.com"))
+  ) {
     // Always redirect to HTTPS eklabya.com
-        const newUrl = `https://eklabya.com${req.originalUrl}`;
+    const newUrl = `https://eklabya.com${req.originalUrl}`;
 
-        // Perform permanent redirect (301)
-        return res.redirect(301, newUrl);
-    }
+    // Perform permanent redirect (301)
+    return res.redirect(301, newUrl);
+  }
 
-    next();
+  next();
 });
 
 // Handle preflight requests
-app.options('*', cors(corsOptions));
+app.options("*", cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Serve static files from the public directory
-const publicDir = path.join(__dirname, 'public');
-const uploadsDir = path.join(__dirname, 'public', 'uploads');
-const pdfsDir = path.join(publicDir, 'pdfs');
+const publicDir = path.join(__dirname, "public");
+const uploadsDir = path.join(__dirname, "public", "uploads");
+const pdfsDir = path.join(publicDir, "pdfs");
 
 // Ensure PDFs directory exists
 if (!fs.existsSync(pdfsDir)) {
-    fs.mkdirSync(pdfsDir, { recursive: true });
+  fs.mkdirSync(pdfsDir, { recursive: true });
 }
-import fs from 'fs';
+import fs from "fs";
 
 // Ensure uploads directory exists
 if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir, { recursive: true });
+  fs.mkdirSync(uploadsDir, { recursive: true });
 } else {
-    
 }
 
 // List all files in the public directory
 const listPublicFiles = (dir) => {
-    try {
-        const files = fs.readdirSync(dir);
-        return files;
-    } catch (err) {
-        console.error(`Error reading directory ${dir}:`, err);
-        return [];
-    }
+  try {
+    const files = fs.readdirSync(dir);
+    return files;
+  } catch (err) {
+    console.error(`Error reading directory ${dir}:`, err);
+    return [];
+  }
 };
 
 listPublicFiles(publicDir);
@@ -181,157 +185,175 @@ listPublicFiles(uploadsDir);
 
 // Ensure PDFs directory exists
 if (!fs.existsSync(pdfsDir)) {
-    fs.mkdirSync(pdfsDir, { recursive: true });
+  fs.mkdirSync(pdfsDir, { recursive: true });
 }
 
 // Serve static files from the public directory
-app.use(express.static(publicDir, {
+app.use(
+  express.static(publicDir, {
     setHeaders: (res, path) => {
-        res.setHeader('Cache-Control', 'public, max-age=31536000');
-    }
-}));
+      res.setHeader("Cache-Control", "public, max-age=31536000");
+    },
+  }),
+);
 
 // Serve uploaded brochures from the public/uploaded_brochure directory
-const uploadedBrochuresDir = path.join(publicDir, 'uploaded_brochure');
-app.use('/uploaded_brochure', express.static(uploadedBrochuresDir, {
+const uploadedBrochuresDir = path.join(publicDir, "uploaded_brochure");
+app.use(
+  "/uploaded_brochure",
+  express.static(uploadedBrochuresDir, {
     setHeaders: (res, path) => {
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', 'inline');
-    }
-}));
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", "inline");
+    },
+  }),
+);
 
 // Serve PDF files from the public/pdfs directory
-app.use('/pdfs', express.static(pdfsDir, {
+app.use(
+  "/pdfs",
+  express.static(pdfsDir, {
     setHeaders: (res, path) => {
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', 'inline; filename="' + path.basename(path) + '"');
-    }
-}));
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        'inline; filename="' + path.basename(path) + '"',
+      );
+    },
+  }),
+);
 
 // Serve static files from the public directory
 app.use(express.static(publicDir));
 
 // Serve candidate profile images
-const candidateProfileDir = path.join(publicDir, 'candidate_profile');
-app.use('/candidate_profile', express.static(candidateProfileDir, {
+const candidateProfileDir = path.join(publicDir, "candidate_profile");
+app.use(
+  "/candidate_profile",
+  express.static(candidateProfileDir, {
     setHeaders: (res, path) => {
-        // Set appropriate cache headers for images
-        res.setHeader('Cache-Control', 'public, max-age=31536000');
-    }
-}));
+      // Set appropriate cache headers for images
+      res.setHeader("Cache-Control", "public, max-age=31536000");
+    },
+  }),
+);
 
 // Serve uploads with specific headers
-app.use('/uploads', (req, res, next) => {
+app.use(
+  "/uploads",
+  (req, res, next) => {
     next();
-}, express.static(uploadsDir, {
-  setHeaders: (res, filePath) => {
-    const ext = path.extname(filePath).toLowerCase().substring(1);
-    const mimeTypes = {
-      'jpg': 'image/jpeg',
-      'jpeg': 'image/jpeg',
-      'png': 'image/png',
-      'gif': 'image/gif',
-      'webp': 'image/webp'
-    };
-    
-    if (mimeTypes[ext]) {
-      res.set('Content-Type', mimeTypes[ext]);
-      res.set('Cache-Control', 'public, max-age=31536000');
-    }
-  }
-}));
+  },
+  express.static(uploadsDir, {
+    setHeaders: (res, filePath) => {
+      const ext = path.extname(filePath).toLowerCase().substring(1);
+      const mimeTypes = {
+        jpg: "image/jpeg",
+        jpeg: "image/jpeg",
+        png: "image/png",
+        gif: "image/gif",
+        webp: "image/webp",
+      };
+
+      if (mimeTypes[ext]) {
+        res.set("Content-Type", mimeTypes[ext]);
+        res.set("Cache-Control", "public, max-age=31536000");
+      }
+    },
+  }),
+);
 
 // Test route to check file serving
-app.get('/test-upload/:filename', (req, res) => {
+app.get("/test-upload/:filename", (req, res) => {
   const { filename } = req.params;
   const filePath = path.join(uploadsDir, filename);
-  
+
   if (fs.existsSync(filePath)) {
     res.sendFile(filePath);
   } else {
     res.status(404).json({
       success: false,
-      message: 'File not found',
+      message: "File not found",
       path: filePath,
-      files: fs.readdirSync(uploadsDir)
+      files: fs.readdirSync(uploadsDir),
     });
   }
 });
-
 
 // Database connection
 const PORT = process.env.PORT || 4002;
 const URI = process.env.MongoDBURI;
 
 const connectDB = async () => {
-    try {
-        await mongoose.connect(URI, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-            serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
-        });
-        
-        console.log("✅ Successfully connected to MongoDB");
-    } catch (error) {
-        console.error("❌ MongoDB connection error:", error);
-        if (error.name === 'MongoServerError') {
-            console.error('MongoDB Server Error:', error.message);
-        } else if (error.name === 'MongooseServerSelectionError') {
-            console.error('Could not connect to MongoDB. Is it running?');
-        }
-        process.exit(1);
+  try {
+    await mongoose.connect(URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+    });
+
+    console.log("✅ Successfully connected to MongoDB");
+  } catch (error) {
+    console.error("❌ MongoDB connection error:", error);
+    if (error.name === "MongoServerError") {
+      console.error("MongoDB Server Error:", error.message);
+    } else if (error.name === "MongooseServerSelectionError") {
+      console.error("Could not connect to MongoDB. Is it running?");
     }
+    process.exit(1);
+  }
 };
 
 // Connect to the database
 connectDB();
 
 // Log database connection status
-mongoose.connection.on('error', err => {
-    console.error('MongoDB connection error:', err);});
+mongoose.connection.on("error", (err) => {
+  console.error("MongoDB connection error:", err);
+});
 
 // Routes - Specific routes first
 // console.log('Mounting upload route at /api/upload');
-app.use('/api/upload', uploadRoute); // File upload routes
-app.use('/api', pdfRoutes); // PDF generation routes
+app.use("/api/upload", uploadRoute); // File upload routes
+app.use("/api", pdfRoutes); // PDF generation routes
 
 // Mount PDF routes at /api/pdfs
 // console.log('Mounting PDF routes at /api/pdfs');
-app.use('/api/pdfs', pdfRouter);
+app.use("/api/pdfs", pdfRouter);
 
 // Debug route to test if the server is running
-app.get('/api/ping', (req, res) => {
-    res.json({
-        success: true,
-        message: 'Server is running',
-        timestamp: new Date().toISOString(),
-        nodeVersion: process.version,
-        environment: process.env.NODE_ENV || 'development',
-        paths: {
-            currentWorkingDir: process.cwd(),
-            publicDir: publicDir,
-            uploadsDir: uploadsDir
-        }
-    });
+app.get("/api/ping", (req, res) => {
+  res.json({
+    success: true,
+    message: "Server is running",
+    timestamp: new Date().toISOString(),
+    nodeVersion: process.version,
+    environment: process.env.NODE_ENV || "development",
+    paths: {
+      currentWorkingDir: process.cwd(),
+      publicDir: publicDir,
+      uploadsDir: uploadsDir,
+    },
+  });
 });
 
 // Test public categories endpoint
-app.get('/api/test-categories', async (req, res) => {
-    try {
-        const categories = await Category.find({}).limit(10);
-        res.json({
-            success: true,
-            count: categories.length,
-            data: categories
-        });
-    } catch (err) {
-        console.error('Test categories error:', err);
-        res.status(500).json({
-            success: false,
-            message: 'Error fetching test categories',
-            error: process.env.NODE_ENV === 'development' ? err.message : undefined
-        });
-    }
+app.get("/api/test-categories", async (req, res) => {
+  try {
+    const categories = await Category.find({}).limit(10);
+    res.json({
+      success: true,
+      count: categories.length,
+      data: categories,
+    });
+  } catch (err) {
+    console.error("Test categories error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching test categories",
+      error: process.env.NODE_ENV === "development" ? err.message : undefined,
+    });
+  }
 });
 
 // Mount routes in specific order
@@ -367,15 +389,15 @@ app.use("/api/careers", careerRoutes);
 app.use("/api/applications", applicationRoutes);
 
 // Admin email routes
-app.use('/api/v1/admin/emails', adminEmailRoutes);
+app.use("/api/v1/admin/emails", adminEmailRoutes);
 
 // Email record routes
-app.use('/api/emails', emailRecordRoutes);
+app.use("/api/emails", emailRecordRoutes);
 
 // Proposal document routes
 app.use("/api/v1/admin", proposalDocumentRoutes);
 app.use("/api/admin/test-qa", testQARoutes);
-app.use('/api/test-questions', testQARoutes);
+app.use("/api/test-questions", testQARoutes);
 
 // External API Routes
 app.use("/api/outcontact", externalContactRoutes);
@@ -385,14 +407,18 @@ app.use("/api/outcontact", externalContactRoutes);
 app.use("/api/pdfs", pdfRouter);
 
 // Log all routes for debugging
-const printRoutes = (routes, parentPath = '') => {
-  routes.forEach(route => {
+const printRoutes = (routes, parentPath = "") => {
+  routes.forEach((route) => {
     if (route.route) {
-      const methods = Object.keys(route.route.methods).join(',').toUpperCase();
+      const methods = Object.keys(route.route.methods).join(",").toUpperCase();
       console.log(`${methods.padEnd(6)} ${parentPath}${route.route.path}`);
-    } else if (route.name === 'router') {
+    } else if (route.name === "router") {
       // This is a router instance
-      const routerPath = route.regexp?.toString().replace(/^\/\^|\$\//g, '').replace('\\/?', '') || '';
+      const routerPath =
+        route.regexp
+          ?.toString()
+          .replace(/^\/\^|\$\//g, "")
+          .replace("\\/?", "") || "";
       if (route.handle?.stack) {
         printRoutes(route.handle.stack, `${parentPath}${routerPath}/`);
       }
@@ -403,54 +429,57 @@ const printRoutes = (routes, parentPath = '') => {
 // console.log('\nRegistered Routes:');
 // printRoutes(app._router.stack);
 
+// Sitemap route
+app.use("/", sitemapRoute);
+
 // Health check endpoint
-app.get('/api/health', (req, res) => {
-    res.status(200).json({ status: 'OK', timestamp: new Date() });
+app.get("/api/health", (req, res) => {
+  res.status(200).json({ status: "OK", timestamp: new Date() });
 });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-    const isDev = process.env.NODE_ENV === 'development';
+  const isDev = process.env.NODE_ENV === "development";
 
-    // Default values
-    let statusCode = err.statusCode || 500;
-    let message = err.message || 'Internal Server Error';
+  // Default values
+  let statusCode = err.statusCode || 500;
+  let message = err.message || "Internal Server Error";
 
-    // Handle common Mongoose/Mongo errors
-    if (err.code === 11000) { // Duplicate key error
-        statusCode = 409;
-        const fields = Object.keys(err.keyValue || {});
-        if (fields.includes('email')) {
-            message = 'Email already registered. Go to Login page';
-        } else {
-            message = 'Duplicate value entered';
-        }
+  // Handle common Mongoose/Mongo errors
+  if (err.code === 11000) {
+    // Duplicate key error
+    statusCode = 409;
+    const fields = Object.keys(err.keyValue || {});
+    if (fields.includes("email")) {
+      message = "Email already registered. Go to Login page";
+    } else {
+      message = "Duplicate value entered";
     }
+  }
 
-    if (err.name === 'ValidationError') {
-        statusCode = 400;
-    }
+  if (err.name === "ValidationError") {
+    statusCode = 400;
+  }
 
-    res.status(statusCode).json({
-        status: String(statusCode).startsWith('4') ? 'fail' : 'error',
-        message,
-        ...(isDev ? { stack: err.stack } : {})
-    });
+  res.status(statusCode).json({
+    status: String(statusCode).startsWith("4") ? "fail" : "error",
+    message,
+    ...(isDev ? { stack: err.stack } : {}),
+  });
 });
 
 // Start the server
 const server = app.listen(PORT, () => {
-    
-    console.log(`Server is running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
 
 // Handle unhandled promise rejections
-process.on('unhandledRejection', (err) => {
-    console.error('UNHANDLED REJECTION! Shutting down...');
-    console.error(err);
-    server.close(() => {
-        process.exit(1);
-    });
+process.on("unhandledRejection", (err) => {
+  console.error("UNHANDLED REJECTION! Shutting down...");
+  console.error(err);
+  server.close(() => {
+    process.exit(1);
+  });
 });
 
 export default app;
