@@ -89,7 +89,7 @@ export const sendOTP = async (req, res) => {
 
         // Send email with OTP
         const mailOptions = {
-            from: `Eklabya <${emailFrom}>`, // Sender address with name
+            from: `Eklavya <${emailFrom}>`, // Sender address with name
             to: email, // List of recipients
             subject: "Your OTP for Email Verification", // Subject line
             text: `Your OTP for email verification is: ${otp}. This OTP is valid for 10 minutes.`,
@@ -100,7 +100,7 @@ export const sendOTP = async (req, res) => {
           <p>Your OTP for email verification is: <strong>${otp}</strong></p>
           <p>This OTP is valid for 10 minutes.</p>
           <p>If you didn't request this OTP, please ignore this email.</p>
-          <p>Best regards,<br>Eklabya Team</p>
+          <p>Best regards,<br>Eklavya Team</p>
         </div>
       `,
         };
@@ -190,7 +190,7 @@ export const createCandidate = async (req, res) => {
     let profilePhotoPath = null;
 
     // Default values for email template
-    const myCompanyName = 'Eklabya E-Learning Pvt.Ltd';
+    const myCompanyName = 'Eklavya center of excellence Pvt.Ltd.';
     const eventName = 'Career Hiring Camp 2025';
     const eventDate = 'November 9, 2025 - Sunday';
     const eventTime = '9:00 AM - 5:00 PM';
@@ -200,7 +200,7 @@ export const createCandidate = async (req, res) => {
     const supportEmail = 'info@eklabya.com';
     const supportPhone = '9990056799';
     const website = 'https://eklabya.com';
-    const yourName = 'Eklabya E-Learning';
+    const yourName = 'Eklavya center of excellence Pvt Ltd.';
 
     try {
         const { name, email, phone, course, college, university, companyName, userType = 'student', companyName: userCompanyName } = req.body;
@@ -315,9 +315,9 @@ export const createCandidate = async (req, res) => {
 
         // Send welcome email
         const welcomeMailOptions = {
-            from: `Eklabya <${emailFrom}>`,
+            from: `Eklavya <${emailFrom}>`,
             to: email,
-            subject: `Registration Confirmed — JobFair 2025 | Eklabya E-Learning`,
+            subject: `Registration Confirmed — JobFair 2025 | Eklavya center of excellence Pvt. Ltd.`,
             html: `
   <div style="font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f5f7fb; padding: 24px;">
     <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%; max-width:600px; margin:0 auto; background:#ffffff; border-radius:10px; overflow:hidden; box-shadow:0 6px 18px rgba(32,33,36,0.08);">
@@ -332,7 +332,7 @@ export const createCandidate = async (req, res) => {
       <tr>
         <td style="padding:20px 24px;">
             <p style="margin:0 0 12px; font-size:15px; color:#111827;">
-                Thank you for registering for <strong>${eventName}</strong>, organized by <strong> <span style="color: rgb(30, 144, 255)">e</span><span style="color: rgb(244, 124, 38)">KLABYA</span> </ strong> in collaboration with our partner companies. We’re excited to have you ${userType === "student"
+                Thank you for registering for <strong>${eventName}</strong>, organized by <strong> <span style="color: rgb(30, 144, 255)">e</span><span style="color: rgb(244, 124, 38)">KLAVYA</span> </ strong> in collaboration with our partner companies. We’re excited to have you ${userType === "student"
                     ? "— this event will connect you directly with recruiters, provide skill sessions, and  create  real job & internship opportunities."
                     : "— this event will connect you with talented students from multiple colleges, helping     you     discover the right candidates for your hiring needs."
                 }
@@ -393,7 +393,7 @@ export const createCandidate = async (req, res) => {
             <ul style="margin:8px 0 0 18px; color:#4b5563; padding:0;">
               <li>Updated Resume</li>
               <li>College ID Card / Valid Photo ID</li>
-              <li>Eklabya Provided Invitation (Find Attached in this Email)</li>
+              <li>Eklavya Provided Invitation (Find Attached in this Email)</li>
               <li>Passport-size photograph (optional)</li>
             </ul>
           ` : ""}
@@ -540,7 +540,7 @@ ${companyName}
         // Send admin notification email
         const adminEmail = process.env.ADMIN_EMAIL_YAHOO || 'anand24h@yahoo.com';
         const adminMailOptions = {
-            from: `Eklabya <${emailFrom}>`,
+            from: `Eklavya <${emailFrom}>`,
             to: adminEmail,
             subject: `New Candidate Registration: ${name}`,
             html: `

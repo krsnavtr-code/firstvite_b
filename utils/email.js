@@ -85,7 +85,7 @@ export const sendEmail = async ({
     });
 
     const mailOptions = {
-      from: `"${process.env.EMAIL_FROM_NAME || 'Eklabya E-Learning'}" <${fromEmail}>`,
+      from: `"${process.env.EMAIL_FROM_NAME || 'Eklavya'}" <${fromEmail}>`,
       to: to,
       subject: subject,
       text: text,

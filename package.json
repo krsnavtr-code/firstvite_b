@@ -1,5 +1,5 @@
 {
-  "name": "Eklabya",
+  "name": "Eklavya",
   "version": "1.0.0",
   "description": "mern project with admin dashboard",
   "main": "index.js",
@@ -17,7 +17,7 @@
   },
   "keywords": [
     "mern",
-    "Eklabya",
+    "Eklavya",
     "admin-dashboard"
   ],
   "author": "Akhil",
