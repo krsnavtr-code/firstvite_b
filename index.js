@@ -69,8 +69,8 @@ app.timeout = 300000;
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
-  "https://eklabya.com",
-  "https://www.eklabya.com",
+  "https://theeklavya.com",
+  "https://www.theeklavya.com",
 ];
 
 // CORS configuration
@@ -85,16 +85,13 @@ const corsOptions = {
     const allowedOrigins = [
       "http://localhost:5173",
       "http://localhost:5174",
-      "https://eklabya.com",
-      "https://www.eklabya.com",
-      "https://eklabya.vercel.app",
-      "https://www.eklabya.vercel.app",
+      "https://theeklavya.com",
+      "https://www.theeklavya.com",
     ];
 
     if (
       allowedOrigins.includes(origin) ||
-      origin.endsWith(".eklabya.com") ||
-      origin.endsWith(".vercel.app")
+      origin.endsWith(".theeklavya.com")
     ) {
       return callback(null, true);
     }
