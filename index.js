@@ -39,6 +39,7 @@ import adminEmailRoutes from "./routes/adminEmailRoutes.js";
 import emailRecordRoutes from "./routes/emailRecordRoutes.js";
 import proposalDocumentRoutes from "./routes/proposalDocumentRoutes.js";
 import testQARoutes from "./routes/testQARoutes.js";
+import adminRoleRoutes from "./routes/adminRoleRoutes.js";
 import sitemapRoute from "./route/sitemap.route.js";
 
 import dns from "dns";
@@ -89,10 +90,7 @@ const corsOptions = {
       "https://www.eklabya.com",
     ];
 
-    if (
-      allowedOrigins.includes(origin) ||
-      origin.endsWith(".eklabya.com")
-    ) {
+    if (allowedOrigins.includes(origin) || origin.endsWith(".eklabya.com")) {
       return callback(null, true);
     }
 
@@ -395,6 +393,7 @@ app.use("/api/emails", emailRecordRoutes);
 app.use("/api/v1/admin", proposalDocumentRoutes);
 app.use("/api/admin/test-qa", testQARoutes);
 app.use("/api/test-questions", testQARoutes);
+app.use("/api/admin/roles", adminRoleRoutes);
 
 // External API Routes
 app.use("/api/outcontact", externalContactRoutes);

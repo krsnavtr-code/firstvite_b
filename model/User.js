@@ -127,6 +127,22 @@ const userSchema = new mongoose.Schema(
     designation: {
       type: String,
     },
+    adminRoleId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "AdminRole",
+      sparse: true, // Only for admin users
+    },
+    adminPermissions: {
+      type: Map,
+      of: {
+        canView: { type: Boolean, default: false },
+        canCreate: { type: Boolean, default: false },
+        canEdit: { type: Boolean, default: false },
+        canDelete: { type: Boolean, default: false },
+      },
+      default: new Map(),
+      select: false, // Don't include by default for security
+    },
   },
   {
     timestamps: true,
