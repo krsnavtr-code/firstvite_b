@@ -85,7 +85,9 @@ export const login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
 
   // Check for user email
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email }).select(
+    "+adminRoleId +adminPermissions",
+  );
 
   if (!user) {
     return next(new AppError("Invalid email or password", 401));
@@ -142,6 +144,8 @@ export const login = catchAsync(async (req, res, next) => {
     isApproved: user.isApproved,
     phone: user.phone || "",
     address: user.address || "",
+    adminRoleId: user.adminRoleId,
+    adminPermissions: user.adminPermissions,
   };
 
   const responseData = {
@@ -160,7 +164,9 @@ export const login = catchAsync(async (req, res, next) => {
 export const getUserProfile = catchAsync(async (req, res, next) => {
   try {
     // Get user from the database to ensure we have the latest data
-    const user = await User.findById(req.user.id).select("-password");
+    const user = await User.findById(req.user.id).select(
+      "-password +adminRoleId +adminPermissions",
+    );
 
     if (!user) {
       return next(new AppError("User not found", 404));
@@ -174,6 +180,8 @@ export const getUserProfile = catchAsync(async (req, res, next) => {
       isApproved: user.isApproved,
       phone: user.phone || "",
       address: user.address || "",
+      adminRoleId: user.adminRoleId,
+      adminPermissions: user.adminPermissions,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     });

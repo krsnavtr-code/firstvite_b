@@ -73,21 +73,21 @@ export const updateAdminRole = catchAsync(async (req, res, next) => {
   }
 
   // Update permissions for all users with this role
+  const adminPermissions = {};
+  permissions.forEach((perm) => {
+    adminPermissions[perm.page] = {
+      canView: perm.canView,
+      canCreate: perm.canCreate,
+      canEdit: perm.canEdit,
+      canDelete: perm.canDelete,
+    };
+  });
+
   await User.updateMany(
     { adminRoleId: role._id },
     {
       $set: {
-        adminPermissions: new Map(
-          permissions.map((perm) => [
-            perm.page,
-            {
-              canView: perm.canView,
-              canCreate: perm.canCreate,
-              canEdit: perm.canEdit,
-              canDelete: perm.canDelete,
-            },
-          ]),
-        ),
+        adminPermissions,
       },
     },
   );
@@ -159,18 +159,16 @@ export const createAdminUser = catchAsync(async (req, res, next) => {
     return next(new AppError("Invalid admin role specified", 400));
   }
 
-  // Create permissions map from role permissions
-  const adminPermissions = new Map(
-    role.permissions.map((perm) => [
-      perm.page,
-      {
-        canView: perm.canView,
-        canCreate: perm.canCreate,
-        canEdit: perm.canEdit,
-        canDelete: perm.canDelete,
-      },
-    ]),
-  );
+  // Create permissions object from role permissions (convert Map to plain object for MongoDB)
+  const adminPermissions = {};
+  role.permissions.forEach((perm) => {
+    adminPermissions[perm.page] = {
+      canView: perm.canView,
+      canCreate: perm.canCreate,
+      canEdit: perm.canEdit,
+      canDelete: perm.canDelete,
+    };
+  });
 
   const user = await User.create({
     fullname,
@@ -214,18 +212,16 @@ export const updateAdminUserRole = catchAsync(async (req, res, next) => {
     return next(new AppError("Invalid admin role specified", 400));
   }
 
-  // Create permissions map from role permissions
-  const adminPermissions = new Map(
-    role.permissions.map((perm) => [
-      perm.page,
-      {
-        canView: perm.canView,
-        canCreate: perm.canCreate,
-        canEdit: perm.canEdit,
-        canDelete: perm.canDelete,
-      },
-    ]),
-  );
+  // Create permissions object from role permissions (convert Map to plain object for MongoDB)
+  const adminPermissions = {};
+  role.permissions.forEach((perm) => {
+    adminPermissions[perm.page] = {
+      canView: perm.canView,
+      canCreate: perm.canCreate,
+      canEdit: perm.canEdit,
+      canDelete: perm.canDelete,
+    };
+  });
 
   // Update user role and permissions
   const updatedUser = await User.findByIdAndUpdate(
