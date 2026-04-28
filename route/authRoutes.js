@@ -21,6 +21,7 @@ router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
 
 // Protected routes
+router.get("/me", protect, getUserProfile);
 router.get("/profile", protect, getUserProfile);
 router.put("/profile", protect, updateProfile);
 router.put("/change-password", protect, changePassword);

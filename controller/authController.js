@@ -15,7 +15,7 @@ const generateToken = (id) => {
     },
     process.env.JWT_SECRET || "your_jwt_secret",
     {
-      expiresIn: "15m", // Access token expires in 15 minutes
+      expiresIn: process.env.JWT_EXPIRES_IN || "15m", // Use environment variable or fallback to 15m
     },
   );
 };
@@ -28,9 +28,11 @@ const generateRefreshToken = (id) => {
       type: "refresh",
       iat: Math.floor(Date.now() / 1000),
     },
-    process.env.JWT_REFRESH_SECRET || "your_jwt_refresh_secret",
+    process.env.JWT_REFRESH_SECRET ||
+      process.env.JWT_SECRET ||
+      "your_jwt_refresh_secret",
     {
-      expiresIn: "7d", // Refresh token expires in 7 days
+      expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || "7d", // Refresh token expires in 7 days or use env var
     },
   );
 };
@@ -164,8 +166,8 @@ export const login = catchAsync(async (req, res, next) => {
 export const getUserProfile = catchAsync(async (req, res, next) => {
   try {
     // Get user from the database to ensure we have the latest data
-    const user = await User.findById(req.user.id).select(
-      "-password +adminRoleId +adminPermissions",
+    const user = await User.findById(req.user._id || req.user.id).select(
+      "-password",
     );
 
     if (!user) {
@@ -173,17 +175,20 @@ export const getUserProfile = catchAsync(async (req, res, next) => {
     }
 
     res.json({
-      _id: user._id,
-      fullname: user.fullname,
-      email: user.email,
-      role: user.role,
-      isApproved: user.isApproved,
-      phone: user.phone || "",
-      address: user.address || "",
-      adminRoleId: user.adminRoleId,
-      adminPermissions: user.adminPermissions,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
+      success: true,
+      user: {
+        _id: user._id,
+        fullname: user.fullname,
+        email: user.email,
+        role: user.role,
+        isApproved: user.isApproved,
+        phone: user.phone || "",
+        address: user.address || "",
+        adminRoleId: user.adminRoleId,
+        adminPermissions: user.adminPermissions,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      },
     });
   } catch (error) {
     console.error("Error in getUserProfile:", error);

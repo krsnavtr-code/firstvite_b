@@ -55,13 +55,25 @@ export const protect = async (req, res, next) => {
           });
         }
 
-        // Check if token is expired
+        // Check if token is expired (but allow for /auth/me endpoint to trigger refresh)
         const now = Math.floor(Date.now() / 1000);
-        if (decoded.exp && decoded.exp < now) {
+        const isAuthMeEndpoint =
+          req.originalUrl?.includes("/auth/me") ||
+          req.url?.includes("/auth/me");
+
+        if (decoded.exp && decoded.exp < now && !isAuthMeEndpoint) {
           console.error("Token expired:", new Date(decoded.exp * 1000));
           return res.status(401).json({
             success: false,
             message: "Your session has expired. Please log in again.",
+          });
+        } else if (decoded.exp && decoded.exp < now && isAuthMeEndpoint) {
+          console.log("Token expired for /auth/me, allowing client to refresh");
+          // Still return 401 to trigger client-side refresh, but with a specific message
+          return res.status(401).json({
+            success: false,
+            message: "Token expired - refresh needed",
+            requiresRefresh: true,
           });
         }
       } catch (accessError) {
