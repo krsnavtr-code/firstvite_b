@@ -514,7 +514,7 @@ ${companyName}
         venue,
         city,
         qrCodeUrl: `https://eklabya.com/verify/${candidate._id}`,
-        logoUrl: "https://eklabya.com/logo.png",
+        logoUrl: "http://eklabya.com/api/upload/file/eKlabya-0644.png",
       },
     );
 
