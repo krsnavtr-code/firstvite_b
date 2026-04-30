@@ -90,7 +90,14 @@ const corsOptions = {
       "https://www.eklabya.com",
     ];
 
-    if (allowedOrigins.includes(origin) || origin.endsWith(".eklabya.com")) {
+    // Allow exact matches or any subdomain of eklabya.com
+    if (
+      allowedOrigins.includes(origin) ||
+      origin === "https://eklabya.com" ||
+      origin === "https://www.eklabya.com" ||
+      (origin && origin.endsWith(".eklabya.com"))
+    ) {
+      console.log("CORS allowed request from origin:", origin);
       return callback(null, true);
     }
 
@@ -119,6 +126,8 @@ const corsOptions = {
     "x-user-agent",
     "x-client-ip",
   ],
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
 };
 
 app.use(cors(corsOptions));
@@ -142,7 +151,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Handle preflight requests
+// Handle preflight requests - must be before other middleware
 app.options("*", cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
