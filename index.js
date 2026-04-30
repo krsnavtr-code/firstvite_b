@@ -177,6 +177,9 @@ const publicDir = path.join(__dirname, "public");
 const uploadsDir = path.join(__dirname, "public", "uploads");
 const pdfsDir = path.join(publicDir, "pdfs");
 
+// Serve static files from the client dist directory (for production)
+const clientDistDir = path.join(__dirname, "..", "client", "dist");
+
 // Ensure PDFs directory exists
 if (!fs.existsSync(pdfsDir)) {
   fs.mkdirSync(pdfsDir, { recursive: true });
@@ -245,6 +248,19 @@ app.use(
 
 // Serve static files from the public directory
 app.use(express.static(publicDir));
+
+// Serve static files from the client dist directory (for production)
+app.use(
+  express.static(clientDistDir, {
+    setHeaders: (res, path) => {
+      // Set correct MIME types for JavaScript modules
+      if (path.endsWith(".js")) {
+        res.setHeader("Content-Type", "application/javascript");
+      }
+      res.setHeader("Cache-Control", "public, max-age=31536000");
+    },
+  }),
+);
 
 // Serve candidate profile images
 const candidateProfileDir = path.join(publicDir, "candidate_profile");
@@ -456,6 +472,27 @@ app.use("/", sitemapRoute);
 // Health check endpoint
 app.get("/api/health", (req, res) => {
   res.status(200).json({ status: "OK", timestamp: new Date() });
+});
+
+// Serve React app for all non-API routes (must be before error handling)
+app.get("*", (req, res, next) => {
+  // Skip API routes and static file routes
+  if (
+    req.path.startsWith("/api") ||
+    req.path.startsWith("/uploads") ||
+    req.path.startsWith("/pdfs") ||
+    req.path.startsWith("/candidate_profile")
+  ) {
+    return next();
+  }
+
+  // Serve the index.html from the client dist directory
+  const indexPath = path.join(clientDistDir, "index.html");
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    next();
+  }
 });
 
 // Error handling middleware
