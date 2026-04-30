@@ -95,7 +95,10 @@ const corsOptions = {
       allowedOrigins.includes(origin) ||
       origin === "https://eklabya.com" ||
       origin === "https://www.eklabya.com" ||
-      (origin && origin.endsWith(".eklabya.com"))
+      (origin && origin.endsWith(".eklabya.com")) ||
+      (origin &&
+        (origin.startsWith("https://eklabya.com") ||
+          origin.startsWith("https://www.eklabya.com")))
     ) {
       console.log("CORS allowed request from origin:", origin);
       return callback(null, true);
@@ -132,7 +135,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// Middleware for URL redirection from firstvite.com to eklabya.com
+// Middleware for URL redirection from firstvite.com to eklabya.com and eklabya.com to www.eklabya.com
 app.use((req, res, next) => {
   const host = req.headers.host;
 
@@ -141,8 +144,21 @@ app.use((req, res, next) => {
     host &&
     (host.includes("firstvite.com") || host.startsWith("firstvite.com"))
   ) {
-    // Always redirect to HTTPS eklabya.com
-    const newUrl = `https://eklabya.com${req.originalUrl}`;
+    // Always redirect to HTTPS www.eklabya.com
+    const newUrl = `https://www.eklabya.com${req.originalUrl}`;
+
+    // Perform permanent redirect (301)
+    return res.redirect(301, newUrl);
+  }
+
+  // Redirect from eklabya.com to www.eklabya.com for consistency
+  if (
+    host &&
+    (host === "eklabya.com" ||
+      (host.startsWith("eklabya.com") && !host.startsWith("www.")))
+  ) {
+    // Always redirect to HTTPS www.eklabya.com
+    const newUrl = `https://www.eklabya.com${req.originalUrl}`;
 
     // Perform permanent redirect (301)
     return res.redirect(301, newUrl);
