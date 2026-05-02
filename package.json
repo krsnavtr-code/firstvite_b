@@ -9,7 +9,6 @@
     "dev": "nodemon index.js",
     "setup:admin": "node scripts/setupAdmin.js",
     "generate:sitemap": "node scripts/generateSitemap.js",
-    "build:client": "node scripts/triggerBuild.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
