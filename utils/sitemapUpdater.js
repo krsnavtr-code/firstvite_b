@@ -4,6 +4,7 @@ import generateSitemap from "./sitemapGenerator.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { exec } from "child_process";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -49,6 +50,16 @@ export const updateSitemap = async () => {
       `✅ Sitemap auto-updated successfully! Total URLs: ${urlCount}`,
     );
 
+    // Trigger client build for production deployment
+    if (process.env.NODE_ENV === "production") {
+      console.log("🔄 Triggering client build for deployment...");
+      triggerClientBuild();
+    } else {
+      console.log(
+        "💡 In development mode. Run 'npm run build' in client directory to update sitemap for live testing.",
+      );
+    }
+
     return true;
   } catch (error) {
     console.error("❌ Error auto-updating sitemap:", error.message);
@@ -66,4 +77,36 @@ export const updateSitemapAsync = () => {
   setTimeout(() => {
     updateSitemap();
   }, 1000); // 1 second delay
+};
+
+/**
+ * Trigger client build for production deployment
+ */
+const triggerClientBuild = () => {
+  // Use different client paths based on environment
+  let clientPath;
+
+  if (process.env.NODE_ENV === "production") {
+    // Production VPS structure: /root/firstvite-client/
+    clientPath = "/root/firstvite-client";
+  } else {
+    // Development structure: ../../client/
+    clientPath = path.join(__dirname, "../../client");
+  }
+
+  exec(`cd "${clientPath}" && npm run build`, (error, stdout, stderr) => {
+    if (error) {
+      console.error("❌ Client build failed:", error.message);
+      return;
+    }
+
+    console.log("✅ Client build completed successfully!");
+    console.log(
+      "📁 Updated sitemap is now available in client/public/sitemap.xml",
+    );
+
+    if (stderr) {
+      console.warn("Build warnings:", stderr);
+    }
+  });
 };
