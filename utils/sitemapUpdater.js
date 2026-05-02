@@ -20,26 +20,16 @@ if (process.env.NODE_ENV !== "production") {
 export const updateSitemap = async () => {
   try {
     console.log("🔄 Auto-updating sitemap...");
-    
-    // Database connection
-    const URI = process.env.MongoDBURI;
-    
-    if (!URI) {
-      console.warn("⚠️  MongoDBURI not found, skipping sitemap update");
+
+    // Check if database is connected
+    if (mongoose.connection.readyState !== 1) {
+      console.warn("⚠️  Database not connected, skipping sitemap update");
       return false;
     }
 
-    // Connect to database
-    await mongoose.connect(URI, {
-      serverSelectionTimeoutMS: 30000,
-    });
-
-    // Generate sitemap
+    // Generate sitemap using existing connection
     const baseUrl = process.env.BASE_URL || "https://www.eklabya.com";
     const sitemap = await generateSitemap(baseUrl);
-
-    // Close database connection
-    await mongoose.connection.close();
 
     // Save to client/public directory
     const outputPath = path.join(__dirname, "../../client/public/sitemap.xml");
@@ -55,17 +45,14 @@ export const updateSitemap = async () => {
 
     // Show stats
     const urlCount = (sitemap.match(/<url>/g) || []).length;
-    console.log(`✅ Sitemap auto-updated successfully! Total URLs: ${urlCount}`);
-    
+    console.log(
+      `✅ Sitemap auto-updated successfully! Total URLs: ${urlCount}`,
+    );
+
     return true;
   } catch (error) {
     console.error("❌ Error auto-updating sitemap:", error.message);
-    
-    // Close database connection if still open
-    if (mongoose.connection.readyState === 1) {
-      await mongoose.connection.close();
-    }
-    
+
     return false;
   }
 };
@@ -75,8 +62,8 @@ export const updateSitemap = async () => {
  * Use this when you don't want to wait for sitemap update to complete
  */
 export const updateSitemapAsync = () => {
-  // Run asynchronously without blocking the main response
-  setImmediate(() => {
+  // Run asynchronously with delay to avoid connection conflicts
+  setTimeout(() => {
     updateSitemap();
-  });
+  }, 1000); // 1 second delay
 };

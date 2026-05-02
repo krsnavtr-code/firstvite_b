@@ -323,8 +323,6 @@ const URI = process.env.MongoDBURI;
 const connectDB = async () => {
   try {
     await mongoose.connect(URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
       serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
     });
 
