@@ -10,13 +10,79 @@ const generateSitemap = async (baseUrl, fallbackMode = false) => {
     // EXCLUDED: Admin routes, user dashboards, status/error pages, authentication pages, and authenticated-only pages
     const staticPages = [
       { url: "/", changefreq: "daily", priority: 1.0 },
-      { url: "/about", changefreq: "monthly", priority: 0.8 },
       { url: "/courses", changefreq: "weekly", priority: 0.9 },
-      { url: "/blog", changefreq: "daily", priority: 0.8 },
+      { url: "/categories", changefreq: "weekly", priority: 0.8 },
+      { url: "/free-course", changefreq: "weekly", priority: 0.8 },
+      {
+        url: "/courses/artificial-intelligence",
+        changefreq: "weekly",
+        priority: 0.8,
+      },
+      { url: "/courses/cloud", changefreq: "weekly", priority: 0.8 },
+      { url: "/courses/cyber-security", changefreq: "weekly", priority: 0.8 },
+      {
+        url: "/courses/data-science-and-ml",
+        changefreq: "weekly",
+        priority: 0.8,
+      },
+      {
+        url: "/courses/database-management-system",
+        changefreq: "weekly",
+        priority: 0.8,
+      },
+      {
+        url: "/courses/digital-marketing",
+        changefreq: "weekly",
+        priority: 0.8,
+      },
+      { url: "/courses/erp-academy", changefreq: "weekly", priority: 0.8 },
+      { url: "/courses/free-courses", changefreq: "weekly", priority: 0.8 },
+      {
+        url: "/courses/full-stack-development",
+        changefreq: "weekly",
+        priority: 0.8,
+      },
+      { url: "/courses/game-development", changefreq: "weekly", priority: 0.8 },
+      {
+        url: "/courses/management-system",
+        changefreq: "weekly",
+        priority: 0.8,
+      },
+      { url: "/courses/microsoft-azure", changefreq: "weekly", priority: 0.8 },
+      {
+        url: "/courses/mobile-app-development",
+        changefreq: "weekly",
+        priority: 0.8,
+      },
+      { url: "/courses/personality", changefreq: "weekly", priority: 0.8 },
+      { url: "/courses/power-bi", changefreq: "weekly", priority: 0.8 },
+      {
+        url: "/courses/professional-language",
+        changefreq: "weekly",
+        priority: 0.8,
+      },
+      {
+        url: "/courses/programming-languages",
+        changefreq: "weekly",
+        priority: 0.8,
+      },
+      { url: "/courses/saas-online", changefreq: "weekly", priority: 0.8 },
+      {
+        url: "/courses/salesforce-development",
+        changefreq: "weekly",
+        priority: 0.8,
+      },
+      { url: "/about", changefreq: "monthly", priority: 0.7 },
       { url: "/contact", changefreq: "monthly", priority: 0.7 },
-      { url: "/careers", changefreq: "weekly", priority: 0.7 },
+      { url: "/blog", changefreq: "daily", priority: 0.8 },
       { url: "/faq", changefreq: "monthly", priority: 0.6 },
-      { url: "/categories", changefreq: "weekly", priority: 0.6 },
+      { url: "/privacy-policy", changefreq: "monthly", priority: 0.5 },
+      { url: "/terms-of-service", changefreq: "monthly", priority: 0.5 },
+      {
+        url: "/payment-terms-and-conditions",
+        changefreq: "monthly",
+        priority: 0.5,
+      },
     ];
 
     const dynamicPages = [];
@@ -24,9 +90,10 @@ const generateSitemap = async (baseUrl, fallbackMode = false) => {
     if (!fallbackMode) {
       try {
         // Get blog posts
-        const blogPosts = await BlogPost.find({ status: "published" }).select(
-          "slug updatedAt",
-        );
+        const blogPosts = await BlogPost.find({ status: "published" })
+          .select("slug updatedAt")
+          .maxTimeMS(10000)
+          .lean();
         blogPosts.forEach((post) => {
           dynamicPages.push({
             url: `/blog/${post.slug}`,
@@ -36,10 +103,11 @@ const generateSitemap = async (baseUrl, fallbackMode = false) => {
           });
         });
 
-        // Get courses
-        const courses = await Course.find({ status: "published" }).select(
-          "slug updatedAt",
-        );
+        // Get courses (include all courses since status is undefined)
+        const courses = await Course.find({})
+          .select("slug updatedAt")
+          .maxTimeMS(10000)
+          .lean();
         courses.forEach((course) => {
           dynamicPages.push({
             url: `/courses/${course.slug}`,
@@ -50,7 +118,10 @@ const generateSitemap = async (baseUrl, fallbackMode = false) => {
         });
 
         // Get categories
-        const categories = await Category.find().select("slug updatedAt");
+        const categories = await Category.find()
+          .select("slug updatedAt")
+          .maxTimeMS(10000)
+          .lean();
         categories.forEach((category) => {
           dynamicPages.push({
             url: `/category/${category.slug}`,
@@ -61,9 +132,10 @@ const generateSitemap = async (baseUrl, fallbackMode = false) => {
         });
 
         // Get careers
-        const careers = await Career.find({ status: "active" }).select(
-          "slug updatedAt",
-        );
+        const careers = await Career.find({ status: "active" })
+          .select("slug updatedAt")
+          .maxTimeMS(10000)
+          .lean();
         careers.forEach((career) => {
           dynamicPages.push({
             url: `/careers/${career.slug}`,

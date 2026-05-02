@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import dns from "dns";
 import generateSitemap from "../utils/sitemapGenerator.js";
 
 // Get directory name in ES module
@@ -11,6 +12,11 @@ const __dirname = path.dirname(__filename);
 
 // Load environment variables
 dotenv.config();
+
+// Set DNS servers (same as main server)
+if (process.env.NODE_ENV !== "production") {
+  dns.setServers(["8.8.8.8", "8.8.4.4"]);
+}
 
 const main = async () => {
   try {
@@ -24,7 +30,7 @@ const main = async () => {
       try {
         console.log("📡 Connecting to database...");
         await mongoose.connect(URI, {
-          serverSelectionTimeoutMS: 5000,
+          serverSelectionTimeoutMS: 30000,
         });
 
         console.log("✅ Successfully connected to MongoDB");
