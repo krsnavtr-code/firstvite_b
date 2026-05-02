@@ -124,7 +124,7 @@ const generateSitemap = async (baseUrl, fallbackMode = false) => {
           .lean();
         categories.forEach((category) => {
           dynamicPages.push({
-            url: `/category/${category.slug}`,
+            url: `/courses/${category.slug}`,
             changefreq: "weekly",
             priority: 0.6,
             lastmod: category.updatedAt,
