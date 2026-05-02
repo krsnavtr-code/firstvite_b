@@ -4,6 +4,7 @@ import { fileURLToPath } from "url";
 import Course from "../model/course.model.js";
 import { validationResult } from "express-validator";
 import { generateCoursePdf } from "../utils/pdfGenerator.js";
+import { updateSitemapAsync } from "../utils/sitemapUpdater.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -29,7 +30,6 @@ const cleanArrayField = (field, defaultVal = []) => {
 
 // Helper function to clean and format course data
 const prepareCourseData = (data) => {
-
   // Clean array fields
   const arrayFields = [
     "benefits",
@@ -205,6 +205,9 @@ export const createCourse = async (req, res) => {
         "category",
         "name _id",
       );
+
+      // Auto-update sitemap when course is created
+      updateSitemapAsync();
 
       return res.status(201).json({
         success: true,
@@ -592,7 +595,6 @@ export const updateCourse = async (req, res) => {
         : [],
     };
 
-
     // Find and update the course
     const course = await Course.findById(courseId);
     if (!course) {
@@ -613,6 +615,9 @@ export const updateCourse = async (req, res) => {
 
     // Populate the category for the response
     await updatedCourse.populate("category", "name _id");
+
+    // Auto-update sitemap when course is updated
+    updateSitemapAsync();
 
     res.json({
       success: true,
@@ -664,6 +669,9 @@ export const deleteCourse = async (req, res) => {
     if (!course) {
       return res.status(404).json({ message: "Course not found" });
     }
+
+    // Auto-update sitemap when course is deleted
+    updateSitemapAsync();
 
     res.json({ message: "Course deleted successfully" });
   } catch (error) {
