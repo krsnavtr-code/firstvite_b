@@ -81,7 +81,11 @@ export const getSprintsByCourse = catchAsync(async (req, res, next) => {
   
   const sprints = await Sprint.find({ courseId, isActive: true })
     .sort('order')
-    .select('-__v');
+    .select('-__v')
+    .populate({
+      path: 'sessions',
+      options: { sort: { order: 1 } }
+    });
 
   res.status(200).json({
     status: 'success',
