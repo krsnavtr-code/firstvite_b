@@ -2,9 +2,7 @@ import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
 import User from "../model/User.js";
 
-// Store active users and their socket IDs
 const activeUsers = new Map();
-// Store classroom room participants
 const classroomParticipants = new Map();
 
 export const initializeSocketServer = (httpServer) => {
@@ -17,32 +15,21 @@ export const initializeSocketServer = (httpServer) => {
     transports: ["websocket", "polling"],
   });
 
-  // Authentication middleware for Socket.IO
   io.use(async (socket, next) => {
     try {
       const token =
         socket.handshake.auth.token || socket.handshake.headers.authorization;
-
-      if (!token) {
+      if (!token)
         return next(new Error("Authentication error: No token provided"));
-      }
 
-      // Remove 'Bearer ' prefix if present
       const tokenString = token.startsWith("Bearer ") ? token.slice(7) : token;
-
-      // Verify token
       const decoded = jwt.verify(tokenString, process.env.JWT_SECRET);
-
-      // Get user from database
       const user = await User.findById(
         decoded.id || decoded._id || decoded.userId,
       );
 
-      if (!user) {
-        return next(new Error("Authentication error: User not found"));
-      }
+      if (!user) return next(new Error("Authentication error: User not found"));
 
-      // Attach user to socket
       socket.user = user;
       socket.userId = user._id.toString();
       next();
@@ -54,15 +41,11 @@ export const initializeSocketServer = (httpServer) => {
 
   io.on("connection", (socket) => {
     console.log(`User connected: ${socket.userId}`);
-
-    // Store socket ID for user
     activeUsers.set(socket.userId, socket.id);
 
-    // Join classroom room
     socket.on("join-classroom", ({ sessionId, role }) => {
       socket.join(sessionId);
 
-      // Add to classroom participants
       if (!classroomParticipants.has(sessionId)) {
         classroomParticipants.set(sessionId, new Map());
       }
@@ -72,18 +55,14 @@ export const initializeSocketServer = (httpServer) => {
         joinedAt: new Date(),
       });
 
-      console.log(
-        `User ${socket.userId} joined classroom ${sessionId} as ${role}`,
-      );
-
-      // Notify others in the room
+      // Notify other existing users that a new member has landed
       socket.to(sessionId).emit("user-joined", {
         userId: socket.userId,
         role,
         fullname: socket.user.fullname,
       });
 
-      // Send current participants list to the new user
+      // Compile current participants list to return back down the pipeline
       const participants = Array.from(
         classroomParticipants.get(sessionId).entries(),
       ).map(([userId, data]) => {
@@ -102,32 +81,21 @@ export const initializeSocketServer = (httpServer) => {
       socket.emit("participants-list", participants);
     });
 
-    // Leave classroom room
     socket.on("leave-classroom", ({ sessionId }) => {
       socket.leave(sessionId);
-
-      // Remove from classroom participants
       if (classroomParticipants.has(sessionId)) {
         classroomParticipants.get(sessionId).delete(socket.userId);
-
-        // Notify others
         socket.to(sessionId).emit("user-left", {
           userId: socket.userId,
           fullname: socket.user.fullname,
         });
-
-        // Clean up if room is empty
         if (classroomParticipants.get(sessionId).size === 0) {
           classroomParticipants.delete(sessionId);
         }
       }
-
-      console.log(`User ${socket.userId} left classroom ${sessionId}`);
     });
 
-    // WebRTC Signaling Events
-
-    // Offer (teacher initiates connection)
+    // --- WebRTC Core Audio/Video Line Distribution ---
     socket.on("webrtc-offer", ({ sessionId, offer, toUserId }) => {
       const targetSocketId = activeUsers.get(toUserId);
       if (targetSocketId) {
@@ -139,7 +107,6 @@ export const initializeSocketServer = (httpServer) => {
       }
     });
 
-    // Answer (student responds)
     socket.on("webrtc-answer", ({ sessionId, answer, toUserId }) => {
       const targetSocketId = activeUsers.get(toUserId);
       if (targetSocketId) {
@@ -150,7 +117,6 @@ export const initializeSocketServer = (httpServer) => {
       }
     });
 
-    // ICE candidates
     socket.on("webrtc-ice-candidate", ({ sessionId, candidate, toUserId }) => {
       const targetSocketId = activeUsers.get(toUserId);
       if (targetSocketId) {
@@ -161,16 +127,29 @@ export const initializeSocketServer = (httpServer) => {
       }
     });
 
-    // Screen share offer
-    socket.on("screen-share-offer", ({ sessionId, offer }) => {
-      socket.to(sessionId).emit("screen-share-offer", {
-        offer,
-        fromUserId: socket.userId,
-        fromFullname: socket.user.fullname,
-      });
+    // --- CRITICAL FIXED: Screen Share Routing Matrices ---
+    socket.on("screen-share-offer", ({ sessionId, offer, toUserId }) => {
+      // If client targets a specific user, route directly, else map array down to room
+      if (toUserId) {
+        const targetSocketId = activeUsers.get(toUserId);
+        if (targetSocketId) {
+          io.to(targetSocketId).emit("screen-share-offer", {
+            offer,
+            fromUserId: socket.userId,
+            fromFullname: socket.user.fullname,
+          });
+        }
+      } else {
+        // Fallback backward compatibility layer for generic signals
+        socket.to(sessionId).emit("screen-share-offer", {
+          offer,
+          fromUserId: socket.userId,
+          fromFullname: socket.user.fullname,
+          isLegacyRoomBroadcast: true,
+        });
+      }
     });
 
-    // Screen share answer
     socket.on("screen-share-answer", ({ sessionId, answer, toUserId }) => {
       const targetSocketId = activeUsers.get(toUserId);
       if (targetSocketId) {
@@ -181,7 +160,6 @@ export const initializeSocketServer = (httpServer) => {
       }
     });
 
-    // Screen share ICE candidates
     socket.on(
       "screen-share-ice-candidate",
       ({ sessionId, candidate, toUserId }) => {
@@ -195,7 +173,6 @@ export const initializeSocketServer = (httpServer) => {
       },
     );
 
-    // Stop screen share
     socket.on("stop-screen-share", ({ sessionId }) => {
       socket.to(sessionId).emit("stop-screen-share", {
         fromUserId: socket.userId,
@@ -203,9 +180,7 @@ export const initializeSocketServer = (httpServer) => {
       });
     });
 
-    // Audio/Video Control Events
-
-    // Mute/Unmute
+    // --- Media Hardware Mappings & Room Toggles ---
     socket.on("toggle-audio", ({ sessionId, isMuted }) => {
       socket.to(sessionId).emit("user-audio-toggled", {
         userId: socket.userId,
@@ -214,7 +189,6 @@ export const initializeSocketServer = (httpServer) => {
       });
     });
 
-    // Video On/Off
     socket.on("toggle-video", ({ sessionId, isVideoOff }) => {
       socket.to(sessionId).emit("user-video-toggled", {
         userId: socket.userId,
@@ -223,7 +197,6 @@ export const initializeSocketServer = (httpServer) => {
       });
     });
 
-    // Request to speak (student raises hand)
     socket.on("raise-hand", ({ sessionId }) => {
       socket.to(sessionId).emit("hand-raised", {
         userId: socket.userId,
@@ -231,7 +204,6 @@ export const initializeSocketServer = (httpServer) => {
       });
     });
 
-    // Lower hand
     socket.on("lower-hand", ({ sessionId }) => {
       socket.to(sessionId).emit("hand-lowered", {
         userId: socket.userId,
@@ -239,7 +211,7 @@ export const initializeSocketServer = (httpServer) => {
       });
     });
 
-    // Teacher approves/unmutes student
+    // --- Teacher Control Mod Commands ---
     socket.on("approve-speak", ({ sessionId, studentUserId }) => {
       io.to(sessionId).emit("speak-approved", {
         studentUserId,
@@ -247,7 +219,6 @@ export const initializeSocketServer = (httpServer) => {
       });
     });
 
-    // Teacher mutes a specific student
     socket.on("mute-student", ({ sessionId, studentUserId }) => {
       io.to(sessionId).emit("student-muted", {
         studentUserId,
@@ -255,16 +226,13 @@ export const initializeSocketServer = (httpServer) => {
       });
     });
 
-    // Teacher mutes all students
     socket.on("mute-all", ({ sessionId }) => {
       io.to(sessionId).emit("all-muted", {
         mutedBy: socket.userId,
       });
     });
 
-    // Chat Events
-
-    // Send chat message
+    // --- Text Messaging Chat Context ---
     socket.on("send-chat", ({ sessionId, message }) => {
       const messageData = {
         sender: socket.userId,
@@ -272,12 +240,9 @@ export const initializeSocketServer = (httpServer) => {
         message,
         timestamp: new Date(),
       };
-
-      // Broadcast to room
       io.to(sessionId).emit("chat-message", messageData);
     });
 
-    // Typing indicator
     socket.on("typing-start", ({ sessionId }) => {
       socket.to(sessionId).emit("user-typing", {
         userId: socket.userId,
@@ -291,30 +256,17 @@ export const initializeSocketServer = (httpServer) => {
       });
     });
 
-    // Error handling
-    socket.on("error", (error) => {
-      console.error(`Socket error for user ${socket.userId}:`, error);
-    });
-
-    // Disconnect
     socket.on("disconnect", () => {
-      console.log(`User disconnected: ${socket.userId}`);
-
-      // Remove from active users
+      console.log(`User disconnected from node: ${socket.userId}`);
       activeUsers.delete(socket.userId);
 
-      // Remove from all classroom rooms
       classroomParticipants.forEach((participants, sessionId) => {
         if (participants.has(socket.userId)) {
           participants.delete(socket.userId);
-
-          // Notify others
           socket.to(sessionId).emit("user-left", {
             userId: socket.userId,
             fullname: socket.user.fullname,
           });
-
-          // Clean up if room is empty
           if (participants.size === 0) {
             classroomParticipants.delete(sessionId);
           }
@@ -326,11 +278,8 @@ export const initializeSocketServer = (httpServer) => {
   return io;
 };
 
-// Helper function to get participants in a classroom
 export const getClassroomParticipants = (sessionId) => {
-  if (!classroomParticipants.has(sessionId)) {
-    return [];
-  }
+  if (!classroomParticipants.has(sessionId)) return [];
   return Array.from(classroomParticipants.get(sessionId).entries()).map(
     ([userId, data]) => ({
       userId,
@@ -340,15 +289,11 @@ export const getClassroomParticipants = (sessionId) => {
   );
 };
 
-// Helper function to check if user is in a classroom
 export const isUserInClassroom = (sessionId, userId) => {
-  if (!classroomParticipants.has(sessionId)) {
-    return false;
-  }
+  if (!classroomParticipants.has(sessionId)) return false;
   return classroomParticipants.get(sessionId).has(userId);
 };
 
-// Helper function to get user's socket ID
 export const getUserSocketId = (userId) => {
   return activeUsers.get(userId);
 };
