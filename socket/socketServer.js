@@ -97,96 +97,44 @@ export const initializeSocketServer = (httpServer) => {
     socket.heartbeatTimer = heartbeatTimer;
 
     // Atomic classroom join with locking to prevent race conditions
-    socket.on("join-classroom", async ({ sessionId, role }) => {
-      try {
-        // Acquire lock for this session to prevent concurrent joins
-        if (!connectionLocks.has(sessionId)) {
-          connectionLocks.set(sessionId, new Set());
-        }
-        const sessionLock = connectionLocks.get(sessionId);
+    // --- Inside socketServer.js (join-classroom event) ---
+    socket.on("join-classroom", ({ sessionId, role }) => {
+      socket.join(sessionId);
 
-        // Prevent duplicate join attempts
-        if (sessionLock.has(socket.userId)) {
-          console.log(
-            `[LOCK] User ${socket.userId} already joining session ${sessionId}, skipping`,
-          );
-          return;
-        }
-
-        sessionLock.add(socket.userId);
-
-        // Initialize session if needed
-        if (!classroomParticipants.has(sessionId)) {
-          classroomParticipants.set(sessionId, new Map());
-        }
-
-        // Check if already in classroom (reconnection scenario)
-        const existingParticipant = classroomParticipants
-          .get(sessionId)
-          .get(socket.userId);
-        if (existingParticipant) {
-          console.log(
-            `[REJOIN] User ${socket.userId} rejoining session ${sessionId}`,
-          );
-          // Update socket ID for reconnection
-          existingParticipant.socketId = socket.id;
-          existingParticipant.connectionState = "connected";
-          existingParticipant.rejoinedAt = new Date();
-        } else {
-          // New participant
-          console.log(
-            `[JOIN] User ${socket.userId} joining session ${sessionId} as ${role}`,
-          );
-          classroomParticipants.get(sessionId).set(socket.userId, {
-            socketId: socket.id,
-            role,
-            joinedAt: new Date(),
-            connectionState: "connected",
-          });
-        }
-
-        // Join socket room
-        socket.join(sessionId);
-
-        // Release lock
-        sessionLock.delete(socket.userId);
-
-        // Notify other existing users (atomic broadcast)
-        socket.to(sessionId).emit("user-joined", {
-          userId: socket.userId,
-          role,
-          fullname: socket.user.fullname,
-          timestamp: Date.now(),
-        });
-
-        // Compile current participants list with atomic read
-        const participants = Array.from(
-          classroomParticipants.get(sessionId).entries(),
-        ).map(([userId, data]) => {
-          const userData = activeUsers.get(userId);
-          const user = userData?.user || null;
-          return {
-            userId,
-            role: data.role,
-            fullname: user?.fullname || "Unknown",
-            joinedAt: data.joinedAt,
-            connectionState: data.connectionState,
-          };
-        });
-
-        // Send participants list to new user
-        socket.emit("participants-list", {
-          participants,
-          timestamp: Date.now(),
-        });
-
-        console.log(
-          `[SUCCESS] User ${socket.userId} joined session ${sessionId}. Total: ${participants.length}`,
-        );
-      } catch (error) {
-        console.error(`[ERROR] Failed to join classroom ${sessionId}:`, error);
-        socket.emit("error", { message: "Failed to join classroom" });
+      if (!classroomParticipants.has(sessionId)) {
+        classroomParticipants.set(sessionId, new Map());
       }
+
+      // Cross-device safety: Purane stale socket map ko overwrite karein instantly
+      classroomParticipants.get(sessionId).set(socket.userId, {
+        socketId: socket.id,
+        role,
+        joinedAt: new Date(),
+      });
+
+      // Pure Room ko notify karein (including cross-device broadcast buffers)
+      io.to(sessionId).emit("user-joined", {
+        userId: socket.userId,
+        role,
+        fullname: socket.user.fullname,
+      });
+
+      // Compile full dynamic active list
+      const participants = Array.from(
+        classroomParticipants.get(sessionId).entries(),
+      ).map(([userId, data]) => {
+        // Direct source identification directly from the active socket room pool
+        const targetSocket = io.sockets.sockets.get(data.socketId);
+        return {
+          userId,
+          role: data.role,
+          fullname: targetSocket?.user?.fullname || "LMS Student",
+          joinedAt: data.joinedAt,
+        };
+      });
+
+      // Target socket backup connection force check
+      io.to(socket.id).emit("participants-list", participants);
     });
 
     socket.on("leave-classroom", ({ sessionId }) => {
