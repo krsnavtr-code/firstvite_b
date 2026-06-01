@@ -20,7 +20,8 @@ export const initializeSocketServer = (httpServer) => {
   // Authentication middleware for Socket.IO
   io.use(async (socket, next) => {
     try {
-      const token = socket.handshake.auth.token || socket.handshake.headers.authorization;
+      const token =
+        socket.handshake.auth.token || socket.handshake.headers.authorization;
 
       if (!token) {
         return next(new Error("Authentication error: No token provided"));
@@ -33,7 +34,9 @@ export const initializeSocketServer = (httpServer) => {
       const decoded = jwt.verify(tokenString, process.env.JWT_SECRET);
 
       // Get user from database
-      const user = await User.findById(decoded.id || decoded._id || decoded.userId);
+      const user = await User.findById(
+        decoded.id || decoded._id || decoded.userId,
+      );
 
       if (!user) {
         return next(new Error("Authentication error: User not found"));
@@ -69,7 +72,9 @@ export const initializeSocketServer = (httpServer) => {
         joinedAt: new Date(),
       });
 
-      console.log(`User ${socket.userId} joined classroom ${sessionId} as ${role}`);
+      console.log(
+        `User ${socket.userId} joined classroom ${sessionId} as ${role}`,
+      );
 
       // Notify others in the room
       socket.to(sessionId).emit("user-joined", {
@@ -80,12 +85,19 @@ export const initializeSocketServer = (httpServer) => {
 
       // Send current participants list to the new user
       const participants = Array.from(
-        classroomParticipants.get(sessionId).entries()
-      ).map(([userId, data]) => ({
-        userId,
-        role: data.role,
-        joinedAt: data.joinedAt,
-      }));
+        classroomParticipants.get(sessionId).entries(),
+      ).map(([userId, data]) => {
+        const userSocket = activeUsers.get(userId);
+        const user = userSocket
+          ? io.sockets.sockets.get(userSocket)?.user
+          : null;
+        return {
+          userId,
+          role: data.role,
+          fullname: user?.fullname || "Unknown",
+          joinedAt: data.joinedAt,
+        };
+      });
 
       socket.emit("participants-list", participants);
     });
@@ -117,27 +129,36 @@ export const initializeSocketServer = (httpServer) => {
 
     // Offer (teacher initiates connection)
     socket.on("webrtc-offer", ({ sessionId, offer, toUserId }) => {
-      socket.to(sessionId).emit("webrtc-offer", {
-        offer,
-        fromUserId: socket.userId,
-        fromFullname: socket.user.fullname,
-      });
+      const targetSocketId = activeUsers.get(toUserId);
+      if (targetSocketId) {
+        io.to(targetSocketId).emit("webrtc-offer", {
+          offer,
+          fromUserId: socket.userId,
+          fromFullname: socket.user.fullname,
+        });
+      }
     });
 
     // Answer (student responds)
     socket.on("webrtc-answer", ({ sessionId, answer, toUserId }) => {
-      socket.to(sessionId).emit("webrtc-answer", {
-        answer,
-        fromUserId: socket.userId,
-      });
+      const targetSocketId = activeUsers.get(toUserId);
+      if (targetSocketId) {
+        io.to(targetSocketId).emit("webrtc-answer", {
+          answer,
+          fromUserId: socket.userId,
+        });
+      }
     });
 
     // ICE candidates
     socket.on("webrtc-ice-candidate", ({ sessionId, candidate, toUserId }) => {
-      socket.to(sessionId).emit("webrtc-ice-candidate", {
-        candidate,
-        fromUserId: socket.userId,
-      });
+      const targetSocketId = activeUsers.get(toUserId);
+      if (targetSocketId) {
+        io.to(targetSocketId).emit("webrtc-ice-candidate", {
+          candidate,
+          fromUserId: socket.userId,
+        });
+      }
     });
 
     // Screen share offer
@@ -151,19 +172,28 @@ export const initializeSocketServer = (httpServer) => {
 
     // Screen share answer
     socket.on("screen-share-answer", ({ sessionId, answer, toUserId }) => {
-      socket.to(sessionId).emit("screen-share-answer", {
-        answer,
-        fromUserId: socket.userId,
-      });
+      const targetSocketId = activeUsers.get(toUserId);
+      if (targetSocketId) {
+        io.to(targetSocketId).emit("screen-share-answer", {
+          answer,
+          fromUserId: socket.userId,
+        });
+      }
     });
 
     // Screen share ICE candidates
-    socket.on("screen-share-ice-candidate", ({ sessionId, candidate, toUserId }) => {
-      socket.to(sessionId).emit("screen-share-ice-candidate", {
-        candidate,
-        fromUserId: socket.userId,
-      });
-    });
+    socket.on(
+      "screen-share-ice-candidate",
+      ({ sessionId, candidate, toUserId }) => {
+        const targetSocketId = activeUsers.get(toUserId);
+        if (targetSocketId) {
+          io.to(targetSocketId).emit("screen-share-ice-candidate", {
+            candidate,
+            fromUserId: socket.userId,
+          });
+        }
+      },
+    );
 
     // Stop screen share
     socket.on("stop-screen-share", ({ sessionId }) => {
@@ -306,7 +336,7 @@ export const getClassroomParticipants = (sessionId) => {
       userId,
       role: data.role,
       joinedAt: data.joinedAt,
-    })
+    }),
   );
 };
 
