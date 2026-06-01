@@ -2,12 +2,11 @@ import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
 import User from "../model/User.js";
 
-// Thread-safe data structures with atomic operations
-const activeUsers = new Map(); // userId -> { socketId, user, connectionState, lastHeartbeat }
-const classroomParticipants = new Map(); // sessionId -> Map(userId -> { socketId, role, joinedAt, connectionState })
-const connectionLocks = new Map(); // sessionId -> Set of userIds currently joining (prevents race conditions)
-const heartbeatInterval = 30000; // 30 seconds
-const connectionTimeout = 60000; // 60 seconds
+// Production-grade configuration constants
+const HEARTBEAT_INTERVAL = 20000; // 20 seconds - optimized for mobile
+const CONNECTION_TIMEOUT = 45000; // 45 seconds - allows for cellular network delays
+const PING_TIMEOUT = 25000; // 25 seconds
+const PING_INTERVAL = 10000; // 10 seconds
 
 export const initializeSocketServer = (httpServer) => {
   const io = new Server(httpServer, {
@@ -16,21 +15,23 @@ export const initializeSocketServer = (httpServer) => {
       methods: ["GET", "POST"],
       credentials: true,
     },
-    transports: ["websocket", "polling"],
-    pingTimeout: heartbeatInterval,
-    pingInterval: heartbeatInterval / 2,
+    transports: ["websocket"], // Force WebSocket only - no polling overhead
+    pingTimeout: PING_TIMEOUT,
+    pingInterval: PING_INTERVAL,
     reconnection: true,
-    reconnectionDelay: 1000,
-    reconnectionAttempts: 5,
+    reconnectionDelay: 500, // Fast reconnection for mobile
+    reconnectionAttempts: 10, // More attempts for unstable networks
+    maxHttpBufferSize: 1e6, // 1MB for WebRTC signaling data
   });
 
-  // Atomic authentication with connection state tracking
+  // Authentication middleware with user data attachment
   io.use(async (socket, next) => {
     try {
       const token =
         socket.handshake.auth.token || socket.handshake.headers.authorization;
-      if (!token)
+      if (!token) {
         return next(new Error("Authentication error: No token provided"));
+      }
 
       const tokenString = token.startsWith("Bearer ") ? token.slice(7) : token;
       const decoded = jwt.verify(tokenString, process.env.JWT_SECRET);
@@ -38,143 +39,146 @@ export const initializeSocketServer = (httpServer) => {
         decoded.id || decoded._id || decoded.userId,
       );
 
-      if (!user) return next(new Error("Authentication error: User not found"));
+      if (!user) {
+        return next(new Error("Authentication error: User not found"));
+      }
 
+      // Attach user data directly to socket for atomic access
       socket.user = user;
       socket.userId = user._id.toString();
-      socket.connectionState = "authenticated";
+      socket.role = user.role || "student";
+      socket.joinedAt = Date.now();
 
-      console.log(`[AUTH] User ${socket.userId} authenticated successfully`);
+      console.log(
+        `[AUTH] User ${socket.userId} authenticated as ${socket.role}`,
+      );
       next();
     } catch (error) {
       console.error(
         "[AUTH ERROR] Socket authentication failed:",
         error.message,
       );
-      socket.connectionState = "failed";
       next(new Error("Authentication error: Invalid token"));
     }
   });
 
   io.on("connection", (socket) => {
     console.log(
-      `[CONNECT] User ${socket.userId} connected with socket ${socket.id}`,
+      `[CONNECT] User ${socket.userId} (${socket.role}) connected with socket ${socket.id}`,
     );
 
-    // Clean up any stale connections for this user (reconnection handling)
-    const existingConnection = activeUsers.get(socket.userId);
-    if (existingConnection) {
-      console.log(
-        `[RECONNECT] Cleaning up stale connection for user ${socket.userId}`,
-      );
-      const oldSocket = io.sockets.sockets.get(existingConnection.socketId);
-      if (oldSocket && oldSocket.id !== socket.id) {
-        oldSocket.disconnect(true);
+    // Handle reconnection: Disconnect old socket if same user reconnects
+    io.sockets.sockets.forEach((existingSocket) => {
+      if (
+        existingSocket.userId === socket.userId &&
+        existingSocket.id !== socket.id
+      ) {
+        console.log(
+          `[RECONNECT] Disconnecting stale socket ${existingSocket.id} for user ${socket.userId}`,
+        );
+        existingSocket.disconnect(true);
       }
-    }
-
-    // Atomically update active users with connection state
-    activeUsers.set(socket.userId, {
-      socketId: socket.id,
-      user: socket.user,
-      connectionState: "connected",
-      lastHeartbeat: Date.now(),
     });
 
-    socket.connectionState = "connected";
-
-    // Setup heartbeat monitoring
+    // Heartbeat monitoring
+    let lastHeartbeat = Date.now();
     const heartbeatTimer = setInterval(() => {
-      const userData = activeUsers.get(socket.userId);
-      if (userData && Date.now() - userData.lastHeartbeat > connectionTimeout) {
+      if (Date.now() - lastHeartbeat > CONNECTION_TIMEOUT) {
         console.log(
           `[TIMEOUT] User ${socket.userId} heartbeat timeout, disconnecting`,
         );
         socket.disconnect(true);
       }
-    }, heartbeatInterval);
+    }, HEARTBEAT_INTERVAL);
 
-    socket.heartbeatTimer = heartbeatTimer;
+    socket.on("heartbeat", () => {
+      lastHeartbeat = Date.now();
+    });
 
-    // Atomic classroom join with locking to prevent race conditions
-    // --- Inside socketServer.js (join-classroom event) ---
+    // ATOMIC ROOM REGISTRATION: Use Socket.IO's built-in room management
     socket.on("join-classroom", ({ sessionId, role }) => {
+      console.log(
+        `[JOIN] User ${socket.userId} joining session ${sessionId} as ${role}`,
+      );
+
+      // Join the room - Socket.IO handles this atomically
       socket.join(sessionId);
 
-      if (!classroomParticipants.has(sessionId)) {
-        classroomParticipants.set(sessionId, new Map());
+      // Store role on socket for atomic access
+      socket.currentSession = sessionId;
+      socket.currentRole = role || socket.role;
+
+      // Get all sockets in the room (atomic read from Socket.IO adapter)
+      const roomSockets = io.sockets.adapter.rooms.get(sessionId);
+      const participants = [];
+
+      if (roomSockets) {
+        roomSockets.forEach((socketId) => {
+          const targetSocket = io.sockets.sockets.get(socketId);
+          if (targetSocket && targetSocket.userId) {
+            participants.push({
+              userId: targetSocket.userId,
+              role: targetSocket.currentRole || targetSocket.role,
+              fullname: targetSocket.user?.fullname || "Unknown",
+              joinedAt: targetSocket.joinedAt,
+            });
+          }
+        });
       }
 
-      // Cross-device safety: Purane stale socket map ko overwrite karein instantly
-      classroomParticipants.get(sessionId).set(socket.userId, {
-        socketId: socket.id,
-        role,
-        joinedAt: new Date(),
-      });
-
-      // Pure Room ko notify karein (including cross-device broadcast buffers)
-      io.to(sessionId).emit("user-joined", {
+      // Broadcast user-joined to all in room EXCEPT sender
+      socket.to(sessionId).emit("user-joined", {
         userId: socket.userId,
-        role,
+        role: socket.currentRole,
         fullname: socket.user.fullname,
+        timestamp: Date.now(),
       });
 
-      // Compile full dynamic active list
-      const participants = Array.from(
-        classroomParticipants.get(sessionId).entries(),
-      ).map(([userId, data]) => {
-        // Direct source identification directly from the active socket room pool
-        const targetSocket = io.sockets.sockets.get(data.socketId);
-        return {
-          userId,
-          role: data.role,
-          fullname: targetSocket?.user?.fullname || "LMS Student",
-          joinedAt: data.joinedAt,
-        };
+      // Send participants list to the joining user
+      socket.emit("participants-list", {
+        participants,
+        timestamp: Date.now(),
       });
 
-      // Target socket backup connection force check
-      io.to(socket.id).emit("participants-list", participants);
+      console.log(
+        `[JOIN] Session ${sessionId} now has ${participants.length} participants`,
+      );
     });
 
     socket.on("leave-classroom", ({ sessionId }) => {
       console.log(`[LEAVE] User ${socket.userId} leaving session ${sessionId}`);
 
       socket.leave(sessionId);
+      socket.currentSession = null;
 
-      if (classroomParticipants.has(sessionId)) {
-        const participants = classroomParticipants.get(sessionId);
-        participants.delete(socket.userId);
-
-        // Notify others
-        socket.to(sessionId).emit("user-left", {
-          userId: socket.userId,
-          fullname: socket.user.fullname,
-          timestamp: Date.now(),
-        });
-
-        // Clean up empty sessions
-        if (participants.size === 0) {
-          classroomParticipants.delete(sessionId);
-          connectionLocks.delete(sessionId);
-          console.log(`[CLEANUP] Session ${sessionId} removed (empty)`);
-        }
-      }
+      // Notify others in the room
+      socket.to(sessionId).emit("user-left", {
+        userId: socket.userId,
+        fullname: socket.user.fullname,
+        timestamp: Date.now(),
+      });
     });
 
-    // --- WebRTC Core Audio/Video Line Distribution ---
-    // STRICT RULE: Only TEACHER initiates connections to prevent dual-initiator collisions
+    // ASYMMETRIC WEBRTC SIGNALING: Teacher initiates, Student receives
     socket.on("webrtc-offer", ({ sessionId, offer, toUserId }) => {
-      const targetUserData = activeUsers.get(toUserId);
-      if (!targetUserData) {
-        console.log(`[WEBRTC] Target user ${toUserId} not found for offer`);
+      // Find target socket by iterating through room members
+      const roomSockets = io.sockets.adapter.rooms.get(sessionId);
+      if (!roomSockets) {
+        console.log(`[WEBRTC] Room ${sessionId} not found`);
         return;
       }
 
-      const targetSocket = io.sockets.sockets.get(targetUserData.socketId);
+      let targetSocket = null;
+      roomSockets.forEach((socketId) => {
+        const s = io.sockets.sockets.get(socketId);
+        if (s && s.userId === toUserId) {
+          targetSocket = s;
+        }
+      });
+
       if (!targetSocket) {
         console.log(
-          `[WEBRTC] Target socket ${targetUserData.socketId} not found`,
+          `[WEBRTC] Target user ${toUserId} not found in room ${sessionId}`,
         );
         return;
       }
@@ -189,17 +193,19 @@ export const initializeSocketServer = (httpServer) => {
     });
 
     socket.on("webrtc-answer", ({ sessionId, answer, toUserId }) => {
-      const targetUserData = activeUsers.get(toUserId);
-      if (!targetUserData) {
-        console.log(`[WEBRTC] Target user ${toUserId} not found for answer`);
-        return;
-      }
+      const roomSockets = io.sockets.adapter.rooms.get(sessionId);
+      if (!roomSockets) return;
 
-      const targetSocket = io.sockets.sockets.get(targetUserData.socketId);
+      let targetSocket = null;
+      roomSockets.forEach((socketId) => {
+        const s = io.sockets.sockets.get(socketId);
+        if (s && s.userId === toUserId) {
+          targetSocket = s;
+        }
+      });
+
       if (!targetSocket) {
-        console.log(
-          `[WEBRTC] Target socket ${targetUserData.socketId} not found`,
-        );
+        console.log(`[WEBRTC] Target user ${toUserId} not found`);
         return;
       }
 
@@ -212,46 +218,52 @@ export const initializeSocketServer = (httpServer) => {
     });
 
     socket.on("webrtc-ice-candidate", ({ sessionId, candidate, toUserId }) => {
-      const targetUserData = activeUsers.get(toUserId);
-      if (!targetUserData) {
-        return; // Silently drop ICE candidates for disconnected users
-      }
+      const roomSockets = io.sockets.adapter.rooms.get(sessionId);
+      if (!roomSockets) return;
 
-      const targetSocket = io.sockets.sockets.get(targetUserData.socketId);
-      if (!targetSocket) {
-        return;
-      }
-
-      targetSocket.emit("webrtc-ice-candidate", {
-        candidate,
-        fromUserId: socket.userId,
-        timestamp: Date.now(),
+      let targetSocket = null;
+      roomSockets.forEach((socketId) => {
+        const s = io.sockets.sockets.get(socketId);
+        if (s && s.userId === toUserId) {
+          targetSocket = s;
+        }
       });
+
+      if (targetSocket) {
+        targetSocket.emit("webrtc-ice-candidate", {
+          candidate,
+          fromUserId: socket.userId,
+          timestamp: Date.now(),
+        });
+      }
     });
 
-    // --- Screen Share Routing Matrices ---
+    // Screen Share Routing
     socket.on("screen-share-offer", ({ sessionId, offer, toUserId }) => {
       if (toUserId) {
-        const targetUserData = activeUsers.get(toUserId);
-        if (targetUserData) {
-          const targetSocket = io.sockets.sockets.get(targetUserData.socketId);
-          if (targetSocket) {
-            console.log(
-              `[SCREEN SHARE] Offer from ${socket.userId} to ${toUserId}`,
-            );
-            targetSocket.emit("screen-share-offer", {
-              offer,
-              fromUserId: socket.userId,
-              fromFullname: socket.user.fullname,
-              timestamp: Date.now(),
-            });
+        const roomSockets = io.sockets.adapter.rooms.get(sessionId);
+        if (!roomSockets) return;
+
+        let targetSocket = null;
+        roomSockets.forEach((socketId) => {
+          const s = io.sockets.sockets.get(socketId);
+          if (s && s.userId === toUserId) {
+            targetSocket = s;
           }
+        });
+
+        if (targetSocket) {
+          console.log(
+            `[SCREEN SHARE] Offer from ${socket.userId} to ${toUserId}`,
+          );
+          targetSocket.emit("screen-share-offer", {
+            offer,
+            fromUserId: socket.userId,
+            fromFullname: socket.user.fullname,
+            timestamp: Date.now(),
+          });
         }
       } else {
-        // Broadcast to all in room
-        console.log(
-          `[SCREEN SHARE] Broadcast from ${socket.userId} to room ${sessionId}`,
-        );
         socket.to(sessionId).emit("screen-share-offer", {
           offer,
           fromUserId: socket.userId,
@@ -262,32 +274,46 @@ export const initializeSocketServer = (httpServer) => {
     });
 
     socket.on("screen-share-answer", ({ sessionId, answer, toUserId }) => {
-      const targetUserData = activeUsers.get(toUserId);
-      if (targetUserData) {
-        const targetSocket = io.sockets.sockets.get(targetUserData.socketId);
-        if (targetSocket) {
-          targetSocket.emit("screen-share-answer", {
-            answer,
-            fromUserId: socket.userId,
-            timestamp: Date.now(),
-          });
+      const roomSockets = io.sockets.adapter.rooms.get(sessionId);
+      if (!roomSockets) return;
+
+      let targetSocket = null;
+      roomSockets.forEach((socketId) => {
+        const s = io.sockets.sockets.get(socketId);
+        if (s && s.userId === toUserId) {
+          targetSocket = s;
         }
+      });
+
+      if (targetSocket) {
+        targetSocket.emit("screen-share-answer", {
+          answer,
+          fromUserId: socket.userId,
+          timestamp: Date.now(),
+        });
       }
     });
 
     socket.on(
       "screen-share-ice-candidate",
       ({ sessionId, candidate, toUserId }) => {
-        const targetUserData = activeUsers.get(toUserId);
-        if (targetUserData) {
-          const targetSocket = io.sockets.sockets.get(targetUserData.socketId);
-          if (targetSocket) {
-            targetSocket.emit("screen-share-ice-candidate", {
-              candidate,
-              fromUserId: socket.userId,
-              timestamp: Date.now(),
-            });
+        const roomSockets = io.sockets.adapter.rooms.get(sessionId);
+        if (!roomSockets) return;
+
+        let targetSocket = null;
+        roomSockets.forEach((socketId) => {
+          const s = io.sockets.sockets.get(socketId);
+          if (s && s.userId === toUserId) {
+            targetSocket = s;
           }
+        });
+
+        if (targetSocket) {
+          targetSocket.emit("screen-share-ice-candidate", {
+            candidate,
+            fromUserId: socket.userId,
+            timestamp: Date.now(),
+          });
         }
       },
     );
@@ -301,7 +327,7 @@ export const initializeSocketServer = (httpServer) => {
       });
     });
 
-    // --- Media Hardware Mappings & Room Toggles ---
+    // Media Controls
     socket.on("toggle-audio", ({ sessionId, isMuted }) => {
       socket.to(sessionId).emit("user-audio-toggled", {
         userId: socket.userId,
@@ -332,7 +358,7 @@ export const initializeSocketServer = (httpServer) => {
       });
     });
 
-    // --- Teacher Control Mod Commands ---
+    // Teacher Controls
     socket.on("approve-speak", ({ sessionId, studentUserId }) => {
       io.to(sessionId).emit("speak-approved", {
         studentUserId,
@@ -353,7 +379,7 @@ export const initializeSocketServer = (httpServer) => {
       });
     });
 
-    // --- Text Messaging Chat Context ---
+    // Chat
     socket.on("send-chat", ({ sessionId, message }) => {
       const messageData = {
         sender: socket.userId,
@@ -377,107 +403,60 @@ export const initializeSocketServer = (httpServer) => {
       });
     });
 
-    // Heartbeat/ping handler
-    socket.on("heartbeat", () => {
-      const userData = activeUsers.get(socket.userId);
-      if (userData) {
-        userData.lastHeartbeat = Date.now();
-      }
-    });
-
-    // Graceful disconnect with cleanup
+    // Disconnect handler
     socket.on("disconnect", (reason) => {
       console.log(
         `[DISCONNECT] User ${socket.userId} disconnected. Reason: ${reason}`,
       );
 
-      // Clear heartbeat timer
-      if (socket.heartbeatTimer) {
-        clearInterval(socket.heartbeatTimer);
+      clearInterval(heartbeatTimer);
+
+      // Notify all rooms the user was in
+      if (socket.currentSession) {
+        socket.to(socket.currentSession).emit("user-left", {
+          userId: socket.userId,
+          fullname: socket.user.fullname,
+          timestamp: Date.now(),
+        });
       }
-
-      // Update connection state
-      const userData = activeUsers.get(socket.userId);
-      if (userData) {
-        userData.connectionState = "disconnected";
-      }
-
-      // Remove from active users (but keep data for potential reconnection)
-      // We'll clean up after connection timeout
-      setTimeout(() => {
-        const currentData = activeUsers.get(socket.userId);
-        if (currentData && currentData.connectionState === "disconnected") {
-          activeUsers.delete(socket.userId);
-          console.log(
-            `[CLEANUP] User ${socket.userId} removed from active users`,
-          );
-        }
-      }, connectionTimeout);
-
-      // Remove from all classroom participants
-      classroomParticipants.forEach((participants, sessionId) => {
-        if (participants.has(socket.userId)) {
-          const participant = participants.get(socket.userId);
-          participant.connectionState = "disconnected";
-
-          // Notify others
-          socket.to(sessionId).emit("user-left", {
-            userId: socket.userId,
-            fullname: socket.user.fullname,
-            timestamp: Date.now(),
-          });
-
-          // Clean up after timeout (allow for reconnection)
-          setTimeout(() => {
-            const currentParticipant = participants.get(socket.userId);
-            if (
-              currentParticipant &&
-              currentParticipant.connectionState === "disconnected"
-            ) {
-              participants.delete(socket.userId);
-              console.log(
-                `[CLEANUP] User ${socket.userId} removed from session ${sessionId}`,
-              );
-
-              if (participants.size === 0) {
-                classroomParticipants.delete(sessionId);
-                connectionLocks.delete(sessionId);
-                console.log(`[CLEANUP] Session ${sessionId} removed (empty)`);
-              }
-            }
-          }, connectionTimeout);
-        }
-      });
     });
   });
 
   return io;
 };
 
-export const getClassroomParticipants = (sessionId) => {
-  if (!classroomParticipants.has(sessionId)) return [];
-  return Array.from(classroomParticipants.get(sessionId).entries())
-    .filter(([userId, data]) => data.connectionState !== "disconnected")
-    .map(([userId, data]) => ({
-      userId,
-      role: data.role,
-      joinedAt: data.joinedAt,
-      connectionState: data.connectionState,
-    }));
+// Helper functions using Socket.IO's room management
+export const getClassroomParticipants = (io, sessionId) => {
+  const roomSockets = io.sockets.adapter.rooms.get(sessionId);
+  if (!roomSockets) return [];
+
+  const participants = [];
+  roomSockets.forEach((socketId) => {
+    const socket = io.sockets.sockets.get(socketId);
+    if (socket && socket.userId) {
+      participants.push({
+        userId: socket.userId,
+        role: socket.currentRole || socket.role,
+        fullname: socket.user?.fullname || "Unknown",
+        joinedAt: socket.joinedAt,
+      });
+    }
+  });
+
+  return participants;
 };
 
-export const isUserInClassroom = (sessionId, userId) => {
-  if (!classroomParticipants.has(sessionId)) return false;
-  const participant = classroomParticipants.get(sessionId).get(userId);
-  return participant && participant.connectionState !== "disconnected";
-};
+export const isUserInClassroom = (io, sessionId, userId) => {
+  const roomSockets = io.sockets.adapter.rooms.get(sessionId);
+  if (!roomSockets) return false;
 
-export const getUserSocketId = (userId) => {
-  const userData = activeUsers.get(userId);
-  return userData?.socketId || null;
-};
+  let found = false;
+  roomSockets.forEach((socketId) => {
+    const socket = io.sockets.sockets.get(socketId);
+    if (socket && socket.userId === userId) {
+      found = true;
+    }
+  });
 
-export const getConnectionState = (userId) => {
-  const userData = activeUsers.get(userId);
-  return userData?.connectionState || "unknown";
+  return found;
 };
