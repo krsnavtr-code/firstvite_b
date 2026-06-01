@@ -207,6 +207,7 @@ export const getMyEnrollments = asyncHandler(async (req, res) => {
 
     const enrollments = await Enrollment.find(query)
       .populate("course", "title thumbnail price")
+      .populate("batch", "name code status teacher whatsappGroupLink")
       .sort("-createdAt")
       .lean(); // Convert to plain JS objects for logging
 

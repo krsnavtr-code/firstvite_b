@@ -229,6 +229,7 @@ export const updateBatch = async (req, res) => {
       maxCapacity,
       location,
       meetingLink,
+      whatsappGroupLink,
       description,
       status,
       isActive,
@@ -344,7 +345,8 @@ export const updateBatch = async (req, res) => {
     console.error("Error updating batch:", error);
     res.status(500).json({
       success: false,
-      message: "Server error",
+      message: error.message || "Server error",
+      error: process.env.NODE_ENV === "development" ? error : undefined,
     });
   }
 };
