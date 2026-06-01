@@ -157,6 +157,12 @@ const courseSchema = new mongoose.Schema(
         ref: "Lesson",
       },
     ],
+    batches: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Batch",
+      },
+    ],
     enrollmentCount: {
       type: Number,
       default: 0,

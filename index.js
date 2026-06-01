@@ -41,6 +41,7 @@ import proposalDocumentRoutes from "./routes/proposalDocumentRoutes.js";
 import testQARoutes from "./routes/testQARoutes.js";
 import adminRoleRoutes from "./routes/adminRoleRoutes.js";
 import sitemapRoute from "./route/sitemap.route.js";
+import batchRoute from "./route/batch.route.js";
 
 import dns from "dns";
 
@@ -395,6 +396,7 @@ app.get("/api/test-categories", async (req, res) => {
 app.use("/api/books", bookRoute);
 app.use("/api/categories", categoryRoute);
 app.use("/api/courses", courseRoute);
+app.use("/api/batches", batchRoute);
 app.use("/api/contacts", contactRoute);
 app.use("/api/faqs", faqRoute);
 app.use("/api/blog", blogRoutes);

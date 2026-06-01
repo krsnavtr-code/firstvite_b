@@ -66,6 +66,18 @@ const userSchema = new mongoose.Schema(
         ref: "Course",
       },
     ],
+    enrolledBatches: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Batch",
+      },
+    ],
+    assignedBatches: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Batch",
+      },
+    ],
     completedLessons: [
       {
         type: mongoose.Schema.Types.ObjectId,
