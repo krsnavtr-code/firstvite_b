@@ -72,6 +72,12 @@ const batchSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    classroomSessions: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ClassroomSession",
+      },
+    ],
   },
   {
     timestamps: true,

@@ -42,8 +42,11 @@ import testQARoutes from "./routes/testQARoutes.js";
 import adminRoleRoutes from "./routes/adminRoleRoutes.js";
 import sitemapRoute from "./route/sitemap.route.js";
 import batchRoute from "./route/batch.route.js";
+import classroomRoutes from "./routes/classroomRoutes.js";
 
 import dns from "dns";
+import { createServer } from "http";
+import { initializeSocketServer } from "./socket/socketServer.js";
 
 // Only set DNS in development/local environment
 if (process.env.NODE_ENV !== "production") {
@@ -397,6 +400,7 @@ app.use("/api/books", bookRoute);
 app.use("/api/categories", categoryRoute);
 app.use("/api/courses", courseRoute);
 app.use("/api/batches", batchRoute);
+app.use("/api/classroom", classroomRoutes);
 app.use("/api/contacts", contactRoute);
 app.use("/api/faqs", faqRoute);
 app.use("/api/blog", blogRoutes);
@@ -527,8 +531,12 @@ app.use((err, req, res, next) => {
 });
 
 // Start the server
-const server = app.listen(PORT, () => {
+const httpServer = createServer(app);
+const io = initializeSocketServer(httpServer);
+
+const server = httpServer.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  console.log(`Socket.IO server initialized`);
 });
 
 // Handle unhandled promise rejections
