@@ -11,7 +11,7 @@ const PING_INTERVAL = 10000; // 10 seconds
 export const initializeSocketServer = (httpServer) => {
   const io = new Server(httpServer, {
     cors: {
-      origin: process.env.CLIENT_URL || "http://localhost:5173",
+      origin: "https://www.eklabya.com",
       methods: ["GET", "POST"],
       credentials: true,
     },
