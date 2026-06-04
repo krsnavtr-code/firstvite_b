@@ -67,6 +67,36 @@ export const initializeSocketServer = (httpServer) => {
       `[CONNECT] User ${socket.userId} (${socket.role}) connected with socket ${socket.id}`,
     );
 
+    // --- NEW: Screen Share Approval Matrix ---
+    socket.on("request-screen-share", ({ sessionId, userId, fullname }) => {
+      console.log(`[APPROVAL] Student ${fullname} requested screen share.`);
+      const roomSockets = io.sockets.adapter.rooms.get(sessionId);
+      if (!roomSockets) return;
+
+      // Find the Teacher and send request to them
+      roomSockets.forEach((socketId) => {
+        const s = io.sockets.sockets.get(socketId);
+        if (s && (s.currentRole === "teacher" || s.role === "teacher")) {
+          s.emit("screen-share-requested", { studentId: userId, fullname });
+        }
+      });
+    });
+
+    socket.on("approve-screen-share", ({ sessionId, studentId }) => {
+      console.log(`[APPROVED] Teacher approved screen share for ${studentId}`);
+      const roomSockets = io.sockets.adapter.rooms.get(sessionId);
+      if (!roomSockets) return;
+
+      // Find specific student and send approval signal
+      roomSockets.forEach((socketId) => {
+        const s = io.sockets.sockets.get(socketId);
+        if (s && s.userId === studentId) {
+          s.emit("screen-share-approved");
+        }
+      });
+    });
+    // ------------------------------------------
+
     // Handle reconnection: Disconnect old socket if same user reconnects
     io.sockets.sockets.forEach((existingSocket) => {
       if (
