@@ -140,6 +140,12 @@ export const initializeSocketServer = (httpServer) => {
         timestamp: Date.now(),
       });
 
+      // Broadcast updated participants list to all in room
+      io.to(sessionId).emit("participants-list", {
+        participants,
+        timestamp: Date.now(),
+      });
+
       console.log(
         `[JOIN] Session ${sessionId} now has ${participants.length} participants`,
       );
@@ -157,6 +163,27 @@ export const initializeSocketServer = (httpServer) => {
         fullname: socket.user.fullname,
         timestamp: Date.now(),
       });
+
+      // Broadcast updated participants list to remaining users
+      const roomSockets = io.sockets.adapter.rooms.get(sessionId);
+      if (roomSockets) {
+        const participants = [];
+        roomSockets.forEach((socketId) => {
+          const targetSocket = io.sockets.sockets.get(socketId);
+          if (targetSocket && targetSocket.userId) {
+            participants.push({
+              userId: targetSocket.userId,
+              role: targetSocket.currentRole || targetSocket.role,
+              fullname: targetSocket.user?.fullname || "Unknown",
+              joinedAt: targetSocket.joinedAt,
+            });
+          }
+        });
+        io.to(sessionId).emit("participants-list", {
+          participants,
+          timestamp: Date.now(),
+        });
+      }
     });
 
     // ASYMMETRIC WEBRTC SIGNALING: Teacher initiates, Student receives
@@ -187,6 +214,7 @@ export const initializeSocketServer = (httpServer) => {
       targetSocket.emit("webrtc-offer", {
         offer,
         fromUserId: socket.userId,
+        fromUserRole: socket.currentRole || socket.role,
         fromFullname: socket.user.fullname,
         timestamp: Date.now(),
       });
@@ -267,6 +295,7 @@ export const initializeSocketServer = (httpServer) => {
         socket.to(sessionId).emit("screen-share-offer", {
           offer,
           fromUserId: socket.userId,
+          fromUserRole: socket.currentRole || socket.role,
           fromFullname: socket.user.fullname,
           timestamp: Date.now(),
         });
@@ -418,6 +447,27 @@ export const initializeSocketServer = (httpServer) => {
           fullname: socket.user.fullname,
           timestamp: Date.now(),
         });
+
+        // Broadcast updated participants list to remaining users
+        const roomSockets = io.sockets.adapter.rooms.get(socket.currentSession);
+        if (roomSockets) {
+          const participants = [];
+          roomSockets.forEach((socketId) => {
+            const targetSocket = io.sockets.sockets.get(socketId);
+            if (targetSocket && targetSocket.userId) {
+              participants.push({
+                userId: targetSocket.userId,
+                role: targetSocket.currentRole || targetSocket.role,
+                fullname: targetSocket.user?.fullname || "Unknown",
+                joinedAt: targetSocket.joinedAt,
+              });
+            }
+          });
+          io.to(socket.currentSession).emit("participants-list", {
+            participants,
+            timestamp: Date.now(),
+          });
+        }
       }
     });
   });
