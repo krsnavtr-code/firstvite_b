@@ -169,6 +169,7 @@ const courseSchema = new mongoose.Schema(
     },
     slug: {
       type: String,
+      required: true,
       unique: true,
       lowercase: true,
     },
@@ -213,17 +214,6 @@ const courseSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
-
-// Create slug from title before saving
-courseSchema.pre("save", function (next) {
-  if (this.isModified("title")) {
-    this.slug = this.title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
-  }
-  next();
-});
 
 const Course = mongoose.model("Course", courseSchema);
 
