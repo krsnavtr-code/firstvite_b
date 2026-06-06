@@ -60,6 +60,18 @@ const userSchema = new mongoose.Schema(
       type: Date,
       select: false, // Don't include this field by default in queries
     },
+    emailVerificationOTP: {
+      type: String,
+      select: false, // Don't include this field by default in queries
+    },
+    emailVerificationOTPExpires: {
+      type: Date,
+      select: false, // Don't include this field by default in queries
+    },
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
     enrolledCourses: [
       {
         type: mongoose.Schema.Types.ObjectId,

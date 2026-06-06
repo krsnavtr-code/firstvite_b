@@ -55,7 +55,11 @@ export const register = catchAsync(async (req, res, next) => {
     );
   }
 
-  // Create user (initially approved)
+  // Generate OTP
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const otpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+  // Create user with OTP (not approved yet)
   const user = await User.create({
     fullname,
     email: normalizedEmail,
@@ -63,8 +67,58 @@ export const register = catchAsync(async (req, res, next) => {
     role: role || "student",
     department,
     phone,
-    isApproved: true, // New users are approved by default
+    isApproved: false, // Require email verification first
+    isEmailVerified: false,
+    emailVerificationOTP: otp,
+    emailVerificationOTPExpires: otpExpires,
   });
+
+  // Send OTP email
+  const subject = "Verify Your Email - Eklabya";
+  const html = `
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto;">
+      <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px 10px 0 0;">
+        <h1 style="color: white; margin: 0; font-size: 24px;">Eklabya</h1>
+        <p style="color: white; margin: 5px 0 0 0; opacity: 0.9;">Centre of Excellence</p>
+      </div>
+      
+      <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e9ecef;">
+        <h2 style="color: #333; margin-top: 0;">Email Verification</h2>
+        
+        <p style="color: #666; margin-bottom: 20px;">
+          Hello ${fullname || "User"},<br><br>
+          Thank you for registering with Eklabya. To complete your registration, 
+          please verify your email address using the OTP below:
+        </p>
+        
+        <div style="background: #fff; padding: 20px; border-radius: 8px; text-align: center; margin: 30px 0; border: 2px dashed #667eea;">
+          <p style="color: #999; font-size: 14px; margin: 0 0 10px 0;">Your Verification OTP</p>
+          <p style="color: #667eea; font-size: 32px; font-weight: bold; margin: 0; letter-spacing: 5px;">${otp}</p>
+        </div>
+        
+        <p style="color: #666; font-size: 14px; margin-bottom: 15px;">
+          This OTP will expire in 10 minutes for security reasons.
+        </p>
+        
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e9ecef;">
+          <p style="color: #999; font-size: 12px; margin: 0;">
+            If you didn't create an account with Eklabya, please ignore this email.
+          </p>
+        </div>
+      </div>
+    </div>
+  `;
+
+  try {
+    await sendEmail({
+      to: normalizedEmail,
+      subject,
+      html,
+    });
+  } catch (emailError) {
+    console.error("Error sending verification email:", emailError);
+    // Don't fail registration if email fails, but log it
+  }
 
   if (user) {
     res.status(201).json({
@@ -72,8 +126,9 @@ export const register = catchAsync(async (req, res, next) => {
       fullname: user.fullname,
       email: user.email,
       role: user.role,
-      isApproved: user.isApproved,
-      message: "Registration successful. Your account has been approved.",
+      isEmailVerified: user.isEmailVerified,
+      message:
+        "Registration successful. Please check your email for OTP verification.",
     });
   } else {
     return next(new AppError("Invalid user data", 400));
@@ -477,6 +532,239 @@ export const resetPassword = catchAsync(async (req, res, next) => {
     if (error.name === "ValidationError") {
       return next(new AppError(error.message, 400));
     }
+    next(error);
+  }
+});
+
+// @desc    Verify email with OTP
+// @route   POST /api/auth/verify-otp
+// @access  Public
+export const verifyOTP = catchAsync(async (req, res, next) => {
+  const { email, otp } = req.body;
+  const normalizedEmail = String(email || "")
+    .trim()
+    .toLowerCase();
+
+  try {
+    // Find user by email and select OTP fields
+    const user = await User.findOne({ email: normalizedEmail }).select(
+      "+emailVerificationOTP +emailVerificationOTPExpires",
+    );
+
+    if (!user) {
+      return next(new AppError("No user found with that email address", 404));
+    }
+
+    // Check if OTP exists and is not expired
+    if (!user.emailVerificationOTP || !user.emailVerificationOTPExpires) {
+      return next(new AppError("No OTP request found", 400));
+    }
+
+    // Check if OTP has expired
+    if (Date.now() > user.emailVerificationOTPExpires) {
+      return next(
+        new AppError("OTP has expired. Please request a new one.", 400),
+      );
+    }
+
+    // Verify OTP
+    if (user.emailVerificationOTP !== otp) {
+      return next(new AppError("Invalid OTP. Please try again.", 400));
+    }
+
+    // Mark email as verified and approve user
+    user.isEmailVerified = true;
+    user.isApproved = true;
+    user.emailVerificationOTP = undefined;
+    user.emailVerificationOTPExpires = undefined;
+
+    await user.save();
+
+    // Send welcome email
+    const welcomeSubject = "Welcome to Eklabya - Your Journey Begins!";
+    const welcomeHTML = `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px 10px 0 0;">
+          <h1 style="color: white; margin: 0; font-size: 24px;">Eklabya</h1>
+          <p style="color: white; margin: 5px 0 0 0; opacity: 0.9;">Centre of Excellence</p>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e9ecef;">
+          <h2 style="color: #333; margin-top: 0;">Welcome to Eklabya!</h2>
+          
+          <p style="color: #666; margin-bottom: 20px;">
+            Dear ${user.fullname || "User"},<br><br>
+            We're thrilled to have you join the Eklabya community! Your account has been successfully created and verified.
+          </p>
+          
+          <div style="background: #fff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea;">
+            <h3 style="color: #667eea; margin-top: 0; font-size: 18px;">What's Next?</h3>
+            <ul style="color: #666; margin: 10px 0; padding-left: 20px;">
+              <li style="margin-bottom: 10px;">Explore our wide range of courses</li>
+              <li style="margin-bottom: 10px;">Enroll in your favorite courses</li>
+              <li style="margin-bottom: 10px;">Track your learning progress</li>
+              <li>Earn certificates upon completion</li>
+            </ul>
+          </div>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${process.env.CLIENT_URL || "http://localhost:5173"}/courses"
+               style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                      color: white; 
+                      padding: 12px 30px; 
+                      text-decoration: none; 
+                      border-radius: 5px; 
+                      font-weight: bold;
+                      display: inline-block;
+                      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
+              Explore Courses
+            </a>
+            <a href="${process.env.CLIENT_URL || "http://localhost:5173"}/profile" 
+               style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                      color: white; 
+                      padding: 12px 30px; 
+                      text-decoration: none; 
+                      border-radius: 5px; 
+                      font-weight: bold;
+                      display: inline-block;
+                      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
+              Go to Profile
+            </a>
+          </div>
+          
+          <p style="color: #666; font-size: 14px; margin-bottom: 15px;">
+            If you have any questions or need assistance, feel free to reach out to our support team.
+          </p>
+          
+          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e9ecef;">
+            <p style="color: #999; font-size: 12px; margin: 0;">
+              Best regards,<br>
+              The Eklabya Team
+            </p>
+          </div>
+        </div>
+      </div>
+    `;
+
+    try {
+      await sendEmail({
+        to: normalizedEmail,
+        subject: welcomeSubject,
+        html: welcomeHTML,
+      });
+    } catch (emailError) {
+      console.error("Error sending welcome email:", emailError);
+      // Don't fail verification if welcome email fails
+    }
+
+    // Generate tokens
+    const token = generateToken(user._id);
+    const refreshToken = generateRefreshToken(user._id);
+
+    // Save refresh token
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "Email verified successfully. Your account is now active.",
+      token,
+      refreshToken,
+      user: {
+        _id: user._id,
+        fullname: user.fullname,
+        email: user.email,
+        role: user.role,
+        isApproved: user.isApproved,
+        isEmailVerified: user.isEmailVerified,
+      },
+    });
+  } catch (error) {
+    console.error("Error in verifyOTP:", error);
+    next(error);
+  }
+});
+
+// @desc    Resend OTP
+// @route   POST /api/auth/resend-otp
+// @access  Public
+export const resendOTP = catchAsync(async (req, res, next) => {
+  const { email } = req.body;
+  const normalizedEmail = String(email || "")
+    .trim()
+    .toLowerCase();
+
+  try {
+    // Find user by email and select OTP fields
+    const user = await User.findOne({ email: normalizedEmail }).select(
+      "+emailVerificationOTP +emailVerificationOTPExpires",
+    );
+
+    if (!user) {
+      return next(new AppError("No user found with that email address", 404));
+    }
+
+    // Check if already verified
+    if (user.isEmailVerified) {
+      return next(new AppError("Email is already verified", 400));
+    }
+
+    // Generate new OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+    user.emailVerificationOTP = otp;
+    user.emailVerificationOTPExpires = otpExpires;
+
+    await user.save();
+
+    // Send OTP email
+    const subject = "Verify Your Email - Eklabya";
+    const html = `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px 10px 0 0;">
+          <h1 style="color: white; margin: 0; font-size: 24px;">Eklabya</h1>
+          <p style="color: white; margin: 5px 0 0 0; opacity: 0.9;">Centre of Excellence</p>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e9ecef;">
+          <h2 style="color: #333; margin-top: 0;">Email Verification</h2>
+          
+          <p style="color: #666; margin-bottom: 20px;">
+            Hello ${user.fullname || "User"},<br><br>
+            Here is your new verification OTP:
+          </p>
+          
+          <div style="background: #fff; padding: 20px; border-radius: 8px; text-align: center; margin: 30px 0; border: 2px dashed #667eea;">
+            <p style="color: #999; font-size: 14px; margin: 0 0 10px 0;">Your Verification OTP</p>
+            <p style="color: #667eea; font-size: 32px; font-weight: bold; margin: 0; letter-spacing: 5px;">${otp}</p>
+          </div>
+          
+          <p style="color: #666; font-size: 14px; margin-bottom: 15px;">
+            This OTP will expire in 10 minutes for security reasons.
+          </p>
+          
+          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e9ecef;">
+            <p style="color: #999; font-size: 12px; margin: 0;">
+              If you didn't request this OTP, please ignore this email.
+            </p>
+          </div>
+        </div>
+      </div>
+    `;
+
+    await sendEmail({
+      to: normalizedEmail,
+      subject,
+      html,
+    });
+
+    res.json({
+      success: true,
+      message: "OTP has been resent to your email",
+    });
+  } catch (error) {
+    console.error("Error in resendOTP:", error);
     next(error);
   }
 });
