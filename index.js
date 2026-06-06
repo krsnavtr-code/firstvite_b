@@ -37,6 +37,7 @@ import externalContactRoutes from "./routes/externalContactRoutes.js";
 import candidateRoutes from "./routes/candidateRoutes.js";
 import adminEmailRoutes from "./routes/adminEmailRoutes.js";
 import emailRecordRoutes from "./routes/emailRecordRoutes.js";
+import emailRoutes from "./route/emailRoutes.js";
 import proposalDocumentRoutes from "./routes/proposalDocumentRoutes.js";
 import testQARoutes from "./routes/testQARoutes.js";
 import adminRoleRoutes from "./routes/adminRoleRoutes.js";
@@ -433,6 +434,9 @@ app.use("/api/v1/admin/emails", adminEmailRoutes);
 
 // Email record routes
 app.use("/api/emails", emailRecordRoutes);
+
+// Custom email sender routes
+app.use("/api/email", emailRoutes);
 
 // Proposal document routes
 app.use("/api/v1/admin", proposalDocumentRoutes);
