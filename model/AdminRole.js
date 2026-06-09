@@ -14,6 +14,7 @@ const permissionSchema = new mongoose.Schema(
         "send-proposal",
         "custom-email",
         "redirects",
+        "document-verification",
         "candidates",
         "categories",
         "users",
@@ -23,7 +24,7 @@ const permissionSchema = new mongoose.Schema(
         "enrollments",
         "faqs",
         "image-gallery",
-        "admin-management", // For managing other admin accounts
+        "admin-management",
       ],
     },
     canView: {

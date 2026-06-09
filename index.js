@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
 import path from "path";
+import fs from "fs";
 import Category from "./model/category.model.js";
 import { fileURLToPath } from "url";
 
@@ -39,6 +40,7 @@ import adminEmailRoutes from "./routes/adminEmailRoutes.js";
 import emailRecordRoutes from "./routes/emailRecordRoutes.js";
 import emailRoutes from "./route/emailRoutes.js";
 import redirectRoutes from "./route/redirectRoutes.js";
+import studentDocumentRoutes from "./route/studentDocumentRoutes.js";
 import proposalDocumentRoutes from "./routes/proposalDocumentRoutes.js";
 import testQARoutes from "./routes/testQARoutes.js";
 import adminRoleRoutes from "./routes/adminRoleRoutes.js";
@@ -185,6 +187,11 @@ app.use(express.urlencoded({ extended: true }));
 // Serve static files from the public directory
 const publicDir = path.join(__dirname, "public");
 const uploadsDir = path.join(__dirname, "public", "uploads");
+const studentDocumentsDir = path.join(
+  __dirname,
+  "uploads",
+  "student-documents",
+);
 const pdfsDir = path.join(publicDir, "pdfs");
 
 // Serve static files from the client dist directory (for production)
@@ -194,12 +201,15 @@ const clientDistDir = path.join(__dirname, "..", "client", "dist");
 if (!fs.existsSync(pdfsDir)) {
   fs.mkdirSync(pdfsDir, { recursive: true });
 }
-import fs from "fs";
+
+// Ensure student documents directory exists
+if (!fs.existsSync(studentDocumentsDir)) {
+  fs.mkdirSync(studentDocumentsDir, { recursive: true });
+}
 
 // Ensure uploads directory exists
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
-} else {
 }
 
 // List all files in the public directory
@@ -299,6 +309,7 @@ app.use(
         png: "image/png",
         gif: "image/gif",
         webp: "image/webp",
+        pdf: "application/pdf",
       };
 
       if (mimeTypes[ext]) {
@@ -445,6 +456,9 @@ app.use("/api/email", emailRoutes);
 
 // Redirect management routes
 app.use("/api/redirects", redirectRoutes);
+
+// Student document routes
+app.use("/api/student-documents", studentDocumentRoutes);
 
 // Proposal document routes
 app.use("/api/v1/admin", proposalDocumentRoutes);

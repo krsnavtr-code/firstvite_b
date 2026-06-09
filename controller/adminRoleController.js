@@ -251,6 +251,11 @@ export const getAvailablePages = catchAsync(async (req, res, next) => {
     { key: "send-proposal", label: "Send College Proposal", icon: "file-alt" },
     { key: "custom-email", label: "Custom Email Sender", icon: "mail" },
     { key: "redirects", label: "301 Redirects", icon: "external-link" },
+    {
+      key: "document-verification",
+      label: "Document Verification",
+      icon: "check-circle",
+    },
     { key: "candidates", label: "Candidates", icon: "users" },
     { key: "categories", label: "Categories", icon: "folder" },
     { key: "users", label: "Users", icon: "user-friends" },
