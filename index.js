@@ -38,6 +38,7 @@ import candidateRoutes from "./routes/candidateRoutes.js";
 import adminEmailRoutes from "./routes/adminEmailRoutes.js";
 import emailRecordRoutes from "./routes/emailRecordRoutes.js";
 import emailRoutes from "./route/emailRoutes.js";
+import redirectRoutes from "./route/redirectRoutes.js";
 import proposalDocumentRoutes from "./routes/proposalDocumentRoutes.js";
 import testQARoutes from "./routes/testQARoutes.js";
 import adminRoleRoutes from "./routes/adminRoleRoutes.js";
@@ -48,6 +49,7 @@ import classroomRoutes from "./routes/classroomRoutes.js";
 import dns from "dns";
 import { createServer } from "http";
 import { initializeSocketServer } from "./socket/socketServer.js";
+import handleRedirects from "./middleware/redirectMiddleware.js";
 
 // Only set DNS in development/local environment
 if (process.env.NODE_ENV !== "production") {
@@ -171,6 +173,9 @@ app.use((req, res, next) => {
 
   next();
 });
+
+// Middleware for handling custom URL redirects from database
+app.use(handleRedirects);
 
 // Handle preflight requests - must be before other middleware
 app.options("*", cors(corsOptions));
@@ -437,6 +442,9 @@ app.use("/api/emails", emailRecordRoutes);
 
 // Custom email sender routes
 app.use("/api/email", emailRoutes);
+
+// Redirect management routes
+app.use("/api/redirects", redirectRoutes);
 
 // Proposal document routes
 app.use("/api/v1/admin", proposalDocumentRoutes);

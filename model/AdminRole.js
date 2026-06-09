@@ -13,6 +13,7 @@ const permissionSchema = new mongoose.Schema(
         "send-brochure",
         "send-proposal",
         "custom-email",
+        "redirects",
         "candidates",
         "categories",
         "users",

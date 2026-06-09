@@ -64,8 +64,8 @@ router.post('/', upload.single('profilePhoto'), createCandidate);
 //         eventDate: 'November 15, 2025',
 //         venue: 'Grand Conference Center',
 //         city: 'Mumbai',
-//         qrCodeUrl: 'https://firstvite.com/verify/123456',
-//         logoUrl: 'https://firstvite.com/logo.png'
+//         qrCodeUrl: 'https://eklabya.com/verify/123456',
+//         logoUrl: 'https://eklabya.com/logo.png'
 //     };
     
 //     // Add _id to test candidate as it's required by the generateIdCard function
