@@ -54,7 +54,9 @@ export const createRedirect = catchAsync(async (req, res, next) => {
   // Check if source URL already exists
   const existingRedirect = await Redirect.findOne({ sourceUrl });
   if (existingRedirect) {
-    return next(new AppError("A redirect for this source URL already exists", 400));
+    return next(
+      new AppError("A redirect for this source URL already exists", 400),
+    );
   }
 
   const redirect = await Redirect.create({
@@ -86,7 +88,9 @@ export const updateRedirect = catchAsync(async (req, res, next) => {
   if (sourceUrl && sourceUrl !== redirect.sourceUrl) {
     const existingRedirect = await Redirect.findOne({ sourceUrl });
     if (existingRedirect) {
-      return next(new AppError("A redirect for this source URL already exists", 400));
+      return next(
+        new AppError("A redirect for this source URL already exists", 400),
+      );
     }
   }
 
@@ -99,7 +103,7 @@ export const updateRedirect = catchAsync(async (req, res, next) => {
       isActive: isActive !== undefined ? isActive : redirect.isActive,
       description: description || redirect.description,
     },
-    { new: true, runValidators: true }
+    { new: true, runValidators: true },
   );
 
   res.json({
@@ -162,3 +166,31 @@ export const getRedirectBySource = async (sourceUrl) => {
 
   return redirect;
 };
+
+// @desc    Check if a path has a redirect (public endpoint for client-side check)
+// @route   GET /api/redirects/check?path=/some-path
+// @access  Public
+export const checkRedirect = catchAsync(async (req, res, next) => {
+  const { path } = req.query;
+
+  if (!path) {
+    return next(new AppError("Path parameter is required", 400));
+  }
+
+  const redirect = await Redirect.findOne({
+    sourceUrl: path,
+    isActive: true,
+  });
+
+  if (redirect) {
+    // Update redirect count and last redirected time
+    redirect.redirectCount += 1;
+    redirect.lastRedirectedAt = new Date();
+    await redirect.save();
+  }
+
+  res.json({
+    success: true,
+    data: redirect,
+  });
+});
