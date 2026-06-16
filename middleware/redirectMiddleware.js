@@ -3,23 +3,49 @@ import { getRedirectBySource } from "../controller/redirectController.js";
 const handleRedirects = async (req, res, next) => {
   try {
     const path = req.path; // Get the path without query string
-    const host = req.headers.host;
-    const protocol = req.protocol;
+
+    // 1. PERFORMANCE OPTIMIZATION: Fast path for API requests and static assets
+    // Skip checking database for API routes
+    if (path.startsWith("/api")) {
+      return next();
+    }
+
+    // Skip checking database for common static directories
+    if (
+      path.startsWith("/uploads") ||
+      path.startsWith("/pdfs") ||
+      path.startsWith("/candidate_profile") ||
+      path.startsWith("/uploaded_brochure")
+    ) {
+      return next();
+    }
+
+    // Skip checking database for static files (extensions)
+    const staticExtensionRegex =
+      /\.(js|css|png|jpe?g|gif|svg|ico|webp|json|xml|txt|pdf|woff2?|ttf|eot|map)$/i;
+    if (staticExtensionRegex.test(path)) {
+      return next();
+    }
+
+    const host = req.headers.host || "";
+    const protocol = req.protocol || "http";
     const fullUrl = `${protocol}://${host}${path}`; // Construct full URL
 
-    // Check if there's a redirect rule for this path (try both path and full URL)
-    let redirect = await getRedirectBySource(path);
-
-    // If not found by path, try with full URL
-    if (!redirect) {
-      redirect = await getRedirectBySource(fullUrl);
+    // 2. PERFORMANCE OPTIMIZATION: Query all potential source URLs in ONE database call
+    const candidates = [path];
+    if (fullUrl !== path) {
+      candidates.push(fullUrl);
     }
 
-    // If still not found, try with www prefix if not present
-    if (!redirect && !host.startsWith("www.")) {
+    if (host && !host.startsWith("www.")) {
       const wwwUrl = `${protocol}://www.${host}${path}`;
-      redirect = await getRedirectBySource(wwwUrl);
+      if (!candidates.includes(wwwUrl)) {
+        candidates.push(wwwUrl);
+      }
     }
+
+    // Query all possible candidate URLs in a single database round-trip
+    const redirect = await getRedirectBySource(candidates);
 
     if (redirect) {
       // Perform the redirect

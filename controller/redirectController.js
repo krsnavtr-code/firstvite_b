@@ -151,17 +151,28 @@ export const toggleRedirect = catchAsync(async (req, res, next) => {
 
 // @desc    Get redirect by source URL (for middleware)
 // @access  Public
-export const getRedirectBySource = async (sourceUrl) => {
-  const redirect = await Redirect.findOne({
-    sourceUrl,
+export const getRedirectBySource = async (sourceUrlOrUrls) => {
+  const query = {
     isActive: true,
-  });
+  };
+
+  if (Array.isArray(sourceUrlOrUrls)) {
+    query.sourceUrl = { $in: sourceUrlOrUrls };
+  } else {
+    query.sourceUrl = sourceUrlOrUrls;
+  }
+
+  const redirect = await Redirect.findOne(query);
 
   if (redirect) {
-    // Update redirect count and last redirected time
-    redirect.redirectCount += 1;
-    redirect.lastRedirectedAt = new Date();
-    await redirect.save();
+    // Update redirect count and last redirected time in background (non-blocking)
+    Redirect.updateOne(
+      { _id: redirect._id },
+      {
+        $inc: { redirectCount: 1 },
+        $set: { lastRedirectedAt: new Date() },
+      },
+    ).catch((err) => console.error("Error updating redirect stats:", err));
   }
 
   return redirect;
@@ -171,22 +182,63 @@ export const getRedirectBySource = async (sourceUrl) => {
 // @route   GET /api/redirects/check?path=/some-path
 // @access  Public
 export const checkRedirect = catchAsync(async (req, res, next) => {
-  const { path } = req.query;
+  const { path: reqPath } = req.query;
 
-  if (!path) {
+  if (!reqPath) {
     return next(new AppError("Path parameter is required", 400));
   }
 
+  const host = req.headers.host || "";
+  const protocol = req.protocol || "http";
+
+  // Construct candidates exactly like middleware does
+  const candidates = [reqPath];
+
+  // If the passed path is a relative path (e.g. /old-url), construct full URLs
+  if (reqPath.startsWith("/")) {
+    const fullUrl = `${protocol}://${host}${reqPath}`;
+    candidates.push(fullUrl);
+    if (host && !host.startsWith("www.")) {
+      candidates.push(`${protocol}://www.${host}${reqPath}`);
+    }
+  } else {
+    // If it's already a full URL, we can extract the path and add it as a candidate,
+    // and also add the www version if not present
+    try {
+      const urlObj = new URL(reqPath);
+      const relativePath = urlObj.pathname + urlObj.search;
+      candidates.push(relativePath);
+
+      const hostname = urlObj.hostname;
+      if (hostname && !hostname.startsWith("www.")) {
+        candidates.push(
+          `${urlObj.protocol}//www.${hostname}${urlObj.pathname}${urlObj.search}`,
+        );
+      }
+    } catch (e) {
+      // Ignore URL parsing errors
+    }
+  }
+
+  // De-duplicate candidates
+  const uniqueCandidates = [...new Set(candidates)];
+
   const redirect = await Redirect.findOne({
-    sourceUrl: path,
+    sourceUrl: { $in: uniqueCandidates },
     isActive: true,
   });
 
   if (redirect) {
-    // Update redirect count and last redirected time
-    redirect.redirectCount += 1;
-    redirect.lastRedirectedAt = new Date();
-    await redirect.save();
+    // Update redirect count and last redirected time in background (non-blocking)
+    Redirect.updateOne(
+      { _id: redirect._id },
+      {
+        $inc: { redirectCount: 1 },
+        $set: { lastRedirectedAt: new Date() },
+      },
+    ).catch((err) =>
+      console.error("Error updating redirect stats in checkRedirect:", err),
+    );
   }
 
   res.json({
