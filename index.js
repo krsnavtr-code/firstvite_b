@@ -61,6 +61,9 @@ if (process.env.NODE_ENV !== "production") {
 // Initialize express app
 const app = express();
 
+// Trust reverse proxy headers (to correctly detect HTTPS protocol in production)
+app.set("trust proxy", true);
+
 // Get directory name in ES module
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

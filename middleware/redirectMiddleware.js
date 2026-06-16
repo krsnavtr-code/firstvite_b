@@ -1,5 +1,59 @@
 import { getRedirectBySource } from "../controller/redirectController.js";
 
+// Generate all possible candidate URLs for robust, domain/protocol-agnostic matching
+const getRedirectCandidates = (path, host, protocol) => {
+  const candidates = [path];
+
+  // Normalise clean path
+  const cleanPath = path.split("?")[0];
+  if (cleanPath !== path && !candidates.includes(cleanPath)) {
+    candidates.push(cleanPath);
+  }
+
+  // Add current host candidates (both http and https to handle proxy protocol mismatches)
+  if (host) {
+    candidates.push(`http://${host}${path}`);
+    candidates.push(`https://${host}${path}`);
+    if (cleanPath !== path) {
+      candidates.push(`http://${host}${cleanPath}`);
+      candidates.push(`https://${host}${cleanPath}`);
+    }
+
+    // Add www variants if host doesn't have it
+    if (!host.startsWith("www.")) {
+      candidates.push(`http://www.${host}${path}`);
+      candidates.push(`https://www.${host}${path}`);
+      if (cleanPath !== path) {
+        candidates.push(`http://www.${host}${cleanPath}`);
+        candidates.push(`https://www.${host}${cleanPath}`);
+      }
+    } else {
+      // Add non-www variants if host has it
+      const nonWwwHost = host.substring(4);
+      candidates.push(`http://${nonWwwHost}${path}`);
+      candidates.push(`https://${nonWwwHost}${path}`);
+      if (cleanPath !== path) {
+        candidates.push(`http://${nonWwwHost}${cleanPath}`);
+        candidates.push(`https://${nonWwwHost}${cleanPath}`);
+      }
+    }
+  }
+
+  // Add production domain candidates (very important for dev/staging and absolute redirects in DB)
+  const prodHosts = ["www.eklabya.com", "eklabya.com"];
+  prodHosts.forEach((prodHost) => {
+    candidates.push(`http://${prodHost}${path}`);
+    candidates.push(`https://${prodHost}${path}`);
+    if (cleanPath !== path) {
+      candidates.push(`http://${prodHost}${cleanPath}`);
+      candidates.push(`https://${prodHost}${cleanPath}`);
+    }
+  });
+
+  // De-duplicate
+  return [...new Set(candidates)];
+};
+
 const handleRedirects = async (req, res, next) => {
   try {
     const path = req.path; // Get the path without query string
@@ -29,20 +83,9 @@ const handleRedirects = async (req, res, next) => {
 
     const host = req.headers.host || "";
     const protocol = req.protocol || "http";
-    const fullUrl = `${protocol}://${host}${path}`; // Construct full URL
 
-    // 2. PERFORMANCE OPTIMIZATION: Query all potential source URLs in ONE database call
-    const candidates = [path];
-    if (fullUrl !== path) {
-      candidates.push(fullUrl);
-    }
-
-    if (host && !host.startsWith("www.")) {
-      const wwwUrl = `${protocol}://www.${host}${path}`;
-      if (!candidates.includes(wwwUrl)) {
-        candidates.push(wwwUrl);
-      }
-    }
+    // 2. PERFORMANCE OPTIMIZATION: Query all potential source URLs in ONE database call (Domain & Protocol-agnostic)
+    const candidates = getRedirectCandidates(path, host, protocol);
 
     // Query all possible candidate URLs in a single database round-trip
     const redirect = await getRedirectBySource(candidates);
