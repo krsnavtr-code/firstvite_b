@@ -24,6 +24,9 @@ export const initializeSocketServer = (httpServer) => {
     maxHttpBufferSize: 1e6, // 1MB for WebRTC signaling data
   });
 
+  // Track screen share state per session
+  const screenShareState = new Map(); // sessionId -> { userId, fullname }
+
   // Authentication middleware with user data attachment
   io.use(async (socket, next) => {
     try {
@@ -96,6 +99,26 @@ export const initializeSocketServer = (httpServer) => {
       });
     });
     // ------------------------------------------
+
+    // Handle screen share offer request from new joiners
+    socket.on("request-screen-share-offer", ({ sessionId, toUserId }) => {
+      console.log(
+        `[SCREEN SHARE] ${socket.userId} requesting screen share offer from ${toUserId}`,
+      );
+      const roomSockets = io.sockets.adapter.rooms.get(sessionId);
+      if (!roomSockets) return;
+
+      // Find the screen sharer and notify them to send offer to the requester
+      roomSockets.forEach((socketId) => {
+        const s = io.sockets.sockets.get(socketId);
+        if (s && s.userId === toUserId) {
+          s.emit("screen-share-offer-request", {
+            requesterId: socket.userId,
+            requesterFullname: socket.user.fullname,
+          });
+        }
+      });
+    });
 
     // Handle reconnection: Disconnect old socket if same user reconnects
     io.sockets.sockets.forEach((existingSocket) => {
@@ -175,6 +198,19 @@ export const initializeSocketServer = (httpServer) => {
         participants,
         timestamp: Date.now(),
       });
+
+      // Notify new joiner about existing screen share
+      const existingScreenShare = screenShareState.get(sessionId);
+      if (existingScreenShare) {
+        console.log(
+          `[SCREEN SHARE] Notifying ${socket.userId} about existing screen share by ${existingScreenShare.userId}`,
+        );
+        socket.emit("screen-share-active", {
+          userId: existingScreenShare.userId,
+          fullname: existingScreenShare.fullname,
+          role: existingScreenShare.role,
+        });
+      }
 
       console.log(
         `[JOIN] Session ${sessionId} now has ${participants.length} participants`,
@@ -298,6 +334,13 @@ export const initializeSocketServer = (httpServer) => {
 
     // Screen Share Routing
     socket.on("screen-share-offer", ({ sessionId, offer, toUserId }) => {
+      // Track screen share state
+      screenShareState.set(sessionId, {
+        userId: socket.userId,
+        fullname: socket.user.fullname,
+        role: socket.currentRole || socket.role,
+      });
+
       if (toUserId) {
         const roomSockets = io.sockets.adapter.rooms.get(sessionId);
         if (!roomSockets) return;
@@ -379,6 +422,8 @@ export const initializeSocketServer = (httpServer) => {
 
     socket.on("stop-screen-share", ({ sessionId }) => {
       console.log(`[SCREEN SHARE] Stop from ${socket.userId}`);
+      // Clear screen share state
+      screenShareState.delete(sessionId);
       socket.to(sessionId).emit("stop-screen-share", {
         fromUserId: socket.userId,
         fromFullname: socket.user.fullname,
