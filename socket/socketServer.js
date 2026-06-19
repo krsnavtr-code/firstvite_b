@@ -100,6 +100,19 @@ export const initializeSocketServer = (httpServer) => {
     });
     // ------------------------------------------
 
+    // Handle screen share started notification
+    socket.on("screen-share-started", ({ sessionId }) => {
+      console.log(
+        `[SCREEN SHARE] User ${socket.userId} started screen sharing in session ${sessionId}`,
+      );
+      // Track screen share state
+      screenShareState.set(sessionId, {
+        userId: socket.userId,
+        fullname: socket.user.fullname,
+        role: socket.currentRole || socket.role,
+      });
+    });
+
     // Handle screen share offer request from new joiners
     socket.on("request-screen-share-offer", ({ sessionId, toUserId }) => {
       console.log(
@@ -186,6 +199,24 @@ export const initializeSocketServer = (httpServer) => {
         fullname: socket.user.fullname,
         timestamp: Date.now(),
       });
+
+      // If there's an active screen share, notify the sharer to connect to new joiner
+      const activeScreenShare = screenShareState.get(sessionId);
+      if (activeScreenShare && activeScreenShare.userId !== socket.userId) {
+        console.log(
+          `[SCREEN SHARE] Notifying screen sharer ${activeScreenShare.userId} about new joiner ${socket.userId}`,
+        );
+        roomSockets.forEach((socketId) => {
+          const s = io.sockets.sockets.get(socketId);
+          if (s && s.userId === activeScreenShare.userId) {
+            s.emit("new-joiner-for-screen-share", {
+              newJoinerId: socket.userId,
+              newJoinerFullname: socket.user.fullname,
+              newJoinerRole: socket.currentRole,
+            });
+          }
+        });
+      }
 
       // Send participants list to the joining user
       socket.emit("participants-list", {
