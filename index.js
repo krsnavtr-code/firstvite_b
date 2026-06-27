@@ -47,6 +47,7 @@ import adminRoleRoutes from "./routes/adminRoleRoutes.js";
 import sitemapRoute from "./route/sitemap.route.js";
 import batchRoute from "./route/batch.route.js";
 import classroomRoutes from "./routes/classroomRoutes.js";
+import loginRecordRoutes from "./routes/loginRecordRoutes.js";
 
 import dns from "dns";
 import { createServer } from "http";
@@ -450,6 +451,9 @@ app.use("/api/applications", applicationRoutes);
 
 // Admin email routes
 app.use("/api/v1/admin/emails", adminEmailRoutes);
+
+// Login record routes
+app.use("/api/admin", loginRecordRoutes);
 
 // Email record routes
 app.use("/api/emails", emailRecordRoutes);

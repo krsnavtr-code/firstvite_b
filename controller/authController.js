@@ -4,6 +4,54 @@ import AppError from "../utils/appError.js";
 import catchAsync from "../utils/catchAsync.js";
 import crypto from "crypto";
 import { sendEmail } from "../utils/email.js";
+import LoginRecord from "../model/LoginRecord.js";
+
+// Helper function to parse user agent (simple version without external dependency)
+const parseUserAgent = (userAgentString) => {
+  const ua = userAgentString || "Unknown";
+
+  // Simple browser detection
+  let browser = "Unknown";
+  if (ua.includes("Chrome")) browser = "Chrome";
+  else if (ua.includes("Firefox")) browser = "Firefox";
+  else if (ua.includes("Safari")) browser = "Safari";
+  else if (ua.includes("Edge")) browser = "Edge";
+  else if (ua.includes("Opera")) browser = "Opera";
+
+  // Simple OS detection
+  let os = "Unknown";
+  if (ua.includes("Windows")) os = "Windows";
+  else if (ua.includes("Mac")) os = "macOS";
+  else if (ua.includes("Linux")) os = "Linux";
+  else if (ua.includes("Android")) os = "Android";
+  else if (ua.includes("iOS")) os = "iOS";
+
+  // Simple device detection
+  let device = "Desktop";
+  if (ua.includes("Mobile") || ua.includes("Android") || ua.includes("iOS")) {
+    device = "Mobile";
+  } else if (ua.includes("Tablet")) {
+    device = "Tablet";
+  }
+
+  return {
+    browser,
+    os,
+    device,
+  };
+};
+
+// Helper function to get client IP
+const getClientIP = (req) => {
+  return (
+    req.headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
+    req.headers["x-client-ip"] ||
+    req.connection?.remoteAddress ||
+    req.socket?.remoteAddress ||
+    req.ip ||
+    "Unknown"
+  );
+};
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -173,6 +221,32 @@ export const login = catchAsync(async (req, res, next) => {
   // Update last login
   user.lastLogin = Date.now();
   await user.save();
+
+  // Track login record
+  try {
+    const userAgentString = req.headers["user-agent"] || "Unknown";
+    const ipAddress = getClientIP(req);
+    const parsedUA = parseUserAgent(userAgentString);
+
+    await LoginRecord.create({
+      user: user._id,
+      userEmail: user.email,
+      userName: user.fullname,
+      userRole: user.role,
+      ipAddress,
+      userAgent: userAgentString,
+      browser: parsedUA.browser,
+      os: parsedUA.os,
+      device: parsedUA.device,
+      loginTime: new Date(),
+      status: "active",
+    });
+
+    console.log(`Login tracked for user: ${user.email} from IP: ${ipAddress}`);
+  } catch (trackingError) {
+    console.error("Error tracking login:", trackingError);
+    // Don't fail the login if tracking fails
+  }
 
   // Generate tokens
   const token = generateToken(user._id);
