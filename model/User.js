@@ -68,6 +68,14 @@ const userSchema = new mongoose.Schema(
       type: Date,
       select: false, // Don't include this field by default in queries
     },
+    adminLoginOTP: {
+      type: String,
+      select: false, // Don't include this field by default in queries
+    },
+    adminLoginOTPExpires: {
+      type: Date,
+      select: false, // Don't include this field by default in queries
+    },
     isEmailVerified: {
       type: Boolean,
       default: false,

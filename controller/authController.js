@@ -218,6 +218,76 @@ export const login = catchAsync(async (req, res, next) => {
     return next(new AppError("Invalid email or password", 401));
   }
 
+  // Check if user is admin - if so, require OTP verification
+  if (user.role === "admin") {
+    // Generate OTP for admin login
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+    // Store OTP in user document
+    user.adminLoginOTP = otp;
+    user.adminLoginOTPExpires = otpExpires;
+    await user.save();
+
+    // Send OTP email
+    const subject = "Admin Login Verification - Eklabya";
+    const html = `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px 10px 0 0;">
+          <h1 style="color: white; margin: 0; font-size: 24px;">Eklabya</h1>
+          <p style="color: white; margin: 5px 0 0 0; opacity: 0.9;">Centre of Excellence</p>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e9ecef;">
+          <h2 style="color: #333; margin-top: 0;">Admin Login Verification</h2>
+          
+          <p style="color: #666; margin-bottom: 20px;">
+            Hello ${user.fullname || "Admin"},<br><br>
+            An admin login attempt was detected for your account. 
+            Please verify your identity using the OTP below:
+          </p>
+          
+          <div style="background: #fff; padding: 20px; border-radius: 8px; text-align: center; margin: 30px 0; border: 2px dashed #667eea;">
+            <p style="color: #999; font-size: 14px; margin: 0 0 10px 0;">Your Verification OTP</p>
+            <p style="color: #667eea; font-size: 32px; font-weight: bold; margin: 0; letter-spacing: 5px;">${otp}</p>
+          </div>
+          
+          <p style="color: #666; font-size: 14px; margin-bottom: 15px;">
+            This OTP will expire in 10 minutes for security reasons.
+          </p>
+          
+          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e9ecef;">
+            <p style="color: #999; font-size: 12px; margin: 0;">
+              If you didn't attempt to login to the admin panel, please ignore this email
+              and contact support immediately.
+            </p>
+          </div>
+        </div>
+      </div>
+    `;
+
+    try {
+      await sendEmail({
+        to: email,
+        subject,
+        html,
+      });
+    } catch (emailError) {
+      console.error("Error sending admin login OTP email:", emailError);
+      return next(
+        new AppError("Failed to send OTP email. Please try again.", 500),
+      );
+    }
+
+    return res.json({
+      success: true,
+      requiresOTP: true,
+      message: "OTP sent to your email for admin verification",
+      email: user.email,
+    });
+  }
+
+  // For non-admin users, proceed with normal login
   // Update last login
   user.lastLogin = Date.now();
   await user.save();
@@ -287,6 +357,130 @@ export const login = catchAsync(async (req, res, next) => {
   };
 
   res.json(responseData);
+});
+
+// @desc    Verify admin login OTP
+// @route   POST /api/auth/verify-admin-otp
+// @access  Public
+export const verifyAdminOTP = catchAsync(async (req, res, next) => {
+  const { email, otp } = req.body;
+
+  try {
+    // Find user by email and select OTP fields
+    const user = await User.findOne({ email }).select(
+      "+adminLoginOTP +adminLoginOTPExpires +adminRoleId +adminPermissions",
+    );
+
+    if (!user) {
+      return next(new AppError("No user found with that email address", 404));
+    }
+
+    // Check if user is admin
+    if (user.role !== "admin") {
+      return next(
+        new AppError("OTP verification is only for admin users", 400),
+      );
+    }
+
+    // Check if OTP exists and is not expired
+    if (!user.adminLoginOTP || !user.adminLoginOTPExpires) {
+      return next(
+        new AppError("No OTP request found. Please login again.", 400),
+      );
+    }
+
+    // Check if OTP has expired
+    if (Date.now() > user.adminLoginOTPExpires) {
+      return next(
+        new AppError("OTP has expired. Please request a new one.", 400),
+      );
+    }
+
+    // Verify OTP
+    if (user.adminLoginOTP !== otp) {
+      return next(new AppError("Invalid OTP. Please try again.", 400));
+    }
+
+    // Clear OTP
+    user.adminLoginOTP = undefined;
+    user.adminLoginOTPExpires = undefined;
+
+    // Update last login
+    user.lastLogin = Date.now();
+    await user.save();
+
+    // Track login record
+    try {
+      const userAgentString = req.headers["user-agent"] || "Unknown";
+      const ipAddress = getClientIP(req);
+      const parsedUA = parseUserAgent(userAgentString);
+
+      await LoginRecord.create({
+        user: user._id,
+        userEmail: user.email,
+        userName: user.fullname,
+        userRole: user.role,
+        ipAddress,
+        userAgent: userAgentString,
+        browser: parsedUA.browser,
+        os: parsedUA.os,
+        device: parsedUA.device,
+        loginTime: new Date(),
+        status: "active",
+      });
+
+      console.log(
+        `Admin login tracked for user: ${user.email} from IP: ${ipAddress}`,
+      );
+    } catch (trackingError) {
+      console.error("Error tracking admin login:", trackingError);
+      // Don't fail the login if tracking fails
+    }
+
+    // Generate tokens
+    const token = generateToken(user._id);
+    const refreshToken = generateRefreshToken(user._id);
+
+    if (!token || !refreshToken) {
+      console.error("Token generation failed");
+      return next(
+        new AppError("Failed to generate authentication tokens", 500),
+      );
+    }
+
+    // Store refresh token in user document
+    user.refreshToken = refreshToken;
+    try {
+      await user.save();
+    } catch (saveError) {
+      console.error("Error saving refresh token:", saveError);
+      return next(new AppError("Failed to save refresh token", 500));
+    }
+
+    // Prepare user data for response
+    const userData = {
+      _id: user._id,
+      fullname: user.fullname,
+      email: user.email,
+      role: user.role,
+      isApproved: user.isApproved,
+      phone: user.phone || "",
+      address: user.address || "",
+      adminRoleId: user.adminRoleId,
+      adminPermissions: user.adminPermissions,
+    };
+
+    res.json({
+      success: true,
+      message: "Admin login verified successfully",
+      token,
+      refreshToken,
+      user: userData,
+    });
+  } catch (error) {
+    console.error("Error in verifyAdminOTP:", error);
+    next(error);
+  }
 });
 
 // @desc    Get user profile

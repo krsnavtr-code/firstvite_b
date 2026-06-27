@@ -9,6 +9,7 @@ import {
   resetPassword,
   verifyOTP,
   resendOTP,
+  verifyAdminOTP,
 } from "../controller/authController.js";
 import { updateProfile } from "../controller/user.controller.js";
 import { protect } from "../middleware/authMiddleware.js";
@@ -23,6 +24,7 @@ router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
 router.post("/verify-otp", verifyOTP);
 router.post("/resend-otp", resendOTP);
+router.post("/verify-admin-otp", verifyAdminOTP);
 
 // Protected routes
 router.get("/me", protect, getUserProfile);
