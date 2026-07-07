@@ -1,7 +1,10 @@
 import Contact from "../model/Contact.js";
 import { validationResult } from "express-validator";
 import mongoose from "mongoose";
-import { sendContactNotifications } from "../utils/email.js";
+import {
+  sendContactNotifications,
+  sendHotLeadAlertEmail,
+} from "../utils/email.js";
 import { v4 as uuidv4 } from "uuid";
 
 /**
@@ -264,6 +267,14 @@ export const trackVisit = async (req, res) => {
           pageUrl: pageUrl,
           timestamp: new Date(),
         });
+      }
+
+      // Send email notification to krishnaavtar955@gmail.com
+      try {
+        await sendHotLeadAlertEmail(contactUser, pageUrl);
+      } catch (emailError) {
+        console.error("Error sending hot lead alert email:", emailError);
+        // Don't fail the request if email sending fails
       }
     }
 

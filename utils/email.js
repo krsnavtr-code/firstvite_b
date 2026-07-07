@@ -1,7 +1,7 @@
-import nodemailer from 'nodemailer';
-import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import nodemailer from "nodemailer";
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 
 // Load environment variables
 dotenv.config();
@@ -10,31 +10,31 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Create a transporter using SMTP
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
+  host: process.env.SMTP_HOST || "smtp.gmail.com",
   port: parseInt(process.env.SMTP_PORT) || 587,
-  secure: process.env.SMTP_SECURE === 'true',
+  secure: process.env.SMTP_SECURE === "true",
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
   tls: {
     // Do not fail on invalid certs
-    rejectUnauthorized: false
+    rejectUnauthorized: false,
   },
   debug: false, // Disable detailed debug output
-  logger: process.env.NODE_ENV === 'development' // Only log in development
+  logger: process.env.NODE_ENV === "development", // Only log in development
 });
 
 // Verify connection configuration
-transporter.verify(function(error, success) {
+transporter.verify(function (error, success) {
   if (error) {
-    console.error('SMTP Connection Error:', error);
+    console.error("SMTP Connection Error:", error);
   } else {
-    console.log('SMTP Config:', {
+    console.log("SMTP Config:", {
       host: process.env.SMTP_HOST,
       port: process.env.SMTP_PORT,
-      user: process.env.SMTP_USER ? 'Set' : 'Not Set',
-      from: process.env.EMAIL_FROM_ADDRESS
+      user: process.env.SMTP_USER ? "Set" : "Not Set",
+      from: process.env.EMAIL_FROM_ADDRESS,
     });
   }
 });
@@ -52,44 +52,45 @@ transporter.verify(function(error, success) {
 export const sendEmail = async ({
   to,
   subject,
-  text = '',
-  html = '',
+  text = "",
+  html = "",
   attachments = [],
 }) => {
   try {
-    
     if (!to) {
-      throw new Error('Recipient email is required');
+      throw new Error("Recipient email is required");
     }
 
     if (!subject) {
-      throw new Error('Email subject is required');
+      throw new Error("Email subject is required");
     }
 
     const fromEmail = process.env.EMAIL_FROM_ADDRESS || process.env.SMTP_USER;
     if (!fromEmail) {
-      throw new Error('Sender email address is not configured');
+      throw new Error("Sender email address is not configured");
     }
 
     // Process attachments to ensure they're in the correct format
-    const processedAttachments = (Array.isArray(attachments) ? attachments : []).map(attachment => {
+    const processedAttachments = (
+      Array.isArray(attachments) ? attachments : []
+    ).map((attachment) => {
       // If content is a buffer, convert it to base64
       if (Buffer.isBuffer(attachment.content)) {
         return {
           ...attachment,
-          content: attachment.content.toString('base64'),
-          encoding: 'base64'
+          content: attachment.content.toString("base64"),
+          encoding: "base64",
         };
       }
       return attachment;
     });
 
     const mailOptions = {
-      from: `"${process.env.EMAIL_FROM_NAME || 'Eklabya'}" <${fromEmail}>`,
+      from: `"${process.env.EMAIL_FROM_NAME || "Eklabya"}" <${fromEmail}>`,
       to: to,
       subject: subject,
       text: text,
-      html: html || text.replace(/\n/g, '<br>'),
+      html: html || text.replace(/\n/g, "<br>"),
       attachments: processedAttachments,
     };
 
@@ -97,10 +98,10 @@ export const sendEmail = async ({
     await new Promise((resolve, reject) => {
       transporter.verify((error, success) => {
         if (error) {
-          console.error('SMTP Connection Error:', error);
+          console.error("SMTP Connection Error:", error);
           reject(new Error(`SMTP Connection Error: ${error.message}`));
         } else {
-          console.log('SMTP Server is ready to take our messages');
+          console.log("SMTP Server is ready to take our messages");
           resolve();
         }
       });
@@ -108,19 +109,19 @@ export const sendEmail = async ({
 
     // Send the email
     const info = await transporter.sendMail(mailOptions);
-    return { 
-      success: true, 
+    return {
+      success: true,
       messageId: info.messageId,
-      response: info.response 
+      response: info.response,
     };
   } catch (error) {
-    console.error('Error in sendEmail function:', {
+    console.error("Error in sendEmail function:", {
       error: error.message,
       stack: error.stack,
       code: error.code,
       syscall: error.syscall,
       path: error.path,
-      response: error.response
+      response: error.response,
     });
     throw new Error(`Failed to send email: ${error.message}`);
   }
@@ -134,24 +135,29 @@ export const sendEmail = async ({
  * @param {string} [fileName] - Name for the PDF file
  * @returns {Promise} - Promise that resolves when email is sent
  */
-export const sendCoursePdfEmail = async (email, course, pdfBuffer, fileName = '') => {
+export const sendCoursePdfEmail = async (
+  email,
+  course,
+  pdfBuffer,
+  fileName = "",
+) => {
   const subject = `Your Course Material: ${course.title}`;
   const text = `Hello,\n\nPlease find attached the course material for ${course.title}.\n\nThank you for learning with us!`;
-  
+
   const html = `
     <div style="font-family: Arial, sans-serif; line-height: 1.6;">
       <h2>Hello,</h2>
       <p>Please find attached the course material for <strong>${course.title}</strong>.</p>
-      <p>Course Description: ${course.description || 'No description available'}</p>
+      <p>Course Description: ${course.description || "No description available"}</p>
       <p>Thank you for learning with us!</p>
-      <p>Best regards,<br>The ${process.env.APP_NAME || 'FirstVite'} Team</p>
+      <p>Best regards,<br>The ${process.env.APP_NAME || "FirstVite"} Team</p>
     </div>
   `;
 
   const attachments = [];
-  
+
   // If pdfBuffer is a string, treat it as a file path
-  if (typeof pdfBuffer === 'string') {
+  if (typeof pdfBuffer === "string") {
     attachments.push({
       filename: fileName || `course-${course.slug || course._id}.pdf`,
       path: pdfBuffer,
@@ -161,7 +167,7 @@ export const sendCoursePdfEmail = async (email, course, pdfBuffer, fileName = ''
     attachments.push({
       filename: fileName || `course-${course.slug || course._id}.pdf`,
       content: pdfBuffer,
-      contentType: 'application/pdf',
+      contentType: "application/pdf",
     });
   }
 
@@ -182,32 +188,32 @@ export const sendCoursePdfEmail = async (email, course, pdfBuffer, fileName = ''
 export const sendContactNotifications = async (contact) => {
   try {
     // 1. Send confirmation email to the user
-    const userSubject = `Thank you for contacting ${process.env.APP_NAME || 'us'}`;
+    const userSubject = `Thank you for contacting ${process.env.APP_NAME || "us"}`;
     const userHtml = `
       <div style="font-family: Arial, sans-serif; line-height: 1.6;">
         <h2>Hello ${contact.name},</h2>
         <p>Thank you for reaching out to us. We have received your message and our team will get back to you shortly.</p>
         
         <h3>Your Message Details:</h3>
-        <p><strong>Subject:</strong> ${contact.subject || 'No subject'}</p>
+        <p><strong>Subject:</strong> ${contact.subject || "No subject"}</p>
         <p><strong>Message:</strong> ${contact.message}</p>
         
-        ${contact.courseTitle ? `<p><strong>Course:</strong> ${contact.courseTitle}</p>` : ''}
+        ${contact.courseTitle ? `<p><strong>Course:</strong> ${contact.courseTitle}</p>` : ""}
         
         <p>We'll respond to you at: ${contact.email}</p>
         
-        <p>Best regards,<br>The ${process.env.APP_NAME || 'FirstVite'} Team</p>
+        <p>Best regards,<br>The ${process.env.APP_NAME || "FirstVite"} Team</p>
       </div>
     `;
 
     await sendEmail({
       to: contact.email,
       subject: userSubject,
-      html: userHtml
+      html: userHtml,
     });
 
     // 2. Send notification to admin
-    const adminSubject = `New Contact Form Submission: ${contact.subject || 'No Subject'}`;
+    const adminSubject = `New Contact Form Submission: ${contact.subject || "No Subject"}`;
     const adminHtml = `
       <div style="font-family: Arial, sans-serif; line-height: 1.6;">
         <h2>New Contact Form Submission</h2>
@@ -215,17 +221,21 @@ export const sendContactNotifications = async (contact) => {
         <h3>Contact Details:</h3>
         <p><strong>Name:</strong> ${contact.name}</p>
         <p><strong>Email:</strong> ${contact.email}</p>
-        ${contact.phone ? `<p><strong>Phone:</strong> ${contact.phone}</p>` : ''}
-        <p><strong>Subject:</strong> ${contact.subject || 'No subject'}</p>
+        ${contact.phone ? `<p><strong>Phone:</strong> ${contact.phone}</p>` : ""}
+        <p><strong>Subject:</strong> ${contact.subject || "No subject"}</p>
         
         <h3>Message:</h3>
         <p>${contact.message}</p>
         
-        ${contact.courseTitle ? `
+        ${
+          contact.courseTitle
+            ? `
           <h3>Course Information:</h3>
           <p><strong>Course Title:</strong> ${contact.courseTitle}</p>
-          ${contact.courseId ? `<p><strong>Course ID:</strong> ${contact.courseId}</p>` : ''}
-        ` : ''}
+          ${contact.courseId ? `<p><strong>Course ID:</strong> ${contact.courseId}</p>` : ""}
+        `
+            : ""
+        }
         
         <h3>Submission Details:</h3>
         <p><strong>Submitted At:</strong> ${new Date(contact.submittedAt).toLocaleString()}</p>
@@ -239,12 +249,12 @@ export const sendContactNotifications = async (contact) => {
     await sendEmail({
       to: process.env.ADMIN_EMAIL || process.env.SMTP_USER,
       subject: adminSubject,
-      html: adminHtml
+      html: adminHtml,
     });
 
     return { success: true };
   } catch (error) {
-    console.error('Error sending contact notifications:', error);
+    console.error("Error sending contact notifications:", error);
     throw error;
   }
 };
@@ -257,34 +267,90 @@ export const sendContactNotifications = async (contact) => {
  * @param {Object} [attachments] - Optional attachments
  * @returns {Promise<Array>} - Array of results for each email sent
  */
-export const sendBulkEmails = async (emailList, subject, htmlContent, attachments = []) => {
+export const sendBulkEmails = async (
+  emailList,
+  subject,
+  htmlContent,
+  attachments = [],
+) => {
   const results = [];
-  
+
   for (const email of emailList) {
     try {
       await sendEmail({
         to: email,
         subject,
         html: htmlContent,
-        attachments
+        attachments,
       });
-      results.push({ email, status: 'success', message: 'Email sent successfully' });
+      results.push({
+        email,
+        status: "success",
+        message: "Email sent successfully",
+      });
     } catch (error) {
       console.error(`Failed to send email to ${email}:`, error);
-      results.push({ 
-        email, 
-        status: 'error', 
-        message: error.message || 'Failed to send email' 
+      results.push({
+        email,
+        status: "error",
+        message: error.message || "Failed to send email",
       });
     }
   }
-  
+
   return results;
+};
+
+/**
+ * Send hot lead alert email when tracked user revisits
+ * @param {Object} contact - Contact user details
+ * @param {string} pageUrl - Current page URL the user is viewing
+ * @returns {Promise} - Promise that resolves when email is sent
+ */
+export const sendHotLeadAlertEmail = async (contact, pageUrl) => {
+  try {
+    const subject = `🔥 Hot Lead Alert: ${contact.name} is back on your website!`;
+    const html = `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+        <h2 style="color: #d97706;">🔥 Hot Lead Alert</h2>
+        <p><strong>${contact.name}</strong> has returned to your website and is currently viewing:</p>
+        
+        <div style="background: #fef3c7; padding: 15px; border-left: 4px solid #f59e0b; margin: 15px 0;">
+          <p style="margin: 0; font-weight: bold;">${pageUrl}</p>
+        </div>
+        
+        <h3>Contact Details:</h3>
+        <p><strong>Name:</strong> ${contact.name}</p>
+        <p><strong>Email:</strong> ${contact.email}</p>
+        ${contact.phone ? `<p><strong>Phone:</strong> ${contact.phone}</p>` : ""}
+        ${contact.courseTitle ? `<p><strong>Interested Course:</strong> ${contact.courseTitle}</p>` : ""}
+        
+        <h3>Visit History:</h3>
+        <p>Total visits: ${contact.visitHistory?.length || 1}</p>
+        <p>Last visit: ${new Date().toLocaleString()}</p>
+        
+        <p style="color: #d97706; font-weight: bold;">⚡ This is a hot lead - consider reaching out immediately!</p>
+        
+        <p>Best regards,<br>The ${process.env.APP_NAME || "Eklabya"} Team</p>
+      </div>
+    `;
+
+    await sendEmail({
+      to: "krishnaavtar955@gmail.com",
+      subject,
+      html,
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error sending hot lead alert email:", error);
+    throw error;
+  }
 };
 
 export default {
   sendEmail,
   sendCoursePdfEmail,
   sendContactNotifications,
-  sendBulkEmails
+  sendBulkEmails,
 };
