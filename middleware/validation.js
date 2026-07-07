@@ -25,11 +25,10 @@ export const contactValidationRules = [
     .matches(/^[\d\s\-+()]+$/)
     .withMessage("Please enter a valid phone number"),
 
-  // Message validation (required)
+  // Message validation (optional)
   body("message")
+    .optional({ checkFalsy: true })
     .trim()
-    .notEmpty()
-    .withMessage("Message is required")
     .isLength({ min: 10, max: 2000 })
     .withMessage("Message must be between 10 and 2000 characters"),
 
