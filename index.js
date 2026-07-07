@@ -53,6 +53,7 @@ import dns from "dns";
 import { createServer } from "http";
 import { initializeSocketServer } from "./socket/socketServer.js";
 import handleRedirects from "./middleware/redirectMiddleware.js";
+import { setSocketIO } from "./middleware/socketMiddleware.js";
 
 // Only set DNS in development/local environment
 if (process.env.NODE_ENV !== "production") {
@@ -566,6 +567,9 @@ app.use((err, req, res, next) => {
 // Start the server
 const httpServer = createServer(app);
 const io = initializeSocketServer(httpServer);
+
+// Set socket.io instance for use in controllers
+setSocketIO(io);
 
 const server = httpServer.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
