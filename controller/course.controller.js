@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import Course from "../model/course.model.js";
+import Contact from "../model/Contact.js";
 import { validationResult } from "express-validator";
 import { generateCoursePdf } from "../utils/pdfGenerator.js";
 import { updateSitemapAsync } from "../utils/sitemapUpdater.js";
@@ -682,7 +683,7 @@ export const deleteUploadedFile = async (req, res) => {
     // Check if file exists
     if (fs.existsSync(fullPath)) {
       fs.unlinkSync(fullPath);
-      console.log("File deleted successfully:", fullPath);
+      // console.log("File deleted successfully:", fullPath);
     }
 
     res.status(200).json({
@@ -694,6 +695,116 @@ export const deleteUploadedFile = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Error deleting file",
+      error: error.message,
+    });
+  }
+};
+
+// Send brochure email
+export const sendBrochureEmail = async (req, res) => {
+  try {
+    const { name, email, phone, courseId, courseTitle } = req.body;
+
+    if (!name || !email || !phone) {
+      return res.status(400).json({
+        success: false,
+        message: "Name, email, and phone are required",
+      });
+    }
+
+    // Get course details to fetch brochure URL
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found",
+      });
+    }
+
+    if (!course.brochureUrl) {
+      // Save user details to Contact model for follow-up
+      await Contact.create({
+        name,
+        email,
+        phone,
+        courseId,
+        courseTitle,
+        subject: "Brochure Request",
+        message: `User requested brochure for ${courseTitle} but brochure is not available.`,
+        status: "new",
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: "You will receive brochure mail shortly",
+        brochureAvailable: false,
+      });
+    }
+
+    // Import email utility
+    const { sendEmail } = await import("../utils/email.js");
+
+    // Get the full path to the brochure file
+    const filename = course.brochureUrl.split("/").pop();
+    const brochurePath = path.join(__dirname, "../public/uploads", filename);
+
+    // Check if file exists
+    if (!fs.existsSync(brochurePath)) {
+      // Save user details to Contact model for follow-up since file doesn't exist
+      await Contact.create({
+        name,
+        email,
+        phone,
+        courseId,
+        courseTitle,
+        subject: "Brochure Request",
+        message: `User requested brochure for ${courseTitle} but brochure file not found.`,
+        status: "new",
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: "You will receive brochure mail shortly",
+        brochureAvailable: false,
+      });
+    }
+
+    // Email content
+    const subject = `Brochure for ${courseTitle}`;
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #333;">Course Brochure</h2>
+        <p>Dear ${name},</p>
+        <p>Thank you for your interest in <strong>${courseTitle}</strong>.</p>
+        <p>Please find the course brochure attached to this email.</p>
+        <p>If you have any questions, feel free to contact us.</p>
+        <p>Best regards,<br>Eklabya Team</p>
+      </div>
+    `;
+
+    // Send email with attachment
+    await sendEmail({
+      to: email,
+      subject: subject,
+      html: html,
+      attachments: [
+        {
+          filename: `${courseTitle.replace(/\s+/g, "_")}_brochure.pdf`,
+          path: brochurePath,
+        },
+      ],
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Brochure sent successfully",
+      brochureAvailable: true,
+    });
+  } catch (error) {
+    console.error("Error sending brochure email:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error sending brochure",
       error: error.message,
     });
   }

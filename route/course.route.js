@@ -8,6 +8,7 @@ import {
   deleteCourse,
   uploadCourseImage,
   deleteUploadedFile,
+  sendBrochureEmail,
   generatePdf,
   deletePdf,
 } from "../controller/course.controller.js";
@@ -115,5 +116,6 @@ router.delete("/:id/pdf", isAdmin, deletePdf);
 // Public routes
 router.get("/", getAllCourses);
 router.get("/:id", getCourseById);
+router.post("/send-brochure", sendBrochureEmail);
 
 export default router;
