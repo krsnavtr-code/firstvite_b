@@ -509,6 +509,7 @@ export const getUserProfile = catchAsync(async (req, res, next) => {
         address: user.address || "",
         adminRoleId: user.adminRoleId,
         adminPermissions: user.adminPermissions,
+        discount: user.discount || 0,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       },
