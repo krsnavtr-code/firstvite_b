@@ -1,31 +1,36 @@
-import express from 'express';
-import bcrypt from 'bcryptjs';
-import User from '../model/User.js';
-import { isAdmin } from '../middleware/admin.js';
-import jwt from 'jsonwebtoken';
-import { signup, login } from '../controller/user.controller.js';
-import validateObjectId from '../middleware/validateObjectId.js';
+import express from "express";
+import bcrypt from "bcryptjs";
+import User from "../model/User.js";
+import { isAdmin } from "../middleware/admin.js";
+import jwt from "jsonwebtoken";
+import { signup, login } from "../controller/user.controller.js";
+import validateObjectId from "../middleware/validateObjectId.js";
 
 // Auth middleware
 const auth = async (req, res, next) => {
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const token = req.header("Authorization")?.replace("Bearer ", "");
     if (!token) {
-      return res.status(401).json({ message: 'No token, authorization denied' });
+      return res
+        .status(401)
+        .json({ message: "No token, authorization denied" });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret');
-    const user = await User.findById(decoded.userId).select('-password');
-    
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "your_jwt_secret",
+    );
+    const user = await User.findById(decoded.userId).select("-password");
+
     if (!user) {
-      return res.status(401).json({ message: 'User not found' });
+      return res.status(401).json({ message: "User not found" });
     }
 
     req.user = user;
     next();
   } catch (error) {
-    console.error('Auth error:', error);
-    res.status(401).json({ message: 'Token is not valid' });
+    console.error("Auth error:", error);
+    res.status(401).json({ message: "Token is not valid" });
   }
 };
 
@@ -38,74 +43,75 @@ const router = express.Router();
 // @route   POST /api/users/signup
 // @desc    Register a new user
 // @access  Public
-router.post('/signup', signup);
+router.post("/signup", signup);
 
 // @route   GET /api/users/signup
 // @desc    Prevent signup page from being treated as an ID
 // @access  Public
-router.get('/signup', (req, res) => {
-  res.status(405).json({ 
+router.get("/signup", (req, res) => {
+  res.status(405).json({
     success: false,
-    message: 'Method not allowed. Use POST /api/users/signup to register a new user.',
-    error: 'METHOD_NOT_ALLOWED'
+    message:
+      "Method not allowed. Use POST /api/users/signup to register a new user.",
+    error: "METHOD_NOT_ALLOWED",
   });
 });
 
 // @route   POST /api/users/login
 // @desc    Authenticate user & get token
 // @access  Public
-router.post('/login', login);
+router.post("/login", login);
 
 // @route   GET /api/users/login
 // @desc    Prevent login page from being treated as an ID
 // @access  Public
-router.get('/login', (req, res) => {
-  res.status(405).json({ 
+router.get("/login", (req, res) => {
+  res.status(405).json({
     success: false,
-    message: 'Method not allowed. Use POST /api/users/login to authenticate.',
-    error: 'METHOD_NOT_ALLOWED'
+    message: "Method not allowed. Use POST /api/users/login to authenticate.",
+    error: "METHOD_NOT_ALLOWED",
   });
 });
 
 // @route   POST /api/users/reset-password
 // @desc    Reset password (temporary route for development)
 // @access  Public
-router.post('/reset-password', async (req, res) => {
-    try {
-        const { email, newPassword } = req.body;
-        
-        if (!email || !newPassword) {
-            return res.status(400).json({
-                success: false,
-                message: 'Email and new password are required'
-            });
-        }
+router.post("/reset-password", async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
 
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: 'User not found'
-            });
-        }
-
-        // Hash the new password
-        const salt = await bcrypt.genSalt(10);
-        user.password = await bcrypt.hash(newPassword, salt);
-        
-        await user.save();
-
-        res.status(200).json({
-            success: true,
-            message: 'Password updated successfully'
-        });
-    } catch (error) {
-        console.error('Password reset error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Server error during password reset'
-        });
+    if (!email || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and new password are required",
+      });
     }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Password updated successfully",
+    });
+  } catch (error) {
+    console.error("Password reset error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error during password reset",
+    });
+  }
 });
 
 // ====================================
@@ -115,13 +121,13 @@ router.post('/reset-password', async (req, res) => {
 // @route   GET /api/users
 // @desc    Get all users (Admin only)
 // @access  Private/Admin
-router.get('/', [auth, isAdmin], async (req, res) => {
+router.get("/", [auth, isAdmin], async (req, res) => {
   try {
-    const users = await User.find({}).select('-password');
+    const users = await User.find({}).select("-password");
     res.json(users);
   } catch (error) {
-    console.error('Error fetching users:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error fetching users:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
@@ -132,37 +138,37 @@ router.get('/', [auth, isAdmin], async (req, res) => {
 // @route   GET /api/users/:id
 // @desc    Get user by ID (Admin only)
 // @access  Private/Admin
-router.get('/:id', [auth, isAdmin, validateObjectId], async (req, res) => {
+router.get("/:id", [auth, isAdmin, validateObjectId], async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select('-password');
+    const user = await User.findById(req.params.id).select("-password");
     if (!user) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        message: 'User not found',
-        error: 'USER_NOT_FOUND'
+        message: "User not found",
+        error: "USER_NOT_FOUND",
       });
     }
-    
+
     res.json({
       success: true,
-      data: user
+      data: user,
     });
   } catch (error) {
-    console.error('Error fetching user:', error);
-    
+    console.error("Error fetching user:", error);
+
     // Handle specific MongoDB errors
-    if (error.name === 'CastError') {
+    if (error.name === "CastError") {
       return res.status(400).json({
         success: false,
-        message: 'Invalid user ID',
-        error: 'INVALID_USER_ID'
+        message: "Invalid user ID",
+        error: "INVALID_USER_ID",
       });
     }
-    
-    res.status(500).json({ 
+
+    res.status(500).json({
       success: false,
-      message: 'Server error while fetching user',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      message: "Server error while fetching user",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 });
@@ -170,14 +176,14 @@ router.get('/:id', [auth, isAdmin, validateObjectId], async (req, res) => {
 // @route   POST /api/users
 // @desc    Create a user (Admin only)
 // @access  Private/Admin
-router.post('/', [auth, isAdmin], async (req, res) => {
+router.post("/", [auth, isAdmin], async (req, res) => {
   try {
     const { email, password, role, ...rest } = req.body;
-    
+
     // Check if user exists
     let user = await User.findOne({ email });
     if (user) {
-      return res.status(400).json({ message: 'User already exists' });
+      return res.status(400).json({ message: "User already exists" });
     }
 
     // Create user
@@ -185,25 +191,25 @@ router.post('/', [auth, isAdmin], async (req, res) => {
       email,
       password,
       role,
-      ...rest
+      ...rest,
     });
 
     await user.save();
-    
+
     // Remove password from response
     user = user.toObject();
     delete user.password;
-    
+
     res.status(201).json(user);
   } catch (error) {
-    console.error('Error creating user:', error);
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({ 
-        message: 'Validation error',
-        errors: Object.values(error.errors).map(err => err.message)
+    console.error("Error creating user:", error);
+    if (error.name === "ValidationError") {
+      return res.status(400).json({
+        message: "Validation error",
+        errors: Object.values(error.errors).map((err) => err.message),
       });
     }
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
 });
 
@@ -213,51 +219,55 @@ router.post('/', [auth, isAdmin], async (req, res) => {
 // @route   PUT /api/users/:id/status
 // @desc    Update user status (active/inactive)
 // @access  Private/Admin
-router.put('/:id/status', [auth, isAdmin, validateObjectId], async (req, res) => {
-  try {
-    const { isActive } = req.body;
-    
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      { isActive },
-      { new: true, runValidators: true }
-    );
+router.put(
+  "/:id/status",
+  [auth, isAdmin, validateObjectId],
+  async (req, res) => {
+    try {
+      const { isActive } = req.body;
 
-    if (!user) {
-      return res.status(404).json({
+      const user = await User.findByIdAndUpdate(
+        req.params.id,
+        { isActive },
+        { new: true, runValidators: true },
+      );
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        message: "User status updated successfully",
+        data: user,
+      });
+    } catch (error) {
+      console.error("Error updating user status:", error);
+      res.status(500).json({
         success: false,
-        message: 'User not found'
+        message: "Error updating user status",
+        error: error.message,
       });
     }
-
-    res.status(200).json({
-      success: true,
-      message: 'User status updated successfully',
-      data: user
-    });
-  } catch (error) {
-    console.error('Error updating user status:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error updating user status',
-      error: error.message
-    });
-  }
-});
+  },
+);
 
 // @route   PUT /api/users/:id
 // @desc    Update user
 // @access  Private/Admin
-router.put('/:id', [auth, isAdmin, validateObjectId], async (req, res) => {
+router.put("/:id", [auth, isAdmin, validateObjectId], async (req, res) => {
   try {
     const { fullname, name, email, role, isActive } = req.body;
 
     const user = await User.findById(req.params.id);
     if (!user) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        message: 'User not found',
-        error: 'USER_NOT_FOUND'
+        message: "User not found",
+        error: "USER_NOT_FOUND",
       });
     }
 
@@ -267,8 +277,8 @@ router.put('/:id', [auth, isAdmin, validateObjectId], async (req, res) => {
       if (existingUser) {
         return res.status(400).json({
           success: false,
-          message: 'Email already in use',
-          error: 'EMAIL_IN_USE'
+          message: "Email already in use",
+          error: "EMAIL_IN_USE",
         });
       }
       user.email = email;
@@ -281,7 +291,7 @@ router.put('/:id', [auth, isAdmin, validateObjectId], async (req, res) => {
     if (isActive !== undefined) user.isActive = isActive;
 
     await user.save();
-    
+
     // Remove sensitive data before sending response
     const userObj = user.toObject();
     delete userObj.password;
@@ -290,24 +300,24 @@ router.put('/:id', [auth, isAdmin, validateObjectId], async (req, res) => {
     res.json({
       success: true,
       data: userObj,
-      message: 'User updated successfully'
+      message: "User updated successfully",
     });
   } catch (error) {
-    console.error('Error updating user:', error);
-    
+    console.error("Error updating user:", error);
+
     // Handle duplicate key error (e.g., duplicate email)
     if (error.code === 11000) {
       return res.status(400).json({
         success: false,
-        message: 'Email already in use',
-        error: 'DUPLICATE_EMAIL'
+        message: "Email already in use",
+        error: "DUPLICATE_EMAIL",
       });
     }
-    
-    res.status(500).json({ 
+
+    res.status(500).json({
       success: false,
-      message: 'Server error while updating user',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      message: "Server error while updating user",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 });
@@ -315,47 +325,47 @@ router.put('/:id', [auth, isAdmin, validateObjectId], async (req, res) => {
 // @route   DELETE /api/users/:id
 // @desc    Delete user (Admin only)
 // @access  Private/Admin
-router.delete('/:id', [auth, isAdmin, validateObjectId], async (req, res) => {
+router.delete("/:id", [auth, isAdmin, validateObjectId], async (req, res) => {
   try {
     // Prevent deleting own account
     if (req.user.id === req.params.id) {
       return res.status(400).json({
         success: false,
-        message: 'Cannot delete your own account',
-        error: 'SELF_DELETE_NOT_ALLOWED'
+        message: "Cannot delete your own account",
+        error: "SELF_DELETE_NOT_ALLOWED",
       });
     }
 
     const user = await User.findById(req.params.id);
     if (!user) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        message: 'User not found',
-        error: 'USER_NOT_FOUND'
+        message: "User not found",
+        error: "USER_NOT_FOUND",
       });
     }
 
     await user.remove();
-    
-    res.json({ 
+
+    res.json({
       success: true,
-      message: 'User deleted successfully'
+      message: "User deleted successfully",
     });
   } catch (error) {
-    console.error('Error deleting user:', error);
-    
-    if (error.name === 'CastError') {
+    console.error("Error deleting user:", error);
+
+    if (error.name === "CastError") {
       return res.status(400).json({
         success: false,
-        message: 'Invalid user ID',
-        error: 'INVALID_USER_ID'
+        message: "Invalid user ID",
+        error: "INVALID_USER_ID",
       });
     }
-    
-    res.status(500).json({ 
+
+    res.status(500).json({
       success: false,
-      message: 'Server error while deleting user',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      message: "Server error while deleting user",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 });
@@ -363,101 +373,103 @@ router.delete('/:id', [auth, isAdmin, validateObjectId], async (req, res) => {
 // @route   PUT /api/users/profile
 // @desc    Update user profile (phone and address only)
 // @access  Private (any authenticated user)
-router.put('/profile', 
+router.put(
+  "/profile",
   // Only use auth middleware, not isAdmin
   auth,
   async (req, res) => {
     try {
-      
       const { phone, address, ...otherData } = req.body;
-      
+
       // Only allow updating specific fields
       const updateData = {};
       if (phone !== undefined) updateData.phone = phone;
       if (address !== undefined) updateData.address = address;
-      
+
       // Prevent updating other fields through this endpoint
       if (Object.keys(otherData).length > 0) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           success: false,
-          message: 'Only phone and address can be updated through this endpoint' 
+          message:
+            "Only phone and address can be updated through this endpoint",
         });
       }
-      
+
       const user = await User.findByIdAndUpdate(
         req.user._id,
         { $set: updateData },
-        { new: true, runValidators: true }
-      ).select('-password');
-      
+        { new: true, runValidators: true },
+      ).select("-password");
+
       if (!user) {
-        console.error('User not found for profile update:', req.user._id);
-        return res.status(404).json({ 
+        console.error("User not found for profile update:", req.user._id);
+        return res.status(404).json({
           success: false,
-          message: 'User not found' 
+          message: "User not found",
         });
       }
-      
+
       res.json({
         success: true,
-        message: 'Profile updated successfully',
-        user
+        message: "Profile updated successfully",
+        user,
       });
     } catch (error) {
-      console.error('Error updating profile:', error);
-      if (error.name === 'ValidationError') {
-        return res.status(400).json({ 
+      console.error("Error updating profile:", error);
+      if (error.name === "ValidationError") {
+        return res.status(400).json({
           success: false,
-          message: 'Validation error',
-          errors: Object.values(error.errors).map(err => err.message)
+          message: "Validation error",
+          errors: Object.values(error.errors).map((err) => err.message),
         });
       }
-      res.status(500).json({ 
+      res.status(500).json({
         success: false,
-        message: 'Server error' 
+        message: "Server error",
       });
     }
-  }
+  },
 );
-
 
 // @route   PUT /api/users/:id/status
 // @desc    Update user status (Admin only)
 // @access  Private/Admin
-router.put('/:id/status', [auth, isAdmin], async (req, res) => {
+router.put("/:id/status", [auth, isAdmin], async (req, res) => {
   try {
     const { isActive } = req.body;
-    
-    if (typeof isActive !== 'boolean') {
-      return res.status(400).json({ message: 'isActive must be a boolean' });
+
+    if (typeof isActive !== "boolean") {
+      return res.status(400).json({ message: "isActive must be a boolean" });
     }
 
     const user = await User.findByIdAndUpdate(
       req.params.id,
       { isActive },
-      { new: true }
-    ).select('-password');
+      { new: true },
+    ).select("-password");
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
     res.json(user);
   } catch (error) {
-    console.error('Error updating user status:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error updating user status:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
 // @route   PUT /api/users/:id/password
 // @desc    Change user password (Admin only)
 // @access  Private/Admin
-router.put('/:id/password', [auth, isAdmin], async (req, res) => {
+router.put("/:id/password", [auth, isAdmin], async (req, res) => {
   try {
     const { newPassword } = req.body;
-    
+
     if (!newPassword || newPassword.length < 6) {
-      return res.status(400).json({ message: 'Password must be at least 6 characters long' });
+      return res
+        .status(400)
+        .json({ message: "Password must be at least 6 characters long" });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -466,17 +478,91 @@ router.put('/:id/password', [auth, isAdmin], async (req, res) => {
     const user = await User.findByIdAndUpdate(
       req.params.id,
       { password: hashedPassword },
-      { new: true }
-    ).select('-password');
+      { new: true },
+    ).select("-password");
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
-    res.json({ message: 'Password updated successfully' });
+    res.json({ message: "Password updated successfully" });
   } catch (error) {
-    console.error('Error changing password:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error changing password:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// @route   PUT /api/users/:id/lms-status
+// @desc    Update user LMS approval status (Admin only)
+// @access  Private/Admin
+router.put("/:id/lms-status", [auth, isAdmin], async (req, res) => {
+  try {
+    const { isApproved } = req.body;
+
+    if (typeof isApproved !== "boolean") {
+      return res.status(400).json({ message: "isApproved must be a boolean" });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { isApproved },
+      { new: true },
+    ).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({
+      success: true,
+      message: "LMS status updated successfully",
+      data: user,
+    });
+  } catch (error) {
+    console.error("Error updating LMS status:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// @route   PUT /api/users/:id/discount
+// @desc    Update user discount percentage (Admin only)
+// @access  Private/Admin
+router.put("/:id/discount", [auth, isAdmin], async (req, res) => {
+  try {
+    const { discount } = req.body;
+
+    // Validate discount value
+    if (typeof discount !== "number" || discount < 0 || discount > 100) {
+      return res.status(400).json({
+        success: false,
+        message: "Discount must be a number between 0 and 100",
+      });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { discount },
+      { new: true, runValidators: true },
+    ).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Discount updated successfully",
+      data: user,
+    });
+  } catch (error) {
+    console.error("Error updating discount:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 });
 

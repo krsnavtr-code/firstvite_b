@@ -175,6 +175,12 @@ const userSchema = new mongoose.Schema(
       default: new Map(),
       select: false, // Don't include by default for security
     },
+    discount: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 100,
+    },
   },
   {
     timestamps: true,
