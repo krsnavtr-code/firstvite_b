@@ -524,6 +524,7 @@ export const updateCourse = async (req, res) => {
       image = "",
       thumbnail = "",
       previewVideo = "",
+      brochureUrl = "",
       metaTitle = "",
       metaDescription = "",
       metaKeywords = "",
@@ -562,6 +563,7 @@ export const updateCourse = async (req, res) => {
       image: image?.toString()?.trim() || "",
       thumbnail: thumbnail?.toString()?.trim() || "",
       previewVideo: previewVideo?.toString()?.trim() || "",
+      brochureUrl: brochureUrl?.toString()?.trim() || "",
       metaTitle: metaTitle?.toString()?.trim() || "",
       metaDescription: metaDescription?.toString()?.trim() || "",
       metaKeywords: metaKeywords?.toString()?.trim() || "",
@@ -652,11 +654,47 @@ export const uploadCourseImage = async (req, res) => {
       fullUrl: fullUrl,
     });
   } catch (error) {
-    console.error("Error processing image upload:", error);
+    console.error("Error uploading image:", error);
     res.status(500).json({
       success: false,
-      message: "Error processing image upload",
-      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+      message: "Error uploading image",
+      error: error.message,
+    });
+  }
+};
+
+// Delete uploaded file
+export const deleteUploadedFile = async (req, res) => {
+  try {
+    const { filePath } = req.body;
+
+    if (!filePath) {
+      return res.status(400).json({
+        success: false,
+        message: "File path is required",
+      });
+    }
+
+    // Extract filename from the path
+    const filename = filePath.split("/").pop();
+    const fullPath = path.join(__dirname, "../public/uploads", filename);
+
+    // Check if file exists
+    if (fs.existsSync(fullPath)) {
+      fs.unlinkSync(fullPath);
+      console.log("File deleted successfully:", fullPath);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "File deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting file:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error deleting file",
+      error: error.message,
     });
   }
 };
