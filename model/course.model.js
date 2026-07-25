@@ -211,6 +211,45 @@ const courseSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    // Custom headings for course detail page
+    customHeadings: {
+      aboutCourse: {
+        type: String,
+        default: "About This Course",
+      },
+      whatYouWillLearn: {
+        type: String,
+        default: "What You'll Learn",
+      },
+      requirements: {
+        type: String,
+        default: "Requirements",
+      },
+      whoIsThisFor: {
+        type: String,
+        default: "Who is this course for?",
+      },
+      curriculum: {
+        type: String,
+        default: "Full Curriculum",
+      },
+      skills: {
+        type: String,
+        default: "Skills Student Will Learn",
+      },
+      topics: {
+        type: String,
+        default: "Topics Student Will Learn",
+      },
+      prerequisites: {
+        type: String,
+        default: "Requirements",
+      },
+      faq: {
+        type: String,
+        default: "Frequently Asked Questions",
+      },
+    },
   },
   { timestamps: true },
 );
