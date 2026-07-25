@@ -217,6 +217,10 @@ const courseSchema = new mongoose.Schema(
         type: String,
         default: "About This Course",
       },
+      aboutCourseInIndia: {
+        type: String,
+        default: "About the course in India",
+      },
       whatYouWillLearn: {
         type: String,
         default: "What You'll Learn",
@@ -249,6 +253,10 @@ const courseSchema = new mongoose.Schema(
         type: String,
         default: "Frequently Asked Questions",
       },
+    },
+    aboutCourseInIndia: {
+      type: String,
+      default: "",
     },
   },
   { timestamps: true },
