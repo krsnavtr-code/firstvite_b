@@ -3,6 +3,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import Course from "../model/course.model.js";
 import Contact from "../model/Contact.js";
+import Category from "../model/category.model.js";
 import { validationResult } from "express-validator";
 import { generateCoursePdf } from "../utils/pdfGenerator.js";
 import { updateSitemapAsync } from "../utils/sitemapUpdater.js";
@@ -268,8 +269,27 @@ export const getAllCourses = async (req, res) => {
 
     const query = {};
 
-    // Add category filter if provided
-    if (category) {
+    const isAdmin = req.user && req.user.role === "admin";
+
+    // Handle category filtering and restrict non-admin to active categories only
+    if (all !== "true" && !isAdmin) {
+      const activeCategories = await Category.find({ isActive: true })
+        .select("_id")
+        .lean();
+      const activeCategoryIds = activeCategories.map((c) => c._id);
+
+      if (category) {
+        if (
+          activeCategoryIds.some((id) => id.toString() === category.toString())
+        ) {
+          query.category = category;
+        } else {
+          query.category = null;
+        }
+      } else {
+        query.category = { $in: activeCategoryIds };
+      }
+    } else if (category) {
       query.category = category;
     }
 
@@ -290,8 +310,6 @@ export const getAllCourses = async (req, res) => {
     }
 
     // Handle published status filtering
-    const isAdmin = req.user && req.user.role === "admin";
-
     // Handle isPublished filter if provided
     if (isPublished === "true") {
       query.isPublished = true;

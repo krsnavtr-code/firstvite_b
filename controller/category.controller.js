@@ -11,7 +11,16 @@ export const getAllCategories = async (filters = {}) => {
 
     // Build query
     const query = {};
-    if (status) query.status = status;
+    if (status === "active") {
+      query.isActive = true;
+    } else if (status === "inactive") {
+      query.isActive = false;
+    } else if (status === "all") {
+      // Do not filter by isActive (return both active and inactive)
+    } else {
+      // Default behavior: show only active categories
+      query.isActive = true;
+    }
 
     // Build projection
     const projection = fields ? fields.split(",").join(" ") : {};

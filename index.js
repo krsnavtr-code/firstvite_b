@@ -400,7 +400,7 @@ app.get("/api/ping", (req, res) => {
 // Test public categories endpoint
 app.get("/api/test-categories", async (req, res) => {
   try {
-    const categories = await Category.find({}).limit(10);
+    const categories = await Category.find({ isActive: true }).limit(10);
     res.json({
       success: true,
       count: categories.length,

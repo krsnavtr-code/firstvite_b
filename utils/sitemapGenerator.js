@@ -118,7 +118,7 @@ const generateSitemap = async (baseUrl, fallbackMode = false) => {
         });
 
         // Get categories
-        const categories = await Category.find()
+        const categories = await Category.find({ isActive: true })
           .select("slug updatedAt")
           .maxTimeMS(10000)
           .lean();
