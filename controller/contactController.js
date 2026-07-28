@@ -6,6 +6,7 @@ import {
   sendHotLeadAlertEmail,
 } from "../utils/email.js";
 import { v4 as uuidv4 } from "uuid";
+import axios from "axios";
 
 /**
  * @desc    Submit a contact form
@@ -86,6 +87,17 @@ export const submitContactForm = async (req, res) => {
       // Don't fail the request if email sending fails
       // Just log the error and continue
     }
+
+    // Sync with CRM in the background (non-blocking)
+    sendLeadToCRM({
+      name: savedContact.name,
+      email: savedContact.email,
+      phone: savedContact.phone,
+      course: savedContact.courseTitle || "",
+      message: savedContact.message,
+    }).catch((err) => {
+      console.error("Error pushing lead to CRM:", err.message);
+    });
 
     // Prepare success response
     const responseData = {
@@ -291,3 +303,46 @@ export const trackVisit = async (req, res) => {
     });
   }
 };
+
+// CRM calling helper function
+async function sendLeadToCRM(leadData) {
+  const crmUrl =
+    process.env.CRM_API_URL;
+  const crmToken = process.env.CRM_API_TOKEN;
+
+  try {
+    const response = await axios.post(
+      crmUrl,
+      {
+        name: leadData.name,
+        email: leadData.email,
+        phone: leadData.phone,
+        course: leadData.course || "",
+        message: leadData.message || "",
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "X-Eklabya-Token": crmToken,
+        },
+        timeout: 10000, // 10 seconds timeout limit
+      },
+    );
+
+    if (response.data.success) {
+      console.log(
+        `[CRM] Lead successfully synced with CRM. Lead ID: ${response.data.lead_id}`,
+      );
+    } else {
+      console.warn(
+        `[CRM] Duplicate or warning from CRM: ${response.data.message}`,
+      );
+    }
+  } catch (error) {
+    console.error(
+      `[CRM] Failed to send lead to CRM:`,
+      error.response ? error.response.data : error.message,
+    );
+  }
+}
+
