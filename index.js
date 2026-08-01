@@ -508,7 +508,7 @@ const printRoutes = (routes, parentPath = "") => {
 app.use("/", sitemapRoute);
 
 // Custom HTML page route (must be before React catch-all)
-app.get("/my-custom-link", (req, res) => {
+app.get("/demo-data-science-ai-programme", (req, res) => {
   res.sendFile(path.join(publicDir, "custom-page.html"));
 });
 
