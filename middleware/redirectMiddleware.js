@@ -64,6 +64,11 @@ const handleRedirects = async (req, res, next) => {
       return next();
     }
 
+    // Skip checking database for custom landing pages
+    if (path === "/demo-data-science-ai-programme") {
+      return next();
+    }
+
     // Skip checking database for common static directories
     if (
       path.startsWith("/uploads") ||
