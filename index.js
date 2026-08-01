@@ -181,11 +181,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Custom HTML page route (must be before redirect middleware to take precedence)
-app.get("/demo-data-science-ai-programme", (req, res) => {
-  res.sendFile(path.join(publicDir, "data-science-landing-page.html"));
-});
-
 // Middleware for handling custom URL redirects from database
 app.use(handleRedirects);
 
@@ -517,14 +512,36 @@ app.get("/api/health", (req, res) => {
   res.status(200).json({ status: "OK", timestamp: new Date() });
 });
 
+// Debug route to check routing
+app.get("/debug-route", (req, res) => {
+  res.json({
+    path: req.path,
+    headers: req.headers,
+    env: process.env.NODE_ENV,
+    publicDir: publicDir,
+    fileExists: fs.existsSync(
+      path.join(publicDir, "data-science-landing-page.html"),
+    ),
+    clientDistDir: clientDistDir,
+    clientIndexExists: fs.existsSync(path.join(clientDistDir, "index.html")),
+  });
+});
+
+// Custom HTML page route (must be before React catch-all to take precedence)
+app.get("/demo-data-science-ai-programme", (req, res) => {
+  console.log("Serving custom HTML page for /demo-data-science-ai-programme");
+  res.sendFile(path.join(publicDir, "data-science-landing-page.html"));
+});
+
 // Serve React app for all non-API routes (must be before error handling)
 app.get("*", (req, res, next) => {
-  // Skip API routes and static file routes
+  // Skip API routes, static file routes, and custom HTML page routes
   if (
     req.path.startsWith("/api") ||
     req.path.startsWith("/uploads") ||
     req.path.startsWith("/pdfs") ||
-    req.path.startsWith("/candidate_profile")
+    req.path.startsWith("/candidate_profile") ||
+    req.path === "/demo-data-science-ai-programme"
   ) {
     return next();
   }
