@@ -181,6 +181,11 @@ app.use((req, res, next) => {
   next();
 });
 
+// Custom HTML page route (must be before redirect middleware to take precedence)
+app.get("/demo-data-science-ai-programme", (req, res) => {
+  res.sendFile(path.join(publicDir, "data-science-landing-page.html"));
+});
+
 // Middleware for handling custom URL redirects from database
 app.use(handleRedirects);
 
@@ -506,11 +511,6 @@ const printRoutes = (routes, parentPath = "") => {
 
 // Sitemap route
 app.use("/", sitemapRoute);
-
-// Custom HTML page route (must be before React catch-all)
-app.get("/demo-data-science-ai-programme", (req, res) => {
-  res.sendFile(path.join(publicDir, "data-science-landing-page.html"));
-});
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {
