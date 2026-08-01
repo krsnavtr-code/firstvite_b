@@ -1,0 +1,1648 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Become a Data Scientist in 6 Months | Eklabya</title>
+    <meta
+      name="description"
+      content="Join Eklabya's 6-month Data Science & AI programme. Live classes, 8 real projects, 100% placement assistance, and freelancing training. Learn from Sumit Choudhary."
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .gradient-hero {
+        background: linear-gradient(135deg, #0c2d6b 0%, #2563eb 100%);
+      }
+      .gradient-btn {
+        background: linear-gradient(90deg, #2563eb, #1d4ed8);
+      }
+      .check-list li {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23f97316' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M5 13l4 4L19 7'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: left top 0.25rem;
+        background-size: 1.25rem;
+        padding-left: 1.75rem;
+      }
+      details > summary {
+        list-style: none;
+      }
+      details > summary::-webkit-details-marker {
+        display: none;
+      }
+    </style>
+  </head>
+  <body class="bg-slate-50 text-slate-800 font-sans antialiased pb-24">
+    <!-- Navbar -->
+    <nav
+      class="sticky top-0 z-50 bg-white text-slate-800 border-b border-slate-200 shadow-sm"
+    >
+      <div class="max-w-6xl mx-auto px-4">
+        <div class="flex items-center justify-between h-16">
+          <!-- Logo -->
+          <a href="#" class="flex items-center">
+            <img
+              src="/images/eKlabya-fit-logo-8874.png"
+              alt="eKlabya"
+              class="h-10 w-auto object-contain"
+            />
+          </a>
+
+          <!-- Desktop Menu -->
+          <div class="hidden md:flex items-center gap-8 text-sm font-medium">
+            <a href="#" class="hover:text-blue-600 transition"
+              >Success Stories</a
+            >
+            <a href="#" class="hover:text-blue-600 transition"
+              >Free Masterclass</a
+            >
+            <a href="#" class="hover:text-blue-600 transition">Resources</a>
+            <a href="#" class="hover:text-blue-600 transition">Recordings</a>
+            <a href="#" class="hover:text-blue-600 transition">Topics</a>
+          </div>
+
+          <!-- CTA -->
+          <button
+            type="button"
+            class="open-modal hidden md:inline-block bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-5 rounded-full transition text-sm"
+          >
+            Free Apply
+          </button>
+
+          <!-- Mobile Menu Button -->
+          <button
+            id="menuBtn"
+            class="md:hidden text-slate-800 focus:outline-none"
+            aria-label="Open menu"
+          >
+            <svg
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              ></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Menu -->
+      <div
+        id="mobileMenu"
+        class="hidden md:hidden bg-white border-t border-slate-200 px-4 pb-4"
+      >
+        <a href="#" class="block py-2 text-sm hover:text-blue-600"
+          >Success Stories</a
+        >
+        <a href="#" class="block py-2 text-sm hover:text-blue-600"
+          >Free Masterclass</a
+        >
+        <a href="#" class="block py-2 text-sm hover:text-blue-600">Resources</a>
+        <a href="#" class="block py-2 text-sm hover:text-blue-600"
+          >Recordings</a
+        >
+        <a href="#" class="block py-2 text-sm hover:text-blue-600">Topics</a>
+        <button
+          type="button"
+          class="open-modal w-full mt-3 bg-emerald-500 hover:bg-emerald-600 text-white text-center font-bold py-2 px-5 rounded-full text-sm"
+        >
+          Free Apply
+        </button>
+      </div>
+    </nav>
+
+    <script>
+      document.getElementById("menuBtn").addEventListener("click", function () {
+        document.getElementById("mobileMenu").classList.toggle("hidden");
+      });
+    </script>
+
+    <!-- Hero -->
+    <section class="bg-white pt-4 pb-10 md:pb-16 px-4">
+      <div class="max-w-6xl mx-auto">
+        <div class="flex flex-col md:flex-row gap-8 md:gap-8 items-start">
+          <!-- Left Content -->
+          <div class="w-full md:w-1/2">
+            <div
+              class="inline-flex items-center gap-2 bg-orange-100 border border-orange-200 text-orange-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4"
+            >
+              <span class="w-1.5 h-1.5 bg-orange-500 rounded-full"></span>
+              Starts on 10 August, Monday
+            </div>
+            <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mb-4">
+              Become a Data Scientist in 6 Months
+            </h1>
+            <p class="text-slate-600 text-lg mb-8 leading-relaxed">
+              Learn from Sumit Choudhary, a data science and AI specialist with
+              10+ years building real products. Master Python, SQL, Machine
+              Learning, and Generative AI, with 100% Placement Assistance from
+              day one.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 mb-10">
+              <!-- <a
+                href="#enroll"
+                class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-lg transition text-center"
+                >Apply Now</a
+              > -->
+              <button
+                type="button"
+                class="open-modal bg-white hover:bg-orange-50 text-orange-600 font-bold py-3 px-8 rounded-lg border border-orange-500 transition text-center"
+              >
+                Download Brochure
+              </button>
+            </div>
+            <h3 class="font-bold text-lg mb-4 text-slate-900">
+              Master 20+ tools and tech
+            </h3>
+            <div class="flex flex-wrap gap-1">
+              <!-- 1. Python -->
+              <span
+                class="inline-flex items-center gap-2 bg-slate-900 text-white pl-1 pr-2 py-1 rounded-full text-sm font-medium"
+              >
+                <span
+                  class="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold border border-slate-700"
+                  >Py</span
+                >
+                Python
+              </span>
+
+              <!-- 2. Pandas -->
+              <span
+                class="inline-flex items-center gap-2 bg-slate-900 text-white pl-1 pr-4 py-2 rounded-full text-sm font-medium"
+              >
+                <span
+                  class="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold border border-slate-700"
+                  >Pd</span
+                >
+                Pandas
+              </span>
+
+              <!-- 3. NumPy -->
+              <span
+                class="inline-flex items-center gap-2 bg-slate-900 text-white pl-1 pr-4 py-2 rounded-full text-sm font-medium"
+              >
+                <span
+                  class="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold border border-slate-700"
+                  >Np</span
+                >
+                NumPy
+              </span>
+
+              <!-- 4. MySQL / SQL -->
+              <span
+                class="inline-flex items-center gap-2 bg-slate-900 text-white pl-1 pr-4 py-2 rounded-full text-sm font-medium"
+              >
+                <span
+                  class="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold border border-slate-700"
+                  >SQL</span
+                >
+                MySQL
+              </span>
+
+              <!-- 5. PowerBI -->
+              <span
+                class="inline-flex items-center gap-2 bg-slate-900 text-white pl-1 pr-4 py-2 rounded-full text-sm font-medium"
+              >
+                <span
+                  class="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold border border-slate-700"
+                  >PBi</span
+                >
+                PowerBI
+              </span>
+
+              <!-- 6. Tableau -->
+              <span
+                class="inline-flex items-center gap-2 bg-slate-900 text-white pl-1 pr-4 py-2 rounded-full text-sm font-medium"
+              >
+                <span
+                  class="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold border border-slate-700"
+                  >Tb</span
+                >
+                Tableau
+              </span>
+
+              <!-- 7. TensorFlow -->
+              <span
+                class="inline-flex items-center gap-2 bg-slate-900 text-white pl-1 pr-4 py-2 rounded-full text-sm font-medium"
+              >
+                <span
+                  class="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold border border-slate-700"
+                  >Tf</span
+                >
+                TensorFlow
+              </span>
+
+              <!-- 8. PyTorch -->
+              <span
+                class="inline-flex items-center gap-2 bg-slate-900 text-white pl-1 pr-4 py-2 rounded-full text-sm font-medium"
+              >
+                <span
+                  class="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold border border-slate-700"
+                  >Pt</span
+                >
+                PyTorch
+              </span>
+
+              <!-- 9. Keras -->
+              <span
+                class="inline-flex items-center gap-2 bg-slate-900 text-white pl-1 pr-4 py-2 rounded-full text-sm font-medium"
+              >
+                <span
+                  class="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold border border-slate-700"
+                  >K</span
+                >
+                Keras
+              </span>
+
+              <!-- 10. Jupyter -->
+              <span
+                class="inline-flex items-center gap-2 bg-slate-900 text-white pl-1 pr-4 py-2 rounded-full text-sm font-medium"
+              >
+                <span
+                  class="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold border border-slate-700"
+                  >Jp</span
+                >
+                Jupyter
+              </span>
+            </div>
+          </div>
+
+          <!-- Right Form -->
+          <div
+            class="w-full md:w-1/2 bg-white rounded-2xl p-3 md:p-6 shadow-2xl border border-slate-200"
+          >
+            <h2 class="text-xl font-bold mb-5 text-slate-900">
+              Check out the full curriculum now
+            </h2>
+            <form id="leadForm" class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium mb-1 text-slate-700"
+                  >Name *</label
+                >
+                <input
+                  type="text"
+                  name="name"
+                  required
+                  class="w-full px-4 py-2.5 rounded-lg bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500"
+                  placeholder="Enter name"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1 text-slate-700"
+                  >Email *</label
+                >
+                <input
+                  type="email"
+                  name="email"
+                  required
+                  class="w-full px-4 py-2.5 rounded-lg bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500"
+                  placeholder="Enter email"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1 text-slate-700"
+                  >Phone Number *</label
+                >
+                <div class="relative">
+                  <span
+                    class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 font-medium"
+                    >+91</span
+                  >
+                  <input
+                    type="tel"
+                    name="phone"
+                    required
+                    class="w-full pl-12 pr-4 py-2.5 rounded-lg bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500"
+                    placeholder="Enter phone number"
+                  />
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-3 text-slate-700"
+                  >Experience *</label
+                >
+                <select
+                  name="experience"
+                  required
+                  class="w-full px-4 py-2.5 rounded-lg bg-slate-50 border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-500"
+                >
+                  <option value="" disabled selected>
+                    Select your experience
+                  </option>
+                  <option value="Working Professional - Technical Roles">
+                    Working Professional - Technical Roles
+                  </option>
+                  <option value="Working Professional - Non Technical">
+                    Working Professional - Non Technical
+                  </option>
+                  <option value="College Student - Final Year">
+                    College Student - Final Year
+                  </option>
+                  <option value="College Student - 1st to Pre-final Year">
+                    College Student - 1st to Pre-final Year
+                  </option>
+                  <option value="Others">Others</option>
+                </select>
+              </div>
+              <button
+                type="submit"
+                class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg transition"
+              >
+                Unlock curriculum
+              </button>
+              <p class="text-xs text-slate-500 mt-2">
+                I authorise Eklabya to contact me with course updates & offers
+                via Email/SMS/Whatsapp/Call. I have read and agree to
+                <a href="#" class="underline text-blue-600">Privacy Policy</a> &
+                <a href="#" class="underline text-blue-600">Terms of use</a>.
+              </p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script>
+      document
+        .getElementById("leadForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+          const formData = new FormData(this);
+          const data = Object.fromEntries(formData.entries());
+          const payload = {
+            name: data.name,
+            email: data.email,
+            phone: data.phone,
+            message: "Experience: " + data.experience,
+            subject: "Google Ads Landing Page Enquiry",
+            courseTitle: "Data Science with GenAI Programme",
+          };
+          try {
+            const res = await fetch("/api/contact", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            });
+            const result = await res.json();
+            if (res.ok) {
+              alert("Thank you! We'll contact you soon.");
+              this.reset();
+            } else {
+              alert(result.message || "Submission failed. Please try again.");
+            }
+          } catch (err) {
+            alert("Something went wrong. Please try again.");
+          }
+        });
+    </script>
+
+    <section class="relative py-24 overflow-hidden bg-slate-950">
+      <!-- Glowing Background Orbs -->
+      <div
+        class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-cyan-600/20 rounded-full blur-[120px] pointer-events-none"
+      ></div>
+      <div
+        class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-emerald-600/20 rounded-full blur-[120px] pointer-events-none"
+      ></div>
+
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
+        <!-- Section Header -->
+        <div class="text-center mb-16">
+          <h2
+            class="text-3xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400 tracking-tight"
+          >
+            Who This Programme Is Actually For
+          </h2>
+          <div
+            class="mt-4 w-24 h-1 mx-auto bg-gradient-to-r from-cyan-500 to-emerald-500 rounded-full shadow-[0_0_15px_rgba(6,182,212,0.5)]"
+          ></div>
+        </div>
+
+        <!-- Grid Layout for Target Audience -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <!-- Card 1: Beginners -->
+          <div class="group relative rounded-2xl p-[1px] overflow-hidden">
+            <!-- Hover Animated Border -->
+            <div
+              class="absolute inset-0 bg-gradient-to-br from-cyan-500 to-emerald-500 opacity-30 group-hover:opacity-100 transition-opacity duration-500"
+            ></div>
+
+            <div
+              class="relative h-full bg-slate-900/90 backdrop-blur-xl rounded-2xl p-8 transition-transform duration-300 group-hover:-translate-y-1"
+            >
+              <div
+                class="w-14 h-14 rounded-full bg-cyan-500/10 flex items-center justify-center mb-6 border border-cyan-500/30 group-hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all"
+              >
+                <svg
+                  class="w-7 h-7 text-cyan-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  ></path>
+                </svg>
+              </div>
+              <h3 class="text-xl font-bold text-white mb-3">
+                Complete Beginners
+              </h3>
+              <p class="text-slate-400 leading-relaxed">
+                Fresh out of BBA, B.Com, B.Sc, B.Tech, or maybe something
+                entirely different. Non-IT background? No coding experience is
+                needed.
+                <span class="text-cyan-300 font-medium"
+                  >Python is covered right from the start.</span
+                >
+              </p>
+            </div>
+          </div>
+
+          <!-- Card 2: Non-IT Professionals -->
+          <div class="group relative rounded-2xl p-[1px] overflow-hidden">
+            <div
+              class="absolute inset-0 bg-gradient-to-br from-emerald-500 to-cyan-500 opacity-30 group-hover:opacity-100 transition-opacity duration-500"
+            ></div>
+
+            <div
+              class="relative h-full bg-slate-900/90 backdrop-blur-xl rounded-2xl p-8 transition-transform duration-300 group-hover:-translate-y-1"
+            >
+              <div
+                class="w-14 h-14 rounded-full bg-emerald-500/10 flex items-center justify-center mb-6 border border-emerald-500/30 group-hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all"
+              >
+                <svg
+                  class="w-7 h-7 text-emerald-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                  ></path>
+                </svg>
+              </div>
+              <h3 class="text-xl font-bold text-white mb-3">
+                Non-IT Professionals
+              </h3>
+              <p class="text-slate-400 leading-relaxed">
+                Working outside of IT looking to make a structured leap into the
+                data world.
+                <span class="text-emerald-300 font-medium"
+                  >No more piecing together bits and bobs from YouTube
+                  here.</span
+                >
+              </p>
+            </div>
+          </div>
+
+          <!-- Card 3: IT Types -->
+          <div class="group relative rounded-2xl p-[1px] overflow-hidden">
+            <div
+              class="absolute inset-0 bg-gradient-to-br from-cyan-500 to-blue-500 opacity-30 group-hover:opacity-100 transition-opacity duration-500"
+            ></div>
+
+            <div
+              class="relative h-full bg-slate-900/90 backdrop-blur-xl rounded-2xl p-8 transition-transform duration-300 group-hover:-translate-y-1"
+            >
+              <div
+                class="w-14 h-14 rounded-full bg-blue-500/10 flex items-center justify-center mb-6 border border-blue-500/30 group-hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] transition-all"
+              >
+                <svg
+                  class="w-7 h-7 text-blue-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+                  ></path>
+                </svg>
+              </div>
+              <h3 class="text-xl font-bold text-white mb-3">
+                Engineers & IT Types
+              </h3>
+              <p class="text-slate-400 leading-relaxed">
+                Got some Python under your belt? Get hands-on
+                <span class="text-blue-300 font-medium"
+                  >Machine Learning and Generative AI training</span
+                >—not just random tutorials to figure out yourself.
+              </p>
+            </div>
+          </div>
+
+          <!-- Card 4: Working Analysts -->
+          <div class="group relative rounded-2xl p-[1px] overflow-hidden">
+            <div
+              class="absolute inset-0 bg-gradient-to-br from-emerald-500 to-green-500 opacity-30 group-hover:opacity-100 transition-opacity duration-500"
+            ></div>
+
+            <div
+              class="relative h-full bg-slate-900/90 backdrop-blur-xl rounded-2xl p-8 transition-transform duration-300 group-hover:-translate-y-1"
+            >
+              <div
+                class="w-14 h-14 rounded-full bg-green-500/10 flex items-center justify-center mb-6 border border-green-500/30 group-hover:shadow-[0_0_20px_rgba(34,197,94,0.4)] transition-all"
+              >
+                <svg
+                  class="w-7 h-7 text-green-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                  ></path>
+                </svg>
+              </div>
+              <h3 class="text-xl font-bold text-white mb-3">
+                Working Analysts
+              </h3>
+              <p class="text-slate-400 leading-relaxed">
+                Getting ready to swap basic reporting out for advanced
+                <span class="text-green-300 font-medium"
+                  >Machine Learning & AI-specialist work.</span
+                >
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Disclaimer / Time Commitment Box (Futuristic Alert) -->
+        <div class="mt-12 relative group rounded-2xl overflow-hidden p-[1px]">
+          <div
+            class="absolute inset-0 bg-gradient-to-r from-red-500/50 via-orange-500/50 to-red-500/50 rounded-2xl animate-pulse"
+          ></div>
+          <div
+            class="relative bg-slate-900/90 backdrop-blur-md rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center gap-6"
+          >
+            <div
+              class="flex-shrink-0 w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center border border-red-500/30"
+            >
+              <svg
+                class="w-8 h-8 text-red-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path>
+              </svg>
+            </div>
+            <div>
+              <h4 class="text-xl font-bold text-white mb-2 tracking-wide">
+                One thing to keep in mind
+              </h4>
+              <p class="text-slate-400 leading-relaxed">
+                This is a
+                <span class="text-white font-medium"
+                  >live & interactive programme with a cohort</span
+                >—you do need to be able to put in a regular time commitment.
+                It's geared up for people who can commit
+                <span class="text-orange-400 font-bold"
+                  >8 to 10 hours a week for 6 months</span
+                >. If you're looking for a self-paced video library, then this
+                isn't the right fit for you, and that's totally okay.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Futuristic Stats Section Start -->
+    <section class="relative py-24 overflow-hidden bg-slate-950">
+      <!-- Background Ambient Glow -->
+      <div
+        class="absolute top-1/4 left-0 w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-[150px] pointer-events-none"
+      ></div>
+      <div
+        class="absolute bottom-0 right-0 w-[400px] h-[400px] bg-cyan-600/20 rounded-full blur-[120px] pointer-events-none"
+      ></div>
+
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
+        <!-- Section Header -->
+        <div class="text-center mb-16">
+          <h2
+            class="text-3xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 tracking-tight"
+          >
+            Why Data Science and AI, Why 2026?
+          </h2>
+          <div
+            class="mt-4 w-24 h-1 mx-auto bg-gradient-to-r from-cyan-500 to-indigo-500 rounded-full shadow-[0_0_15px_rgba(6,182,212,0.5)]"
+          ></div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+          <!-- Stat Card 1: NASSCOM Projection -->
+          <div class="group relative rounded-3xl p-[1px] overflow-hidden">
+            <!-- Hover Animated Border -->
+            <div
+              class="absolute inset-0 bg-gradient-to-br from-cyan-400 to-blue-600 opacity-30 group-hover:opacity-100 transition-opacity duration-500"
+            ></div>
+
+            <div
+              class="relative h-full bg-slate-900/80 backdrop-blur-xl rounded-3xl p-8 md:p-10 transition-transform duration-300 group-hover:-translate-y-1 flex flex-col justify-center"
+            >
+              <div class="flex items-center gap-4 mb-4">
+                <span
+                  class="text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-500 drop-shadow-[0_0_10px_rgba(6,182,212,0.5)]"
+                >
+                  1 Million
+                </span>
+              </div>
+              <h3 class="text-xl font-bold text-white mb-3">
+                AI & Data Professionals Needed
+              </h3>
+              <p class="text-slate-400 leading-relaxed">
+                <span class="text-cyan-400 font-medium">NASSCOM projects</span>
+                India's demand will cross 1 million by 2026, against a domestic
+                talent pool that's currently well under half that number.
+              </p>
+              <div
+                class="mt-6 p-4 rounded-xl bg-slate-800/50 border border-slate-700/50"
+              >
+                <p class="text-sm text-slate-300">
+                  <span class="text-white font-semibold">The Reality:</span>
+                  That gap is the practical reason a structured course keeps
+                  beating self-study for people trying to break in fast:
+                  employers are hiring faster than the market can train people.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stat Card 2: Growth & Hiring -->
+          <div class="group relative rounded-3xl p-[1px] overflow-hidden">
+            <!-- Hover Animated Border -->
+            <div
+              class="absolute inset-0 bg-gradient-to-br from-indigo-400 to-purple-600 opacity-30 group-hover:opacity-100 transition-opacity duration-500"
+            ></div>
+
+            <div
+              class="relative h-full bg-slate-900/80 backdrop-blur-xl rounded-3xl p-8 md:p-10 transition-transform duration-300 group-hover:-translate-y-1 flex flex-col justify-center"
+            >
+              <div class="flex items-center gap-4 mb-4">
+                <span
+                  class="text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-purple-500 drop-shadow-[0_0_10px_rgba(99,102,241,0.5)]"
+                >
+                  36%
+                </span>
+                <span class="text-2xl font-bold text-slate-500 mt-4"
+                  >Growth</span
+                >
+              </div>
+              <h3 class="text-xl font-bold text-white mb-3">
+                Projected Employment Spike
+              </h3>
+              <p class="text-slate-400 leading-relaxed">
+                The
+                <span class="text-indigo-400 font-medium"
+                  >U.S. Bureau of Labor Statistics</span
+                >
+                projects 36% growth in data science employment through 2033,
+                among the fastest of any occupation it tracks.
+              </p>
+              <div
+                class="mt-6 p-4 rounded-xl bg-slate-800/50 border border-slate-700/50 flex items-start gap-3"
+              >
+                <svg
+                  class="w-6 h-6 text-indigo-400 flex-shrink-0 mt-0.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                  ></path>
+                </svg>
+                <p class="text-sm text-slate-300">
+                  It isn't a one-year spike either. NASSCOM's own numbers show
+                  fresher hiring in AI and ML roles growing at a
+                  <span class="text-white font-semibold"
+                    >double-digit clip</span
+                  >
+                  year over year.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Highlight Box (The Conclusion) -->
+        <div class="relative group rounded-3xl p-[1px]">
+          <!-- Rotating Gradient Border Simulation -->
+          <div
+            class="absolute inset-0 bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-500 rounded-3xl opacity-50 group-hover:opacity-100 transition-opacity duration-500"
+          ></div>
+
+          <div
+            class="relative bg-slate-950/80 backdrop-blur-2xl rounded-3xl p-8 md:p-10 flex flex-col md:flex-row items-center gap-8 border border-slate-800"
+          >
+            <div class="flex-shrink-0">
+              <div
+                class="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-indigo-600 flex items-center justify-center shadow-[0_0_30px_rgba(99,102,241,0.4)]"
+              >
+                <svg
+                  class="w-8 h-8 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+            <div>
+              <h4 class="text-2xl font-bold text-white mb-3">
+                In plain terms...
+              </h4>
+              <p class="text-lg text-slate-300 leading-relaxed">
+                This is a
+                <span class="text-cyan-400 font-bold"
+                  >multiyear hiring wave</span
+                >, not a trend that closes the window in six months. The cost of
+                waiting a year to start isn't neutral. It's a year of the gap
+                NASSCOM is describing,
+                <span class="text-indigo-300 font-medium"
+                  >spent on the outside instead of the inside.</span
+                >
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Who This Is For -->
+    <section class="py-12 px-4 max-w-5xl mx-auto">
+      <h2 class="text-3xl font-extrabold text-center mb-8">
+        Who This Programme Is Actually For
+      </h2>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+          <h3 class="font-bold text-lg text-blue-700 mb-2">
+            Complete Beginners
+          </h3>
+          <p class="text-slate-600">
+            Fresh graduates from BBA, B.Com, B.Sc, B.Tech, or any non-IT
+            background. No coding experience needed — Python starts from
+            scratch.
+          </p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+          <h3 class="font-bold text-lg text-blue-700 mb-2">
+            Professionals Switching to IT
+          </h3>
+          <p class="text-slate-600">
+            Working professionals outside IT looking for a structured, practical
+            leap into data science instead of scattered YouTube tutorials.
+          </p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+          <h3 class="font-bold text-lg text-blue-700 mb-2">
+            Engineers & IT Professionals
+          </h3>
+          <p class="text-slate-600">
+            Already know some Python? Get hands-on Machine Learning and
+            Generative AI training with real projects.
+          </p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+          <h3 class="font-bold text-lg text-blue-700 mb-2">Working Analysts</h3>
+          <p class="text-slate-600">
+            Analysts ready to move from reporting to machine learning &
+            AI-specialist roles.
+          </p>
+        </div>
+      </div>
+      <p
+        class="text-center mt-8 text-slate-600 bg-amber-50 p-4 rounded-xl border border-amber-100 max-w-3xl mx-auto"
+      >
+        <strong>Note:</strong> This is a live, cohort-based programme. You need
+        to commit <strong>8 to 10 hours a week for 6 months</strong>. If you
+        want a self-paced video library, this isn't the right fit.
+      </p>
+    </section>
+
+    <!-- Why Data Science -->
+    <section class="bg-white py-12 px-4 border-y border-slate-200">
+      <div class="max-w-5xl mx-auto">
+        <h2 class="text-3xl font-extrabold text-center mb-8">
+          Why Data Science and AI, Why 2026
+        </h2>
+        <div class="grid md:grid-cols-3 gap-8 text-center">
+          <div class="p-6">
+            <div class="text-4xl font-extrabold text-blue-600 mb-2">1M+</div>
+            <p class="text-slate-600">
+              NASSCOM projects India's demand for AI & data professionals to
+              cross 1 million by 2026.
+            </p>
+          </div>
+          <div class="p-6">
+            <div class="text-4xl font-extrabold text-blue-600 mb-2">36%</div>
+            <p class="text-slate-600">
+              U.S. Bureau of Labor Statistics projects data science employment
+              growth through 2033.
+            </p>
+          </div>
+          <div class="p-6">
+            <div class="text-4xl font-extrabold text-blue-600 mb-2">2x</div>
+            <p class="text-slate-600">
+              Fresher hiring in AI & ML roles is growing at a double-digit clip
+              year over year.
+            </p>
+          </div>
+        </div>
+        <p class="text-center mt-10 text-slate-700 max-w-3xl mx-auto text-lg">
+          This is a multi-year hiring wave, not a short trend. Waiting a year to
+          start means spending another year on the outside instead of the
+          inside.
+        </p>
+      </div>
+    </section>
+
+    <!-- Curriculum -->
+    <section id="curriculum" class="py-12 px-4 max-w-5xl mx-auto">
+      <h2 class="text-3xl font-extrabold text-center mb-8">
+        Complete Course Curriculum
+      </h2>
+      <p class="text-center text-slate-600 mb-10">
+        Six structured modules. One path from zero to a portfolio a recruiter
+        can actually question you on.
+      </p>
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+          <div class="text-blue-600 font-bold text-sm mb-2">Module 01</div>
+          <h3 class="font-extrabold text-lg mb-3">
+            Data Analytics Foundations
+          </h3>
+          <ul class="space-y-2 text-sm text-slate-600 check-list">
+            <li>Excel for Data Analysis</li>
+            <li>SQL & Database Queries</li>
+            <li>Statistics & Probability</li>
+            <li>Business Reporting</li>
+          </ul>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+          <div class="text-blue-600 font-bold text-sm mb-2">Module 02</div>
+          <h3 class="font-extrabold text-lg mb-3">Python for Data Science</h3>
+          <ul class="space-y-2 text-sm text-slate-600 check-list">
+            <li>Python Programming Basics</li>
+            <li>Pandas & NumPy</li>
+            <li>Data Cleaning & EDA</li>
+            <li>Data Visualization</li>
+          </ul>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+          <div class="text-blue-600 font-bold text-sm mb-2">Module 03</div>
+          <h3 class="font-extrabold text-lg mb-3">Data Visualization</h3>
+          <ul class="space-y-2 text-sm text-slate-600 check-list">
+            <li>Power BI Dashboards</li>
+            <li>Matplotlib & Seaborn</li>
+            <li>Storytelling with Data</li>
+            <li>Business Intelligence</li>
+          </ul>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+          <div class="text-blue-600 font-bold text-sm mb-2">Module 04</div>
+          <h3 class="font-extrabold text-lg mb-3">Machine Learning</h3>
+          <ul class="space-y-2 text-sm text-slate-600 check-list">
+            <li>Supervised & Unsupervised ML</li>
+            <li>Classification & Regression</li>
+            <li>Model Evaluation & Tuning</li>
+            <li>Scikit-Learn Projects</li>
+          </ul>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+          <div class="text-blue-600 font-bold text-sm mb-2">Module 05</div>
+          <h3 class="font-extrabold text-lg mb-3">AI & NLP</h3>
+          <ul class="space-y-2 text-sm text-slate-600 check-list">
+            <li>Deep Learning Basics</li>
+            <li>Neural Networks</li>
+            <li>Natural Language Processing</li>
+            <li>Computer Vision Intro</li>
+          </ul>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+          <div class="text-blue-600 font-bold text-sm mb-2">Module 06</div>
+          <h3 class="font-extrabold text-lg mb-3">Generative AI & Capstone</h3>
+          <ul class="space-y-2 text-sm text-slate-600 check-list">
+            <li>ChatGPT & Prompt Engineering</li>
+            <li>LLMs & AI Tools</li>
+            <li>Capstone Industry Project</li>
+            <li>Portfolio & GitHub Setup</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Instructor -->
+    <section class="bg-slate-900 text-white py-12 px-4">
+      <div class="max-w-4xl mx-auto text-center">
+        <h2 class="text-3xl font-extrabold mb-8">
+          Learn From Someone Who's Done the Job
+        </h2>
+        <div class="bg-slate-800 rounded-2xl p-8 md:p-12">
+          <div
+            class="w-24 h-24 rounded-full bg-blue-500 mx-auto mb-6 flex items-center justify-center text-3xl font-extrabold"
+          >
+            SC
+          </div>
+          <h3 class="text-2xl font-bold mb-2">Sumit Choudhary</h3>
+          <p class="text-blue-300 font-medium mb-6">
+            Lead Instructor, Data Science & AI Specialist, 10+ Years in Industry
+          </p>
+          <p class="text-slate-300 mb-6 leading-relaxed">
+            An industry veteran who has spent more than a decade working on data
+            science, machine learning, and AI across top MNCs in India. He has
+            trained <strong>510+ learners</strong>, many now placed at TCS,
+            Infosys, Wipro, Amazon, and Deloitte. Known for simplifying complex
+            concepts for non-coders and focusing on real-world problem solving.
+          </p>
+          <div class="flex flex-wrap justify-center gap-3 text-sm">
+            <span class="bg-slate-700 px-3 py-1 rounded-full"
+              >Data Science</span
+            >
+            <span class="bg-slate-700 px-3 py-1 rounded-full"
+              >Machine Learning</span
+            >
+            <span class="bg-slate-700 px-3 py-1 rounded-full"
+              >Generative AI</span
+            >
+            <span class="bg-slate-700 px-3 py-1 rounded-full">Power BI</span>
+            <span class="bg-slate-700 px-3 py-1 rounded-full"
+              >Freelancing Expert</span
+            >
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8 Projects -->
+    <section class="py-12 px-4 max-w-5xl mx-auto">
+      <h2 class="text-3xl font-extrabold text-center mb-4">
+        Work on 8 Real Industry Projects
+      </h2>
+      <p class="text-center text-slate-600 mb-8">
+        Eight lines on your resume a recruiter can actually ask you about.
+      </p>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-white p-5 rounded-xl border border-slate-100 shadow-sm">
+          <h3 class="font-bold text-slate-800">Sales Forecasting Dashboard</h3>
+          <p class="text-sm text-slate-500">Python · Power BI · SQL</p>
+        </div>
+        <div class="bg-white p-5 rounded-xl border border-slate-100 shadow-sm">
+          <h3 class="font-bold text-slate-800">Customer Churn Prediction</h3>
+          <p class="text-sm text-slate-500">ML · Scikit-Learn · Pandas</p>
+        </div>
+        <div class="bg-white p-5 rounded-xl border border-slate-100 shadow-sm">
+          <h3 class="font-bold text-slate-800">AI-Powered Chatbot</h3>
+          <p class="text-sm text-slate-500">NLP · GPT API · Python</p>
+        </div>
+        <div class="bg-white p-5 rounded-xl border border-slate-100 shadow-sm">
+          <h3 class="font-bold text-slate-800">Stock Price Predictor</h3>
+          <p class="text-sm text-slate-500">Deep Learning · TensorFlow</p>
+        </div>
+        <div class="bg-white p-5 rounded-xl border border-slate-100 shadow-sm">
+          <h3 class="font-bold text-slate-800">Recommendation System</h3>
+          <p class="text-sm text-slate-500">ML · Collaborative Filtering</p>
+        </div>
+        <div class="bg-white p-5 rounded-xl border border-slate-100 shadow-sm">
+          <h3 class="font-bold text-slate-800">Market Trend Analyser</h3>
+          <p class="text-sm text-slate-500">Python · Visualization · API</p>
+        </div>
+        <div class="bg-white p-5 rounded-xl border border-slate-100 shadow-sm">
+          <h3 class="font-bold text-slate-800">Freelance Analytics Project</h3>
+          <p class="text-sm text-slate-500">End-to-End Client Delivery</p>
+        </div>
+        <div class="bg-white p-5 rounded-xl border border-slate-100 shadow-sm">
+          <h3 class="font-bold text-slate-800">GenAI Capstone Project</h3>
+          <p class="text-sm text-slate-500">
+            LLM · Prompt Engineering · Python
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Differentiators -->
+    <section class="bg-blue-50 py-12 px-4">
+      <div class="max-w-5xl mx-auto">
+        <h2 class="text-3xl font-extrabold text-center mb-8">
+          What Actually Makes This Different
+        </h2>
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="flex gap-4 bg-white p-5 rounded-xl shadow-sm">
+            <div class="text-blue-600 text-2xl">&#10003;</div>
+            <div>
+              <h3 class="font-bold">Live, Instructor-Led Classes</h3>
+              <p class="text-sm text-slate-600">
+                Direct access to Sumit, not pre-recorded videos.
+              </p>
+            </div>
+          </div>
+          <div class="flex gap-4 bg-white p-5 rounded-xl shadow-sm">
+            <div class="text-blue-600 text-2xl">&#10003;</div>
+            <div>
+              <h3 class="font-bold">Freelancing Training Built-In</h3>
+              <p class="text-sm text-slate-600">
+                How to price, pitch, and deliver client work on Fiverr & Upwork.
+              </p>
+            </div>
+          </div>
+          <div class="flex gap-4 bg-white p-5 rounded-xl shadow-sm">
+            <div class="text-blue-600 text-2xl">&#10003;</div>
+            <div>
+              <h3 class="font-bold">Hindi + English Teaching</h3>
+              <p class="text-sm text-slate-600">
+                Concepts that land the first time, not after the third rewatch.
+              </p>
+            </div>
+          </div>
+          <div class="flex gap-4 bg-white p-5 rounded-xl shadow-sm">
+            <div class="text-blue-600 text-2xl">&#10003;</div>
+            <div>
+              <h3 class="font-bold">Recognized Certification</h3>
+              <p class="text-sm text-slate-600">
+                ISO-certified, NSDC & NIELIT partnered — not a generic badge.
+              </p>
+            </div>
+          </div>
+          <div class="flex gap-4 bg-white p-5 rounded-xl shadow-sm">
+            <div class="text-blue-600 text-2xl">&#10003;</div>
+            <div>
+              <h3 class="font-bold">100% Placement Assistance</h3>
+              <p class="text-sm text-slate-600">
+                Resume rebuilds, LinkedIn optimization, mock interviews, direct
+                referrals.
+              </p>
+            </div>
+          </div>
+          <div class="flex gap-4 bg-white p-5 rounded-xl shadow-sm">
+            <div class="text-blue-600 text-2xl">&#10003;</div>
+            <div>
+              <h3 class="font-bold">Recorded Session Backups</h3>
+              <p class="text-sm text-slate-600">
+                Every live class is recorded so you never fall behind.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Placements -->
+    <section class="py-12 px-4 max-w-5xl mx-auto">
+      <h2 class="text-3xl font-extrabold text-center mb-10">
+        December 2025 Batch Placements
+      </h2>
+      <div
+        class="overflow-x-auto rounded-2xl shadow-sm border border-slate-200"
+      >
+        <table class="w-full text-left text-sm">
+          <thead class="bg-slate-100 text-slate-700">
+            <tr>
+              <th class="p-4 font-bold">Name</th>
+              <th class="p-4 font-bold">Role</th>
+              <th class="p-4 font-bold">Company</th>
+              <th class="p-4 font-bold">Package</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-slate-100">
+            <tr>
+              <td class="p-4">Arjun Kapoor</td>
+              <td class="p-4">Data Analyst</td>
+              <td class="p-4">Accenture, Delhi</td>
+              <td class="p-4 font-semibold text-orange-500">₹7.8 LPA</td>
+            </tr>
+            <tr>
+              <td class="p-4">Neha Singh</td>
+              <td class="p-4">Business Analyst</td>
+              <td class="p-4">Cognizant, Noida</td>
+              <td class="p-4 font-semibold text-orange-500">₹6.5 LPA</td>
+            </tr>
+            <tr>
+              <td class="p-4">Rohit Verma</td>
+              <td class="p-4">ML Engineer</td>
+              <td class="p-4">Tech Mahindra, Pune</td>
+              <td class="p-4 font-semibold text-orange-500">₹9.2 LPA</td>
+            </tr>
+            <tr>
+              <td class="p-4">Sneha Gupta</td>
+              <td class="p-4">Data Scientist</td>
+              <td class="p-4">Wipro, Bangalore</td>
+              <td class="p-4 font-semibold text-orange-500">₹10 LPA</td>
+            </tr>
+            <tr>
+              <td class="p-4">Manish Kumar</td>
+              <td class="p-4">BI Analyst</td>
+              <td class="p-4">IBM, Hyderabad</td>
+              <td class="p-4 font-semibold text-orange-500">₹8.4 LPA</td>
+            </tr>
+            <tr>
+              <td class="p-4">Ankita Tiwari</td>
+              <td class="p-4">Data Analyst</td>
+              <td class="p-4">HCL Technologies, Noida</td>
+              <td class="p-4 font-semibold text-orange-500">₹7.2 LPA</td>
+            </tr>
+            <tr>
+              <td class="p-4">Karan Rawat</td>
+              <td class="p-4">AI Specialist</td>
+              <td class="p-4">Infosys, Gurgaon</td>
+              <td class="p-4 font-semibold text-orange-500">₹11 LPA</td>
+            </tr>
+            <tr>
+              <td class="p-4">Pooja Mishra</td>
+              <td class="p-4">Data Engineer</td>
+              <td class="p-4">TCS, Mumbai</td>
+              <td class="p-4 font-semibold text-orange-500">₹8.0 LPA</td>
+            </tr>
+            <tr>
+              <td class="p-4">Vishal Sharma</td>
+              <td class="p-4">ML Analyst</td>
+              <td class="p-4">Capgemini, Pune</td>
+              <td class="p-4 font-semibold text-orange-500">₹9.5 LPA</td>
+            </tr>
+            <tr>
+              <td class="p-4">Divya Yadav</td>
+              <td class="p-4">Data Scientist</td>
+              <td class="p-4">EY, Delhi</td>
+              <td class="p-4 font-semibold text-orange-500">₹12 LPA</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="bg-slate-100 py-12 px-4">
+      <div class="max-w-5xl mx-auto">
+        <h2 class="text-3xl font-extrabold text-center mb-8">
+          Real Students. Real Results.
+        </h2>
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="bg-white p-6 rounded-2xl shadow-sm">
+            <p class="text-slate-700 mb-4 italic">
+              "Maine yeh course join kiya bina koi coding knowledge ke. 3rd
+              month mein hi ek freelance project mil gaya, ₹18,000 ka! Aur phir
+              TCS ne hire kar liya. Best investment of my life."
+            </p>
+            <p class="font-bold text-slate-900">
+              - Rahul Kumar, Data Analyst, TCS, Delhi
+            </p>
+          </div>
+          <div class="bg-white p-6 rounded-2xl shadow-sm">
+            <p class="text-slate-700 mb-4 italic">
+              "I was a BBA graduate with zero tech background. After this
+              course, I got placed at Deloitte and completed 2 freelance data
+              projects on Upwork."
+            </p>
+            <p class="font-bold text-slate-900">
+              - Aditya Mehta, BI Analyst, Deloitte, Gurgaon
+            </p>
+          </div>
+          <div class="bg-white p-6 rounded-2xl shadow-sm">
+            <p class="text-slate-700 mb-4 italic">
+              "Mujhe lagta tha Data Science bahut mushkil hai. But step-by-step
+              samjhaya. 6 months mein Python se lekar GenAI tak sab seekha.
+              Infosys ne ₹10 LPA pe hire kiya."
+            </p>
+            <p class="font-bold text-slate-900">
+              - Priya Sharma, ML Engineer, Infosys, Noida
+            </p>
+          </div>
+          <div class="bg-white p-6 rounded-2xl shadow-sm">
+            <p class="text-slate-700 mb-4 italic">
+              "Freelancing module alag level ka tha. Maine course ke beech hi
+              Fiverr pe 3 projects complete kiye aur ₹45,000 kama liye! Ab Wipro
+              mein job bhi hai."
+            </p>
+            <p class="font-bold text-slate-900">
+              - Devendra Trivedi, Data Scientist, Wipro, Pune
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing & Enroll -->
+    <section id="enroll" class="py-16 px-4 gradient-hero text-white">
+      <div class="max-w-4xl mx-auto text-center">
+        <h2 class="text-3xl md:text-4xl font-extrabold mb-6">
+          Data Science & AI Programme
+        </h2>
+        <p class="text-blue-100 text-lg mb-10">
+          Everything you need to go from beginner to job-ready and
+          freelance-ready in 6 months.
+        </p>
+        <div
+          class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 md:p-12 border border-white/20"
+        >
+          <div class="text-4xl md:text-5xl font-extrabold mb-2">₹44,100</div>
+          <p class="text-blue-200 mb-6">
+            <span class="line-through opacity-70">₹49,000</span> (10% off)
+          </p>
+          <ul class="text-left max-w-lg mx-auto space-y-3 mb-8 text-blue-100">
+            <li class="flex items-start gap-2">
+              <span class="text-green-400 font-bold">✓</span> Live
+              instructor-led classes
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-400 font-bold">✓</span> 8 real industry
+              projects
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-400 font-bold">✓</span> 100% Placement
+              Assistance
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-400 font-bold">✓</span> ISO-certified
+              certificate
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-400 font-bold">✓</span> Mock interviews &
+              resume help
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-400 font-bold">✓</span> Freelancing
+              project training
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-400 font-bold">✓</span> Recorded session
+              backup for every class
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-400 font-bold">✓</span> Direct mentorship
+              from Sumit Choudhary
+            </li>
+          </ul>
+          <div class="mb-8">
+            <p class="font-semibold text-lg">
+              Zero Cost EMI:
+              <span class="text-2xl font-extrabold">₹7,350</span>/month for 6
+              months
+            </p>
+            <p class="text-sm text-blue-200 mt-1">
+              Scholarship: ₹10,000 for eligible students
+            </p>
+          </div>
+          <a
+            href="#"
+            class="inline-block bg-yellow-400 hover:bg-yellow-300 text-slate-900 font-extrabold py-4 px-10 rounded-xl text-lg transition"
+            >Enroll Now: Pay ₹2,000 to Register</a
+          >
+          <p class="mt-4 text-sm text-blue-200">
+            Lock your seat today. Balance due before batch starts.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-12 px-4 max-w-3xl mx-auto">
+      <h2 class="text-3xl font-extrabold text-center mb-10">
+        Frequently Asked Questions
+      </h2>
+      <div class="space-y-4">
+        <details
+          class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 group"
+        >
+          <summary
+            class="font-bold cursor-pointer flex justify-between items-center"
+          >
+            Do I need coding experience?
+            <span class="text-blue-600 group-open:rotate-180 transition"
+              >▼</span
+            >
+          </summary>
+          <p class="text-slate-600 mt-3 text-sm">
+            Not at all. This course is designed for beginners. We teach Python
+            from scratch alongside all the tools you'll use.
+          </p>
+        </details>
+        <details
+          class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 group"
+        >
+          <summary
+            class="font-bold cursor-pointer flex justify-between items-center"
+          >
+            How long is the course?
+            <span class="text-blue-600 group-open:rotate-180 transition"
+              >▼</span
+            >
+          </summary>
+          <p class="text-slate-600 mt-3 text-sm">
+            Six months, with live classes and practical project work. Weekday or
+            weekend batch options available, plus recorded backups.
+          </p>
+        </details>
+        <details
+          class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 group"
+        >
+          <summary
+            class="font-bold cursor-pointer flex justify-between items-center"
+          >
+            How does the EMI work?
+            <span class="text-blue-600 group-open:rotate-180 transition"
+              >▼</span
+            >
+          </summary>
+          <p class="text-slate-600 mt-3 text-sm">
+            After the 10% discount (₹44,100), you can split it into 6 monthly
+            payments of ₹7,350 each, no extra cost. Pay ₹2,000 upfront to book
+            your seat.
+          </p>
+        </details>
+        <details
+          class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 group"
+        >
+          <summary
+            class="font-bold cursor-pointer flex justify-between items-center"
+          >
+            Is placement guaranteed?
+            <span class="text-blue-600 group-open:rotate-180 transition"
+              >▼</span
+            >
+          </summary>
+          <p class="text-slate-600 mt-3 text-sm">
+            No program can guarantee a job. We promise full support: resume
+            building, LinkedIn optimization, mock interviews, and direct
+            referrals to our hiring network.
+          </p>
+        </details>
+        <details
+          class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 group"
+        >
+          <summary
+            class="font-bold cursor-pointer flex justify-between items-center"
+          >
+            Can I earn through freelancing during the course?
+            <span class="text-blue-600 group-open:rotate-180 transition"
+              >▼</span
+            >
+          </summary>
+          <p class="text-slate-600 mt-3 text-sm">
+            Yes. Freelancing is part of the curriculum. We teach you how to find
+            clients on Fiverr and Upwork, what to charge, and how to deliver
+            great work.
+          </p>
+        </details>
+        <details
+          class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 group"
+        >
+          <summary
+            class="font-bold cursor-pointer flex justify-between items-center"
+          >
+            Will AI make data science jobs redundant?
+            <span class="text-blue-600 group-open:rotate-180 transition"
+              >▼</span
+            >
+          </summary>
+          <p class="text-slate-600 mt-3 text-sm">
+            No — AI is automating routine reporting but increasing demand for
+            people who can ask the right questions and validate AI outputs.
+            That's why Module 6 is dedicated to Generative AI & LLMs.
+          </p>
+        </details>
+      </div>
+    </section>
+
+    <!-- Footer CTA -->
+    <section class="bg-slate-900 text-white py-12 px-4 text-center">
+      <h2 class="text-2xl font-extrabold mb-4">
+        Ready to start your Data Science career?
+      </h2>
+      <a
+        href="#enroll"
+        class="inline-block gradient-btn hover:shadow-lg text-white font-bold py-3 px-8 rounded-xl transition"
+        >Register Now</a
+      >
+      <p class="mt-6 text-slate-400 text-sm">
+        © 2026 Eklabya. All rights reserved.
+      </p>
+    </section>
+    <!-- Modal -->
+    <div id="applyModal" class="fixed inset-0 z-[60] hidden" aria-modal="true">
+      <div
+        class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        id="modalOverlay"
+      ></div>
+      <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div
+          class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 md:p-8"
+        >
+          <button
+            type="button"
+            id="closeModal"
+            class="absolute top-4 right-4 text-slate-400 hover:text-slate-700"
+          >
+            <svg
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
+            </svg>
+          </button>
+          <h2 id="modalTitle" class="text-2xl font-bold text-slate-900 mb-2">
+            Free Apply
+          </h2>
+          <p class="text-slate-500 text-sm mb-6">
+            Fill in your details and we will contact you.
+          </p>
+          <form id="modalForm" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-1 text-slate-700"
+                >Name *</label
+              >
+              <input
+                type="text"
+                name="name"
+                required
+                class="w-full px-4 py-2.5 rounded-lg bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500"
+                placeholder="Enter name"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1 text-slate-700"
+                >Email *</label
+              >
+              <input
+                type="email"
+                name="email"
+                required
+                class="w-full px-4 py-2.5 rounded-lg bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500"
+                placeholder="Enter email"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1 text-slate-700"
+                >Phone Number *</label
+              >
+              <div class="relative">
+                <span
+                  class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 font-medium"
+                  >+91</span
+                >
+                <input
+                  type="tel"
+                  name="phone"
+                  required
+                  class="w-full pl-12 pr-4 py-2.5 rounded-lg bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500"
+                  placeholder="Enter phone number"
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-lg transition"
+            >
+              Submit
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const applyModal = document.getElementById("applyModal");
+      const modalOverlay = document.getElementById("modalOverlay");
+      const closeModalBtn = document.getElementById("closeModal");
+      const modalForm = document.getElementById("modalForm");
+      const modalTitle = document.getElementById("modalTitle");
+
+      document.querySelectorAll(".open-modal").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          modalTitle.textContent = btn.textContent.trim();
+          applyModal.classList.remove("hidden");
+        });
+      });
+
+      closeModalBtn.addEventListener("click", () => {
+        applyModal.classList.add("hidden");
+      });
+
+      modalOverlay.addEventListener("click", () => {
+        applyModal.classList.add("hidden");
+      });
+
+      modalForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(modalForm);
+        const data = Object.fromEntries(formData.entries());
+        const payload = {
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          message: "Free Apply popup",
+          subject: "Free Apply Enquiry",
+          courseTitle: "Data Science with GenAI Programme",
+        };
+        try {
+          const res = await fetch("/api/contact", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          const result = await res.json();
+          if (res.ok) {
+            alert("Thank you! We will contact you soon.");
+            modalForm.reset();
+            applyModal.classList.add("hidden");
+          } else {
+            alert(result.message || "Submission failed. Please try again.");
+          }
+        } catch (err) {
+          alert("Something went wrong. Please try again.");
+        }
+      });
+    </script>
+
+    <!-- Bottom Sticky Bar -->
+    <div
+      class="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] px-4 py-3"
+    >
+      <div
+        class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3"
+      >
+        <div class="flex items-center gap-3 text-sm text-slate-700">
+          <span>New Batch Starts on</span>
+          <span
+            class="bg-emerald-600 text-white text-xs font-semibold px-3 py-1.5 rounded-full"
+            >10 August, Monday</span
+          >
+        </div>
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            class="open-modal inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-800 text-sm font-medium px-4 py-2 rounded-full border border-slate-300 transition"
+          >
+            <svg
+              class="w-4 h-4 text-orange-500"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-2.5 1.25a11.046 11.046 0 005.196 5.196l1.25-2.5a1 1 0 011.06-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-1C7.82 18 2 12.18 2 5V3z"
+              ></path>
+            </svg>
+            Request a Callback
+          </button>
+          <a
+            href="#"
+            class="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium px-4 py-2 rounded-full transition"
+          >
+            Chat Us
+            <svg
+              class="w-4 h-4 text-emerald-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+              ></path>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

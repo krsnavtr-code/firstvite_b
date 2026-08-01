@@ -507,6 +507,11 @@ const printRoutes = (routes, parentPath = "") => {
 // Sitemap route
 app.use("/", sitemapRoute);
 
+// Custom HTML page route (must be before React catch-all)
+app.get("/my-custom-link", (req, res) => {
+  res.sendFile(path.join(publicDir, "custom-page.html"));
+});
+
 // Health check endpoint
 app.get("/api/health", (req, res) => {
   res.status(200).json({ status: "OK", timestamp: new Date() });
