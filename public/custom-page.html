@@ -30,6 +30,11 @@
         display: none;
       }
 
+      /* Smooth Scrolling */
+      html {
+        scroll-behavior: smooth;
+      }
+
       /* Marquee Animation CSS */
       @keyframes slide {
         0% {
@@ -181,16 +186,22 @@
           </a>
 
           <!-- Desktop Menu -->
-          <div class="hidden md:flex items-center gap-8 text-sm font-medium">
-            <a href="#" class="hover:text-blue-600 transition"
-              >Success Stories</a
+          <div class="hidden md:flex items-center gap-6 text-sm font-medium">
+            <a href="#who-this-is-for" class="hover:text-blue-600 transition"
+              >Who It's For</a
             >
-            <a href="#" class="hover:text-blue-600 transition"
-              >Free Masterclass</a
+            <a href="#curriculum" class="hover:text-blue-600 transition"
+              >Curriculum</a
             >
-            <a href="#" class="hover:text-blue-600 transition">Resources</a>
-            <a href="#" class="hover:text-blue-600 transition">Recordings</a>
-            <a href="#" class="hover:text-blue-600 transition">Topics</a>
+            <a href="#projects" class="hover:text-blue-600 transition"
+              >Projects</a
+            >
+            <a href="#placements" class="hover:text-blue-600 transition"
+              >Placements</a
+            >
+            <a href="#pricing" class="hover:text-blue-600 transition"
+              >Pricing</a
+            >
           </div>
 
           <!-- CTA -->
@@ -229,17 +240,23 @@
         id="mobileMenu"
         class="hidden md:hidden bg-white border-t border-slate-200 px-4 pb-4"
       >
-        <a href="#" class="block py-2 text-sm hover:text-blue-600"
-          >Success Stories</a
+        <a
+          href="#who-this-is-for"
+          class="block py-2 text-sm hover:text-blue-600"
+          >Who It's For</a
         >
-        <a href="#" class="block py-2 text-sm hover:text-blue-600"
-          >Free Masterclass</a
+        <a href="#curriculum" class="block py-2 text-sm hover:text-blue-600"
+          >Curriculum</a
         >
-        <a href="#" class="block py-2 text-sm hover:text-blue-600">Resources</a>
-        <a href="#" class="block py-2 text-sm hover:text-blue-600"
-          >Recordings</a
+        <a href="#projects" class="block py-2 text-sm hover:text-blue-600"
+          >Projects</a
         >
-        <a href="#" class="block py-2 text-sm hover:text-blue-600">Topics</a>
+        <a href="#placements" class="block py-2 text-sm hover:text-blue-600"
+          >Placements</a
+        >
+        <a href="#pricing" class="block py-2 text-sm hover:text-blue-600"
+          >Pricing</a
+        >
         <button
           type="button"
           class="open-modal w-full mt-3 bg-emerald-500 hover:bg-emerald-600 text-white text-center font-bold py-2 px-5 rounded-full text-sm"
@@ -253,10 +270,17 @@
       document.getElementById("menuBtn").addEventListener("click", function () {
         document.getElementById("mobileMenu").classList.toggle("hidden");
       });
+
+      // Close mobile menu when clicking a link
+      document.querySelectorAll("#mobileMenu a").forEach(function (link) {
+        link.addEventListener("click", function () {
+          document.getElementById("mobileMenu").classList.add("hidden");
+        });
+      });
     </script>
 
     <!-- Hero -->
-    <section class="bg-white pt-4 pb-10 md:pb-16 px-4">
+    <section id="hero" class="bg-white pt-4 pb-10 md:pb-16 px-4">
       <div class="max-w-6xl mx-auto">
         <div class="flex flex-col md:flex-row gap-8 md:gap-8 items-start">
           <!-- Left Content -->
@@ -534,7 +558,10 @@
         });
     </script>
 
-    <section class="relative py-8 overflow-hidden bg-slate-950">
+    <section
+      id="who-this-is-for"
+      class="relative py-8 overflow-hidden bg-slate-950"
+    >
       <!-- Glowing Background Orbs -->
       <div
         class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-cyan-600/20 rounded-full blur-[120px] pointer-events-none"
@@ -767,7 +794,10 @@
     </section>
 
     <!-- Futuristic Stats Section Start -->
-    <section class="relative py-6 overflow-hidden bg-slate-950">
+    <section
+      id="why-data-science"
+      class="relative py-6 overflow-hidden bg-slate-950"
+    >
       <!-- Background Ambient Glow -->
       <div
         class="absolute top-1/4 left-0 w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-[150px] pointer-events-none"
@@ -942,7 +972,7 @@
     <!-- ==========================================
          SECTION 1: THE CURRICULUM TIMELINE (LIGHT)
     =========================================== -->
-    <section class="relative py-8 overflow-hidden bg-slate-50">
+    <section id="curriculum" class="relative py-8 overflow-hidden bg-slate-50">
       <!-- Soft Ambient Backgrounds for Light Mode -->
       <div
         class="absolute top-0 right-0 w-96 h-96 bg-purple-300/30 rounded-full blur-[100px] pointer-events-none"
@@ -1219,7 +1249,10 @@
     <!-- ==========================================
          SECTION 2: HUD VIEW - SKILLS & OUTCOMES (LIGHT)
     =========================================== -->
-    <section class="relative py-8 bg-white border-t border-slate-200">
+    <section
+      id="skills"
+      class="relative py-8 bg-white border-t border-slate-200"
+    >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           <!-- Left: Skill Arsenal (Tags Cloud) -->
@@ -1597,7 +1630,7 @@
     </section>
 
     <!-- Instructor Section Start -->
-    <section class="relative py-8 overflow-hidden bg-slate-700">
+    <section id="mentor" class="relative py-8 overflow-hidden bg-slate-700">
       <!-- Subtle Ambient Background Glows -->
       <div
         class="absolute top-0 right-1/4 w-96 h-96 bg-emerald-600/10 rounded-full blur-[100px] pointer-events-none"
@@ -1844,7 +1877,7 @@
     </section>
 
     <!-- Projects Section Start -->
-    <section class="relative py-8 overflow-hidden bg-slate-900">
+    <section id="projects" class="relative py-8 overflow-hidden bg-slate-900">
       <!-- Subtle Futuristic Ambient Glows -->
       <div
         class="absolute top-1/4 left-0 w-96 h-96 bg-blue-600/10 rounded-full blur-[120px] pointer-events-none"
@@ -2125,7 +2158,10 @@
     </section>
 
     <!-- Differentiators Section Start -->
-    <section class="relative py-8 overflow-hidden bg-slate-700">
+    <section
+      id="differentiators"
+      class="relative py-8 overflow-hidden bg-slate-700"
+    >
       <!-- Ambient Glowing Backgrounds -->
       <div
         class="absolute top-1/3 left-1/4 w-96 h-96 bg-fuchsia-600/10 rounded-full blur-[120px] pointer-events-none"
@@ -2434,7 +2470,7 @@
     </section>
 
     <!-- Sliding Placements Section -->
-    <section class="relative pt-8 bg-slate-50">
+    <section id="placements" class="relative pt-8 bg-slate-50">
       <!-- Soft Ambient Background Blobs -->
       <div
         class="absolute top-0 right-0 w-72 h-72 bg-emerald-200/40 rounded-full blur-[80px] pointer-events-none"
@@ -3235,6 +3271,7 @@
          COMPACT SLIDING REVIEWS SECTION
     =========================================== -->
     <section
+      id="reviews"
       class="bg-white border-y border-slate-200 overflow-hidden relative"
     >
       <!-- Slider Wrapper -->
@@ -3962,7 +3999,7 @@
     <!-- ==========================================
          COMPACT PRICING & ENROLLMENT SECTION
     =========================================== -->
-    <section class="py-6 bg-slate-50">
+    <section id="pricing" class="py-6 bg-slate-50">
       <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-8">
           <h2 class="text-2xl md:text-3xl font-black text-slate-900 mb-2">
@@ -4230,7 +4267,7 @@
     <!-- ==========================================
          FAQ SECTION
     =========================================== -->
-    <section class="relative py-20 overflow-hidden bg-slate-50">
+    <section id="faq" class="relative py-20 overflow-hidden bg-slate-50">
       <!-- Soft Ambient Backgrounds -->
       <div
         class="absolute top-0 left-0 w-96 h-96 bg-emerald-200/30 rounded-full blur-[100px] pointer-events-none"
