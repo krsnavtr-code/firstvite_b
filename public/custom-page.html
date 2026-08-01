@@ -29,6 +29,58 @@
       details > summary::-webkit-details-marker {
         display: none;
       }
+
+      /* Marquee Animation CSS */
+      @keyframes slide {
+        0% {
+          transform: translateX(0);
+        }
+        100% {
+          transform: translateX(-50%);
+        }
+      }
+
+      .marquee-container {
+        overflow: hidden;
+        display: flex;
+        width: 100%;
+        /* Faded edges effect */
+        mask-image: linear-gradient(
+          to right,
+          transparent,
+          black 5%,
+          black 95%,
+          transparent
+        );
+        -webkit-mask-image: linear-gradient(
+          to right,
+          transparent,
+          black 5%,
+          black 95%,
+          transparent
+        );
+      }
+
+      .marquee-track {
+        display: flex;
+        width: max-content;
+        animation: slide 30s linear infinite; /* Adjust speed here (30s) */
+      }
+
+      /* Pause animation on hover */
+      .marquee-track:hover {
+        animation-play-state: paused;
+      }
+
+      /* Modal popup smooth animation */
+      #placement-modal.show {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      #placement-modal.show .modal-card {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+      }
     </style>
   </head>
   <body class="bg-slate-50 text-slate-800 font-sans antialiased pb-24">
@@ -2299,6 +2351,843 @@
         </div>
       </div>
     </section>
+
+    <!-- Sliding Placements Section -->
+    <section class="relative pt-8 bg-slate-50">
+      <!-- Soft Ambient Background Blobs -->
+      <div
+        class="absolute top-0 right-0 w-72 h-72 bg-emerald-200/40 rounded-full blur-[80px] pointer-events-none"
+      ></div>
+      <div
+        class="absolute bottom-0 left-0 w-72 h-72 bg-cyan-200/40 rounded-full blur-[80px] pointer-events-none"
+      ></div>
+
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <!-- Section Header -->
+        <div class="text-center mb-10 max-w-2xl mx-auto">
+          <h3
+            class="text-emerald-600 font-bold tracking-[0.15em] uppercase text-xs mb-2"
+          >
+            Proven Track Record
+          </h3>
+          <h2 class="text-3xl md:text-4xl font-black text-slate-900 mb-4">
+            December 2025
+            <span
+              class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-cyan-500"
+              >Batch Placements</span
+            >
+          </h2>
+          <div
+            class="bg-white/80 backdrop-blur-sm border border-slate-200 shadow-sm rounded-lg p-3 inline-block"
+          >
+            <p class="text-sm text-slate-600 leading-relaxed">
+              The <span class="font-bold text-slate-800">NASSCOM</span> demand
+              numbers above aren't abstract. <br class="hidden md:block" />
+              Click on any card to see their details.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- The Marquee Wrapper -->
+      <div class="marquee-container py-4 relative z-10">
+        <!-- Track containing all cards (Duplicated once inside for seamless looping) -->
+        <div class="marquee-track gap-4 px-2">
+          <!-- COPY 1 (Original 10 Cards) -->
+          <!-- Use cursor-pointer and onclick attribute to open popup -->
+
+          <!-- Card 1 -->
+          <div
+            onclick="
+              openPopup(
+                'Arjun Kapoor',
+                'Data Analyst',
+                'Accenture, Delhi',
+                '₹7.8 LPA',
+                'AK',
+                false,
+              )
+            "
+            class="w-[260px] cursor-pointer bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md hover:border-cyan-300 transition-all duration-200 hover:-translate-y-1 relative overflow-hidden flex flex-col flex-shrink-0"
+          >
+            <div
+              class="absolute top-0 right-0 bg-emerald-100 text-emerald-700 text-[9px] font-bold px-2 py-0.5 rounded-bl-lg uppercase tracking-wide"
+            >
+              Placed
+            </div>
+            <div class="flex items-center gap-3 mb-3 mt-1">
+              <div
+                class="w-9 h-9 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-sm font-bold text-slate-400"
+              >
+                AK
+              </div>
+              <div>
+                <h3 class="text-base font-bold text-slate-900 leading-tight">
+                  Arjun Kapoor
+                </h3>
+                <p class="text-xs font-semibold text-cyan-600">Data Analyst</p>
+              </div>
+            </div>
+            <div
+              class="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between"
+            >
+              <span class="text-[10px] text-slate-400 font-medium uppercase"
+                >Package</span
+              >
+              <span class="text-lg font-black text-emerald-600">₹7.8 LPA</span>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div
+            onclick="
+              openPopup(
+                'Neha Singh',
+                'Business Analyst',
+                'Cognizant, Noida',
+                '₹6.5 LPA',
+                'NS',
+                false,
+              )
+            "
+            class="w-[260px] cursor-pointer bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md hover:border-cyan-300 transition-all duration-200 hover:-translate-y-1 relative overflow-hidden flex flex-col flex-shrink-0"
+          >
+            <div
+              class="absolute top-0 right-0 bg-emerald-100 text-emerald-700 text-[9px] font-bold px-2 py-0.5 rounded-bl-lg uppercase tracking-wide"
+            >
+              Placed
+            </div>
+            <div class="flex items-center gap-3 mb-3 mt-1">
+              <div
+                class="w-9 h-9 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-sm font-bold text-slate-400"
+              >
+                NS
+              </div>
+              <div>
+                <h3 class="text-base font-bold text-slate-900 leading-tight">
+                  Neha Singh
+                </h3>
+                <p class="text-xs font-semibold text-cyan-600">
+                  Business Analyst
+                </p>
+              </div>
+            </div>
+            <div
+              class="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between"
+            >
+              <span class="text-[10px] text-slate-400 font-medium uppercase"
+                >Package</span
+              >
+              <span class="text-lg font-black text-emerald-600">₹6.5 LPA</span>
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div
+            onclick="
+              openPopup(
+                'Rohit Verma',
+                'ML Engineer',
+                'Tech Mahindra, Pune',
+                '₹9.2 LPA',
+                'RV',
+                false,
+              )
+            "
+            class="w-[260px] cursor-pointer bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md hover:border-cyan-300 transition-all duration-200 hover:-translate-y-1 relative overflow-hidden flex flex-col flex-shrink-0"
+          >
+            <div
+              class="absolute top-0 right-0 bg-emerald-100 text-emerald-700 text-[9px] font-bold px-2 py-0.5 rounded-bl-lg uppercase tracking-wide"
+            >
+              Placed
+            </div>
+            <div class="flex items-center gap-3 mb-3 mt-1">
+              <div
+                class="w-9 h-9 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-sm font-bold text-slate-400"
+              >
+                RV
+              </div>
+              <div>
+                <h3 class="text-base font-bold text-slate-900 leading-tight">
+                  Rohit Verma
+                </h3>
+                <p class="text-xs font-semibold text-cyan-600">ML Engineer</p>
+              </div>
+            </div>
+            <div
+              class="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between"
+            >
+              <span class="text-[10px] text-slate-400 font-medium uppercase"
+                >Package</span
+              >
+              <span class="text-lg font-black text-emerald-600">₹9.2 LPA</span>
+            </div>
+          </div>
+
+          <!-- Card 4 -->
+          <div
+            onclick="
+              openPopup(
+                'Sneha Gupta',
+                'Data Scientist',
+                'Wipro, Bangalore',
+                '₹10.0 LPA',
+                'SG',
+                false,
+              )
+            "
+            class="w-[260px] cursor-pointer bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md hover:border-cyan-300 transition-all duration-200 hover:-translate-y-1 relative overflow-hidden flex flex-col flex-shrink-0"
+          >
+            <div
+              class="absolute top-0 right-0 bg-emerald-100 text-emerald-700 text-[9px] font-bold px-2 py-0.5 rounded-bl-lg uppercase tracking-wide"
+            >
+              Placed
+            </div>
+            <div class="flex items-center gap-3 mb-3 mt-1">
+              <div
+                class="w-9 h-9 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-sm font-bold text-slate-400"
+              >
+                SG
+              </div>
+              <div>
+                <h3 class="text-base font-bold text-slate-900 leading-tight">
+                  Sneha Gupta
+                </h3>
+                <p class="text-xs font-semibold text-cyan-600">
+                  Data Scientist
+                </p>
+              </div>
+            </div>
+            <div
+              class="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between"
+            >
+              <span class="text-[10px] text-slate-400 font-medium uppercase"
+                >Package</span
+              >
+              <span class="text-lg font-black text-emerald-600">₹10.0 LPA</span>
+            </div>
+          </div>
+
+          <!-- Card 5 -->
+          <div
+            onclick="
+              openPopup(
+                'Karan Rawat',
+                'AI Specialist',
+                'Infosys, Gurgaon',
+                '₹11.0 LPA',
+                'KR',
+                true,
+              )
+            "
+            class="w-[260px] cursor-pointer bg-gradient-to-br from-amber-50 to-white rounded-xl p-4 border border-amber-300 shadow-sm hover:shadow-md hover:border-amber-400 transition-all duration-200 hover:-translate-y-1 relative overflow-hidden flex flex-col flex-shrink-0"
+          >
+            <div
+              class="absolute top-0 right-0 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-bl-lg uppercase tracking-wide"
+            >
+              Top Placement
+            </div>
+            <div class="flex items-center gap-3 mb-3 mt-1">
+              <div
+                class="w-9 h-9 rounded-full bg-white border border-amber-200 flex items-center justify-center text-sm font-bold text-amber-600"
+              >
+                KR
+              </div>
+              <div>
+                <h3 class="text-base font-bold text-slate-900 leading-tight">
+                  Karan Rawat
+                </h3>
+                <p class="text-xs font-semibold text-amber-600">
+                  AI Specialist
+                </p>
+              </div>
+            </div>
+            <div
+              class="mt-auto pt-3 border-t border-amber-200/50 flex items-center justify-between"
+            >
+              <span class="text-[10px] text-amber-700/70 font-bold uppercase"
+                >Package</span
+              >
+              <span class="text-lg font-black text-amber-600">₹11.0 LPA</span>
+            </div>
+          </div>
+
+          <!-- Card 6 -->
+          <div
+            onclick="
+              openPopup(
+                'Manish Kumar',
+                'BI Analyst',
+                'IBM, Hyderabad',
+                '₹8.4 LPA',
+                'MK',
+                false,
+              )
+            "
+            class="w-[260px] cursor-pointer bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md hover:border-cyan-300 transition-all duration-200 hover:-translate-y-1 relative overflow-hidden flex flex-col flex-shrink-0"
+          >
+            <div
+              class="absolute top-0 right-0 bg-emerald-100 text-emerald-700 text-[9px] font-bold px-2 py-0.5 rounded-bl-lg uppercase tracking-wide"
+            >
+              Placed
+            </div>
+            <div class="flex items-center gap-3 mb-3 mt-1">
+              <div
+                class="w-9 h-9 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-sm font-bold text-slate-400"
+              >
+                MK
+              </div>
+              <div>
+                <h3 class="text-base font-bold text-slate-900 leading-tight">
+                  Manish Kumar
+                </h3>
+                <p class="text-xs font-semibold text-cyan-600">BI Analyst</p>
+              </div>
+            </div>
+            <div
+              class="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between"
+            >
+              <span class="text-[10px] text-slate-400 font-medium uppercase"
+                >Package</span
+              >
+              <span class="text-lg font-black text-emerald-600">₹8.4 LPA</span>
+            </div>
+          </div>
+
+          <!-- Card 7 -->
+          <div
+            onclick="
+              openPopup(
+                'Divya Yadav',
+                'Data Scientist',
+                'EY, Delhi',
+                '₹12.0 LPA',
+                'DY',
+                true,
+              )
+            "
+            class="w-[260px] cursor-pointer bg-gradient-to-br from-emerald-50 to-white rounded-xl p-4 border border-emerald-400 shadow-sm hover:shadow-md hover:border-emerald-500 transition-all duration-200 hover:-translate-y-1 relative overflow-hidden flex flex-col flex-shrink-0"
+          >
+            <div
+              class="absolute top-0 right-0 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-bl-lg uppercase tracking-wide"
+            >
+              Highest
+            </div>
+            <div class="flex items-center gap-3 mb-3 mt-1">
+              <div
+                class="w-9 h-9 rounded-full bg-white border border-emerald-200 flex items-center justify-center text-sm font-bold text-emerald-600"
+              >
+                DY
+              </div>
+              <div>
+                <h3 class="text-base font-bold text-slate-900 leading-tight">
+                  Divya Yadav
+                </h3>
+                <p class="text-xs font-semibold text-emerald-600">
+                  Data Scientist
+                </p>
+              </div>
+            </div>
+            <div
+              class="mt-auto pt-3 border-t border-emerald-200/50 flex items-center justify-between"
+            >
+              <span class="text-[10px] text-emerald-700/70 font-bold uppercase"
+                >Package</span
+              >
+              <span class="text-lg font-black text-emerald-600">₹12.0 LPA</span>
+            </div>
+          </div>
+
+          <!-- ============================================== -->
+          <!-- COPY 2 (Duplicate exact same cards for loop) -->
+          <!-- ============================================== -->
+
+          <div
+            onclick="
+              openPopup(
+                'Arjun Kapoor',
+                'Data Analyst',
+                'Accenture, Delhi',
+                '₹7.8 LPA',
+                'AK',
+                false,
+              )
+            "
+            class="w-[260px] cursor-pointer bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md hover:border-cyan-300 transition-all duration-200 hover:-translate-y-1 relative overflow-hidden flex flex-col flex-shrink-0"
+          >
+            <div
+              class="absolute top-0 right-0 bg-emerald-100 text-emerald-700 text-[9px] font-bold px-2 py-0.5 rounded-bl-lg uppercase tracking-wide"
+            >
+              Placed
+            </div>
+            <div class="flex items-center gap-3 mb-3 mt-1">
+              <div
+                class="w-9 h-9 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-sm font-bold text-slate-400"
+              >
+                AK
+              </div>
+              <div>
+                <h3 class="text-base font-bold text-slate-900 leading-tight">
+                  Arjun Kapoor
+                </h3>
+                <p class="text-xs font-semibold text-cyan-600">Data Analyst</p>
+              </div>
+            </div>
+            <div
+              class="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between"
+            >
+              <span class="text-[10px] text-slate-400 font-medium uppercase"
+                >Package</span
+              >
+              <span class="text-lg font-black text-emerald-600">₹7.8 LPA</span>
+            </div>
+          </div>
+
+          <div
+            onclick="
+              openPopup(
+                'Neha Singh',
+                'Business Analyst',
+                'Cognizant, Noida',
+                '₹6.5 LPA',
+                'NS',
+                false,
+              )
+            "
+            class="w-[260px] cursor-pointer bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md hover:border-cyan-300 transition-all duration-200 hover:-translate-y-1 relative overflow-hidden flex flex-col flex-shrink-0"
+          >
+            <div
+              class="absolute top-0 right-0 bg-emerald-100 text-emerald-700 text-[9px] font-bold px-2 py-0.5 rounded-bl-lg uppercase tracking-wide"
+            >
+              Placed
+            </div>
+            <div class="flex items-center gap-3 mb-3 mt-1">
+              <div
+                class="w-9 h-9 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-sm font-bold text-slate-400"
+              >
+                NS
+              </div>
+              <div>
+                <h3 class="text-base font-bold text-slate-900 leading-tight">
+                  Neha Singh
+                </h3>
+                <p class="text-xs font-semibold text-cyan-600">
+                  Business Analyst
+                </p>
+              </div>
+            </div>
+            <div
+              class="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between"
+            >
+              <span class="text-[10px] text-slate-400 font-medium uppercase"
+                >Package</span
+              >
+              <span class="text-lg font-black text-emerald-600">₹6.5 LPA</span>
+            </div>
+          </div>
+
+          <div
+            onclick="
+              openPopup(
+                'Rohit Verma',
+                'ML Engineer',
+                'Tech Mahindra, Pune',
+                '₹9.2 LPA',
+                'RV',
+                false,
+              )
+            "
+            class="w-[260px] cursor-pointer bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md hover:border-cyan-300 transition-all duration-200 hover:-translate-y-1 relative overflow-hidden flex flex-col flex-shrink-0"
+          >
+            <div
+              class="absolute top-0 right-0 bg-emerald-100 text-emerald-700 text-[9px] font-bold px-2 py-0.5 rounded-bl-lg uppercase tracking-wide"
+            >
+              Placed
+            </div>
+            <div class="flex items-center gap-3 mb-3 mt-1">
+              <div
+                class="w-9 h-9 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-sm font-bold text-slate-400"
+              >
+                RV
+              </div>
+              <div>
+                <h3 class="text-base font-bold text-slate-900 leading-tight">
+                  Rohit Verma
+                </h3>
+                <p class="text-xs font-semibold text-cyan-600">ML Engineer</p>
+              </div>
+            </div>
+            <div
+              class="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between"
+            >
+              <span class="text-[10px] text-slate-400 font-medium uppercase"
+                >Package</span
+              >
+              <span class="text-lg font-black text-emerald-600">₹9.2 LPA</span>
+            </div>
+          </div>
+
+          <div
+            onclick="
+              openPopup(
+                'Sneha Gupta',
+                'Data Scientist',
+                'Wipro, Bangalore',
+                '₹10.0 LPA',
+                'SG',
+                false,
+              )
+            "
+            class="w-[260px] cursor-pointer bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md hover:border-cyan-300 transition-all duration-200 hover:-translate-y-1 relative overflow-hidden flex flex-col flex-shrink-0"
+          >
+            <div
+              class="absolute top-0 right-0 bg-emerald-100 text-emerald-700 text-[9px] font-bold px-2 py-0.5 rounded-bl-lg uppercase tracking-wide"
+            >
+              Placed
+            </div>
+            <div class="flex items-center gap-3 mb-3 mt-1">
+              <div
+                class="w-9 h-9 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-sm font-bold text-slate-400"
+              >
+                SG
+              </div>
+              <div>
+                <h3 class="text-base font-bold text-slate-900 leading-tight">
+                  Sneha Gupta
+                </h3>
+                <p class="text-xs font-semibold text-cyan-600">
+                  Data Scientist
+                </p>
+              </div>
+            </div>
+            <div
+              class="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between"
+            >
+              <span class="text-[10px] text-slate-400 font-medium uppercase"
+                >Package</span
+              >
+              <span class="text-lg font-black text-emerald-600">₹10.0 LPA</span>
+            </div>
+          </div>
+
+          <div
+            onclick="
+              openPopup(
+                'Karan Rawat',
+                'AI Specialist',
+                'Infosys, Gurgaon',
+                '₹11.0 LPA',
+                'KR',
+                true,
+              )
+            "
+            class="w-[260px] cursor-pointer bg-gradient-to-br from-amber-50 to-white rounded-xl p-4 border border-amber-300 shadow-sm hover:shadow-md hover:border-amber-400 transition-all duration-200 hover:-translate-y-1 relative overflow-hidden flex flex-col flex-shrink-0"
+          >
+            <div
+              class="absolute top-0 right-0 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-bl-lg uppercase tracking-wide"
+            >
+              Top Placement
+            </div>
+            <div class="flex items-center gap-3 mb-3 mt-1">
+              <div
+                class="w-9 h-9 rounded-full bg-white border border-amber-200 flex items-center justify-center text-sm font-bold text-amber-600"
+              >
+                KR
+              </div>
+              <div>
+                <h3 class="text-base font-bold text-slate-900 leading-tight">
+                  Karan Rawat
+                </h3>
+                <p class="text-xs font-semibold text-amber-600">
+                  AI Specialist
+                </p>
+              </div>
+            </div>
+            <div
+              class="mt-auto pt-3 border-t border-amber-200/50 flex items-center justify-between"
+            >
+              <span class="text-[10px] text-amber-700/70 font-bold uppercase"
+                >Package</span
+              >
+              <span class="text-lg font-black text-amber-600">₹11.0 LPA</span>
+            </div>
+          </div>
+
+          <div
+            onclick="
+              openPopup(
+                'Manish Kumar',
+                'BI Analyst',
+                'IBM, Hyderabad',
+                '₹8.4 LPA',
+                'MK',
+                false,
+              )
+            "
+            class="w-[260px] cursor-pointer bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md hover:border-cyan-300 transition-all duration-200 hover:-translate-y-1 relative overflow-hidden flex flex-col flex-shrink-0"
+          >
+            <div
+              class="absolute top-0 right-0 bg-emerald-100 text-emerald-700 text-[9px] font-bold px-2 py-0.5 rounded-bl-lg uppercase tracking-wide"
+            >
+              Placed
+            </div>
+            <div class="flex items-center gap-3 mb-3 mt-1">
+              <div
+                class="w-9 h-9 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-sm font-bold text-slate-400"
+              >
+                MK
+              </div>
+              <div>
+                <h3 class="text-base font-bold text-slate-900 leading-tight">
+                  Manish Kumar
+                </h3>
+                <p class="text-xs font-semibold text-cyan-600">BI Analyst</p>
+              </div>
+            </div>
+            <div
+              class="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between"
+            >
+              <span class="text-[10px] text-slate-400 font-medium uppercase"
+                >Package</span
+              >
+              <span class="text-lg font-black text-emerald-600">₹8.4 LPA</span>
+            </div>
+          </div>
+
+          <div
+            onclick="
+              openPopup(
+                'Divya Yadav',
+                'Data Scientist',
+                'EY, Delhi',
+                '₹12.0 LPA',
+                'DY',
+                true,
+              )
+            "
+            class="w-[260px] cursor-pointer bg-gradient-to-br from-emerald-50 to-white rounded-xl p-4 border border-emerald-400 shadow-sm hover:shadow-md hover:border-emerald-500 transition-all duration-200 hover:-translate-y-1 relative overflow-hidden flex flex-col flex-shrink-0"
+          >
+            <div
+              class="absolute top-0 right-0 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-bl-lg uppercase tracking-wide"
+            >
+              Highest
+            </div>
+            <div class="flex items-center gap-3 mb-3 mt-1">
+              <div
+                class="w-9 h-9 rounded-full bg-white border border-emerald-200 flex items-center justify-center text-sm font-bold text-emerald-600"
+              >
+                DY
+              </div>
+              <div>
+                <h3 class="text-base font-bold text-slate-900 leading-tight">
+                  Divya Yadav
+                </h3>
+                <p class="text-xs font-semibold text-emerald-600">
+                  Data Scientist
+                </p>
+              </div>
+            </div>
+            <div
+              class="mt-auto pt-3 border-t border-emerald-200/50 flex items-center justify-between"
+            >
+              <span class="text-[10px] text-emerald-700/70 font-bold uppercase"
+                >Package</span
+              >
+              <span class="text-lg font-black text-emerald-600">₹12.0 LPA</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Modal Popup Structure (Hidden by default) -->
+    <div
+      id="placement-modal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 opacity-0 pointer-events-none transition-opacity duration-300"
+    >
+      <div
+        id="modal-card"
+        class="modal-card bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 relative transform scale-95 opacity-0 transition-all duration-300"
+      >
+        <!-- Close Button -->
+        <button
+          onclick="closePopup()"
+          class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full p-1.5 transition-colors focus:outline-none"
+        >
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            ></path>
+          </svg>
+        </button>
+
+        <div class="flex flex-col items-center text-center mt-2">
+          <!-- Avatar -->
+          <div
+            id="modal-initials"
+            class="w-20 h-20 rounded-full bg-cyan-50 border-4 border-cyan-100 flex items-center justify-center text-3xl font-bold text-cyan-600 mb-4 shadow-sm"
+          >
+            AK
+          </div>
+
+          <!-- Details -->
+          <h3
+            id="modal-name"
+            class="text-2xl font-black text-slate-900 leading-tight mb-1"
+          >
+            Arjun Kapoor
+          </h3>
+          <p id="modal-role" class="text-sm font-bold text-cyan-600 mb-5">
+            Data Analyst
+          </p>
+
+          <div
+            class="w-full bg-slate-50 rounded-xl p-5 border border-slate-100 relative overflow-hidden"
+          >
+            <!-- Deco element -->
+            <div
+              id="modal-bg-glow"
+              class="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 rounded-full blur-[20px]"
+            ></div>
+
+            <div
+              class="flex items-center justify-center gap-2 text-sm font-medium text-slate-600 mb-4 relative z-10"
+            >
+              <svg
+                class="w-4 h-4 text-slate-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                ></path>
+              </svg>
+              <span id="modal-company">Accenture, Delhi</span>
+            </div>
+            <div class="border-t border-slate-200 pt-4 relative z-10">
+              <span
+                class="text-xs text-slate-400 font-bold uppercase tracking-wider block mb-1"
+                >Secured Package</span
+              >
+              <span
+                id="modal-package"
+                class="text-3xl font-black text-emerald-600"
+                >₹7.8 LPA</span
+              >
+            </div>
+          </div>
+
+          <!-- Congratulation text -->
+          <p
+            class="text-xs text-slate-400 font-medium mt-5 flex items-center gap-1"
+          >
+            <span class="text-emerald-500">✔</span> Placed from Dec 2025 Batch
+          </p>
+        </div>
+      </div>
+    </div>
+    <!-- JavaScript to handle modal data and interactions -->
+    <script>
+      const modal = document.getElementById("placement-modal");
+
+      function openPopup(name, role, company, pkg, initials, isTopPlacement) {
+        // Populate Data
+        document.getElementById("modal-name").innerText = name;
+        document.getElementById("modal-role").innerText = role;
+        document.getElementById("modal-company").innerText = company;
+        document.getElementById("modal-package").innerText = pkg;
+        document.getElementById("modal-initials").innerText = initials;
+
+        // Handle styling based on 'Top Placement' vs Normal
+        const initialsCircle = document.getElementById("modal-initials");
+        const roleText = document.getElementById("modal-role");
+        const bgGlow = document.getElementById("modal-bg-glow");
+
+        if (isTopPlacement) {
+          initialsCircle.className =
+            "w-20 h-20 rounded-full bg-amber-50 border-4 border-amber-200 flex items-center justify-center text-3xl font-bold text-amber-600 mb-4 shadow-sm";
+          roleText.className = "text-sm font-bold text-amber-600 mb-5";
+          bgGlow.className =
+            "absolute top-0 right-0 w-24 h-24 bg-amber-500/10 rounded-full blur-[20px]";
+        } else {
+          initialsCircle.className =
+            "w-20 h-20 rounded-full bg-cyan-50 border-4 border-cyan-100 flex items-center justify-center text-3xl font-bold text-cyan-600 mb-4 shadow-sm";
+          roleText.className = "text-sm font-bold text-cyan-600 mb-5";
+          bgGlow.className =
+            "absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 rounded-full blur-[20px]";
+        }
+
+        // Show Modal
+        modal.classList.add("show");
+      }
+
+      function closePopup() {
+        // Hide Modal
+        modal.classList.remove("show");
+      }
+
+      // Close modal when clicking outside the card
+      modal.addEventListener("click", function (e) {
+        if (e.target === modal) {
+          closePopup();
+        }
+      });
+    </script>
+    <!-- ==========================================
+         COMPACT CALL TO ACTION (Below Slider)
+    =========================================== -->
+    <div
+      class="mb-8 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 bg-white/80 backdrop-blur-sm border border-slate-200/80 rounded-full px-6 py-3 max-w-fit mx-auto shadow-sm hover:shadow-md transition-shadow relative z-10"
+    >
+      <!-- Text -->
+      <p
+        class="text-lg md:text-xl font-extrabold text-slate-800 tracking-tight"
+      >
+        I Want to Be
+        <span
+          class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-cyan-500"
+          >Next</span
+        >
+      </p>
+
+      <!-- Small Glowing Button -->
+      <div class="relative group">
+        <!-- Glow Effect -->
+        <div
+          class="absolute inset-0 bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-full blur opacity-40 group-hover:opacity-70 transition-opacity duration-300"
+        ></div>
+
+        <button
+          class="relative flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white font-bold text-sm rounded-full hover:-translate-y-0.5 transition-transform duration-300 border border-white/20"
+        >
+          Apply Now
+          <svg
+            class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2.5"
+              d="M14 5l7 7m0 0l-7 7m7-7H3"
+            ></path>
+          </svg>
+        </button>
+      </div>
+    </div>
 
     <!-- Who This Is For -->
     <section class="py-12 px-4 max-w-5xl mx-auto">
