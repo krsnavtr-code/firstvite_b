@@ -509,7 +509,7 @@ app.use("/", sitemapRoute);
 
 // Custom HTML page route (must be before React catch-all)
 app.get("/demo-data-science-ai-programme", (req, res) => {
-  res.sendFile(path.join(publicDir, "custom-page.html"));
+  res.sendFile(path.join(publicDir, "data-science-landing-page.html"));
 });
 
 // Health check endpoint
