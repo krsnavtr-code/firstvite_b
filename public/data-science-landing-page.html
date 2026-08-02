@@ -5191,11 +5191,8 @@
                 "Thank you! Your brochure is downloading.",
               );
             } else {
-              showMessagePopup(
-                "success",
-                "Success!",
-                "Thank you! We will contact you soon.",
-              );
+              // Redirect to thank you page for regular form submission
+              window.location.href = "/data-science-ai-programme/thank-you";
             }
           } else {
             showMessagePopup(
