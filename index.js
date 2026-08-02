@@ -528,8 +528,8 @@ app.get("/debug-route", (req, res) => {
 });
 
 // Custom HTML page route (must be before React catch-all to take precedence)
-app.get("/demo-data-science-ai-programme", (req, res) => {
-  console.log("Serving custom HTML page for /demo-data-science-ai-programme");
+app.get("/data-science-ai-programme", (req, res) => {
+  console.log("Serving custom HTML page for /data-science-ai-programme");
   res.sendFile(path.join(publicDir, "data-science-landing-page.html"));
 });
 
@@ -541,7 +541,7 @@ app.get("*", (req, res, next) => {
     req.path.startsWith("/uploads") ||
     req.path.startsWith("/pdfs") ||
     req.path.startsWith("/candidate_profile") ||
-    req.path === "/demo-data-science-ai-programme"
+    req.path === "/data-science-ai-programme"
   ) {
     return next();
   }

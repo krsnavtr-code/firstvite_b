@@ -65,7 +65,7 @@ const handleRedirects = async (req, res, next) => {
     }
 
     // Skip checking database for custom landing pages
-    if (path === "/demo-data-science-ai-programme") {
+    if (path === "/data-science-ai-programme") {
       return next();
     }
 

@@ -10,22 +10,24 @@ const checkRedirect = async () => {
     await mongoose.connect(process.env.MongoDBURI);
     console.log("Connected to MongoDB");
 
-    // Find all redirects that might match /demo-data-science-ai-programme
+    // Find all redirects that might match /data-science-ai-programme
     const redirects = await Redirect.find({
       $or: [
-        { sourceUrl: "/demo-data-science-ai-programme" },
-        { sourceUrl: "demo-data-science-ai-programme" },
-        { sourceUrl: /demo-data-science/i }
-      ]
+        { sourceUrl: "/data-science-ai-programme" },
+        { sourceUrl: "data-science-ai-programme" },
+        { sourceUrl: /demo-data-science/i },
+      ],
     });
-    
-    console.log(`Found ${redirects.length} redirects matching demo-data-science:`);
+
+    console.log(
+      `Found ${redirects.length} redirects matching demo-data-science:`,
+    );
     console.log(JSON.stringify(redirects, null, 2));
 
     // Also check all redirects to see if any might conflict
     const allRedirects = await Redirect.find({});
     console.log(`\nTotal redirects in database: ${allRedirects.length}`);
-    
+
     process.exit(0);
   } catch (error) {
     console.error("Error checking redirects:", error);
