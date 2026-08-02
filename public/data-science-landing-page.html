@@ -308,7 +308,7 @@
               > -->
               <button
                 type="button"
-                class="open-modal bg-white hover:bg-orange-50 text-orange-600 font-bold py-3 px-8 rounded-lg border border-orange-500 transition text-center"
+                class="open-modal download-brochure bg-white hover:bg-orange-50 text-orange-600 font-bold py-3 px-8 rounded-lg border border-orange-500 transition text-center"
               >
                 Download Brochure
               </button>
@@ -5120,20 +5120,24 @@
       const closeModalBtn = document.getElementById("closeModal");
       const modalForm = document.getElementById("modalForm");
       const modalTitle = document.getElementById("modalTitle");
+      let isDownloadBrochure = false;
 
       document.querySelectorAll(".open-modal").forEach((btn) => {
         btn.addEventListener("click", () => {
           modalTitle.textContent = btn.textContent.trim();
+          isDownloadBrochure = btn.classList.contains("download-brochure");
           applyModal.classList.remove("hidden");
         });
       });
 
       closeModalBtn.addEventListener("click", () => {
         applyModal.classList.add("hidden");
+        isDownloadBrochure = false;
       });
 
       modalOverlay.addEventListener("click", () => {
         applyModal.classList.add("hidden");
+        isDownloadBrochure = false;
       });
 
       modalForm.addEventListener("submit", async (e) => {
@@ -5156,8 +5160,12 @@
           name: data.name,
           email: data.email,
           phone: data.phone,
-          message: "Landing Page: Data Science Landing Page, Free Apply popup",
-          subject: "Free Apply Enquiry",
+          message: isDownloadBrochure
+            ? "Landing Page: Data Science Landing Page, Brochure Download"
+            : "Landing Page: Data Science Landing Page, Free Apply popup",
+          subject: isDownloadBrochure
+            ? "Brochure Download Enquiry"
+            : "Free Apply Enquiry",
           courseTitle: "Data Science with GenAI Programme",
         };
         try {
@@ -5170,11 +5178,28 @@
           if (res.ok) {
             modalForm.reset();
             applyModal.classList.add("hidden");
-            showMessagePopup(
-              "success",
-              "Success!",
-              "Thank you! We will contact you soon.",
-            );
+
+            // Download brochure if it was a brochure download request
+            if (isDownloadBrochure) {
+              const link = document.createElement("a");
+              link.href = "/pdfs/Data Science Website Broucher.pdf";
+              link.download = "Data-Science-Brochure.pdf";
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+
+              showMessagePopup(
+                "success",
+                "Success!",
+                "Thank you! Your brochure is downloading.",
+              );
+            } else {
+              showMessagePopup(
+                "success",
+                "Success!",
+                "Thank you! We will contact you soon.",
+              );
+            }
           } else {
             showMessagePopup(
               "error",
