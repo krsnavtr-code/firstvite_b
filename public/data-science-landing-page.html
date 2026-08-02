@@ -630,11 +630,8 @@
             });
             const result = await res.json();
             if (res.ok) {
-              showMessagePopup(
-                "success",
-                "Success!",
-                "Thank you! We'll contact you soon.",
-              );
+              // Redirect to thank you page
+              window.location.href = "/data-science-ai-programme/thank-you";
               this.reset();
             } else {
               showMessagePopup(

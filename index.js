@@ -533,6 +533,14 @@ app.get("/data-science-ai-programme", (req, res) => {
   res.sendFile(path.join(publicDir, "data-science-landing-page.html"));
 });
 
+// Custom HTML thank you page route
+app.get("/data-science-ai-programme/thank-you", (req, res) => {
+  console.log(
+    "Serving custom HTML thank you page for /data-science-ai-programme/thank-you",
+  );
+  res.sendFile(path.join(publicDir, "data-science-thank-you.html"));
+});
+
 // Serve React app for all non-API routes (must be before error handling)
 app.get("*", (req, res, next) => {
   // Skip API routes, static file routes, and custom HTML page routes
@@ -541,7 +549,8 @@ app.get("*", (req, res, next) => {
     req.path.startsWith("/uploads") ||
     req.path.startsWith("/pdfs") ||
     req.path.startsWith("/candidate_profile") ||
-    req.path === "/data-science-ai-programme"
+    req.path === "/data-science-ai-programme" ||
+    req.path === "/data-science-ai-programme/thank-you"
   ) {
     return next();
   }
