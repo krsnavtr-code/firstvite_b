@@ -67,6 +67,8 @@ export const submitContactForm = async (req, res) => {
     // Add course-related fields if they exist
     if (courseId) {
       contactData.courseId = courseId; // Store the original course ID
+    }
+    if (courseTitle) {
       contactData.courseTitle = courseTitle?.trim();
     }
 
@@ -306,8 +308,7 @@ export const trackVisit = async (req, res) => {
 
 // CRM calling helper function
 async function sendLeadToCRM(leadData) {
-  const crmUrl =
-    process.env.CRM_API_URL;
+  const crmUrl = process.env.CRM_API_URL;
   const crmToken = process.env.CRM_API_TOKEN;
 
   try {
@@ -345,4 +346,3 @@ async function sendLeadToCRM(leadData) {
     );
   }
 }
-

@@ -209,7 +209,7 @@
             type="button"
             class="open-modal hidden md:inline-block bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-5 rounded-full transition text-sm"
           >
-            Free Apply
+            Apply Now
           </button>
 
           <!-- Mobile Menu Button -->
@@ -261,7 +261,7 @@
           type="button"
           class="open-modal w-full mt-3 bg-emerald-500 hover:bg-emerald-600 text-white text-center font-bold py-2 px-5 rounded-full text-sm"
         >
-          Free Apply
+          Apply Now
         </button>
       </div>
     </nav>
@@ -510,7 +510,7 @@
                 type="submit"
                 class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg transition"
               >
-                Unlock curriculum
+                Submit
               </button>
               <p class="text-xs text-slate-500 mt-2">
                 I authorise Eklabya to contact me with course updates & offers
@@ -524,18 +524,101 @@
       </div>
     </section>
 
+    <!-- Custom Message Popup -->
+    <div
+      id="messagePopup"
+      class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+    >
+      <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+      <div
+        class="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 md:p-8 transform transition-all text-center"
+      >
+        <div
+          id="popupIcon"
+          class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"
+        >
+          <!-- Icon will be inserted here -->
+        </div>
+        <h3 id="popupTitle" class="text-xl font-bold text-slate-900 mb-2"></h3>
+        <p id="popupMessage" class="text-slate-600 text-sm mb-6"></p>
+        <button
+          id="popupCloseBtn"
+          class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-lg transition"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+
     <script>
+      // Custom popup functions
+      function showMessagePopup(type, title, message) {
+        const popup = document.getElementById("messagePopup");
+        const popupIcon = document.getElementById("popupIcon");
+        const popupTitle = document.getElementById("popupTitle");
+        const popupMessage = document.getElementById("popupMessage");
+
+        popupTitle.textContent = title;
+        popupMessage.textContent = message;
+
+        if (type === "success") {
+          popupIcon.className =
+            "w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-emerald-100";
+          popupIcon.innerHTML = `
+            <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+          `;
+        } else {
+          popupIcon.className =
+            "w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-red-100";
+          popupIcon.innerHTML = `
+            <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          `;
+        }
+
+        popup.classList.remove("hidden");
+      }
+
+      document.getElementById("popupCloseBtn").addEventListener("click", () => {
+        document.getElementById("messagePopup").classList.add("hidden");
+      });
+
+      // Close popup when clicking outside
+      document.getElementById("messagePopup").addEventListener("click", (e) => {
+        if (e.target.id === "messagePopup") {
+          document.getElementById("messagePopup").classList.add("hidden");
+        }
+      });
+
+      // Lead form submission
       document
         .getElementById("leadForm")
         .addEventListener("submit", async function (e) {
           e.preventDefault();
+          const submitBtn = this.querySelector('button[type="submit"]');
+          const originalText = submitBtn.textContent;
+
+          // Show loading state
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = `
+            <svg class="animate-spin h-5 w-5 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          `;
+
           const formData = new FormData(this);
           const data = Object.fromEntries(formData.entries());
           const payload = {
             name: data.name,
             email: data.email,
             phone: data.phone,
-            message: "Experience: " + data.experience,
+            message:
+              "Landing Page: Data Science Landing Page, Experience: " +
+              data.experience,
             subject: "Google Ads Landing Page Enquiry",
             courseTitle: "Data Science with GenAI Programme",
           };
@@ -547,13 +630,29 @@
             });
             const result = await res.json();
             if (res.ok) {
-              alert("Thank you! We'll contact you soon.");
+              showMessagePopup(
+                "success",
+                "Success!",
+                "Thank you! We'll contact you soon.",
+              );
               this.reset();
             } else {
-              alert(result.message || "Submission failed. Please try again.");
+              showMessagePopup(
+                "error",
+                "Error",
+                result.message || "Submission failed. Please try again.",
+              );
             }
           } catch (err) {
-            alert("Something went wrong. Please try again.");
+            showMessagePopup(
+              "error",
+              "Error",
+              "Something went wrong. Please try again.",
+            );
+          } finally {
+            // Reset button state
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
           }
         });
     </script>
@@ -5044,13 +5143,25 @@
 
       modalForm.addEventListener("submit", async (e) => {
         e.preventDefault();
+        const submitBtn = modalForm.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+
+        // Show loading state
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `
+          <svg class="animate-spin h-5 w-5 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        `;
+
         const formData = new FormData(modalForm);
         const data = Object.fromEntries(formData.entries());
         const payload = {
           name: data.name,
           email: data.email,
           phone: data.phone,
-          message: "Free Apply popup",
+          message: "Landing Page: Data Science Landing Page, Free Apply popup",
           subject: "Free Apply Enquiry",
           courseTitle: "Data Science with GenAI Programme",
         };
@@ -5062,14 +5173,30 @@
           });
           const result = await res.json();
           if (res.ok) {
-            alert("Thank you! We will contact you soon.");
             modalForm.reset();
             applyModal.classList.add("hidden");
+            showMessagePopup(
+              "success",
+              "Success!",
+              "Thank you! We will contact you soon.",
+            );
           } else {
-            alert(result.message || "Submission failed. Please try again.");
+            showMessagePopup(
+              "error",
+              "Error",
+              result.message || "Submission failed. Please try again.",
+            );
           }
         } catch (err) {
-          alert("Something went wrong. Please try again.");
+          showMessagePopup(
+            "error",
+            "Error",
+            "Something went wrong. Please try again.",
+          );
+        } finally {
+          // Reset button state
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
         }
       });
     </script>
