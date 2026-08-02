@@ -5516,11 +5516,8 @@
               link.click();
               document.body.removeChild(link);
 
-              showMessagePopup(
-                "success",
-                "Success!",
-                "Thank you! Your brochure is downloading.",
-              );
+              // Redirect to thank you page after brochure download
+              window.location.href = "/data-science-ai-programme/thank-you";
             } else {
               // Redirect to thank you page for regular form submission
               window.location.href = "/data-science-ai-programme/thank-you";
