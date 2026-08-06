@@ -49,6 +49,7 @@ import batchRoute from "./route/batch.route.js";
 import classroomRoutes from "./routes/classroomRoutes.js";
 import loginRecordRoutes from "./routes/loginRecordRoutes.js";
 import mediaMentionRoutes from "./routes/mediaMentionRoutes.js";
+import awardRoutes from "./routes/awardRoutes.js";
 
 import dns from "dns";
 import { createServer } from "http";
@@ -428,6 +429,7 @@ app.use("/api/contacts", contactRoute);
 app.use("/api/faqs", faqRoute);
 app.use("/api/blog", blogRoutes);
 app.use("/api/media-mentions", mediaMentionRoutes);
+app.use("/api/awards", awardRoutes);
 
 // Auth routes
 app.use("/api/auth", authRoutes);
