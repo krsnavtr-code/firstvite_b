@@ -11,6 +11,7 @@ import {
   sendBrochureEmail,
   generatePdf,
   deletePdf,
+  toggleCoursePublish,
 } from "../controller/course.controller.js";
 import { isAdmin } from "../middleware/admin.js";
 import multer from "multer";
@@ -112,6 +113,7 @@ router.post(
 );
 router.post("/:id/generate-pdf", isAdmin, generatePdf);
 router.delete("/:id/pdf", isAdmin, deletePdf);
+router.patch("/:id/publish", isAdmin, toggleCoursePublish);
 
 // Public routes
 router.get("/", getAllCourses);

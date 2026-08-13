@@ -828,6 +828,46 @@ export const sendBrochureEmail = async (req, res) => {
   }
 };
 
+// Toggle course publish status
+export const toggleCoursePublish = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { isPublished } = req.body;
+
+    const course = await Course.findById(id);
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found",
+      });
+    }
+
+    // Update the publish status
+    course.isPublished = isPublished;
+    await course.save();
+
+    // Auto-update sitemap when course is published/unpublished
+    updateSitemapAsync();
+
+    res.json({
+      success: true,
+      message: `Course ${isPublished ? "published" : "unpublished"} successfully`,
+      data: {
+        _id: course._id,
+        isPublished: course.isPublished,
+      },
+    });
+  } catch (error) {
+    console.error("Error toggling course publish status:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
 // Delete a course
 export const deleteCourse = async (req, res) => {
   try {
