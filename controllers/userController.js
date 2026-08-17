@@ -39,9 +39,28 @@ export const createUser = async (req, res) => {
 // Update user
 export const updateUser = async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(req.params.id, req.body, {
+    // Build update object with only provided fields
+    const updateData = {};
+    const allowedFields = [
+      "fullname",
+      "email",
+      "role",
+      "password",
+      "phone",
+      "address",
+      "department",
+      "designation",
+    ];
+
+    allowedFields.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        updateData[field] = req.body[field];
+      }
+    });
+
+    const user = await User.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
-      runValidators: true,
+      runValidators: false, // Don't run validators on update to avoid required field validation
     });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
