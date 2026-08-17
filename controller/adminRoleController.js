@@ -195,7 +195,7 @@ export const createAdminUser = catchAsync(async (req, res, next) => {
 
 // Update admin user role
 export const updateAdminUserRole = catchAsync(async (req, res, next) => {
-  const { adminRoleId } = req.body;
+  const { adminRoleId, fullname, email } = req.body;
 
   const user = await User.findById(req.params.id);
   if (!user) {
@@ -223,12 +223,16 @@ export const updateAdminUserRole = catchAsync(async (req, res, next) => {
     };
   });
 
-  // Update user role and permissions
-  const updatedUser = await User.findByIdAndUpdate(
-    req.params.id,
-    { adminRoleId, adminPermissions },
-    { new: true, runValidators: true },
-  )
+  // Build update object with fields that are provided
+  const updateData = { adminRoleId, adminPermissions };
+  if (fullname) updateData.fullname = fullname;
+  if (email) updateData.email = email;
+
+  // Update user role, permissions, and optionally fullname/email
+  const updatedUser = await User.findByIdAndUpdate(req.params.id, updateData, {
+    new: true,
+    runValidators: true,
+  })
     .select("+adminPermissions +adminRoleId")
     .populate("adminRoleId", "name description");
 
