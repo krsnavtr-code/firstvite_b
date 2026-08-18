@@ -49,14 +49,17 @@ export const populateAdminPermissions = async (req, res, next) => {
   try {
     if (req.user && req.user.role === "admin") {
       // Populate admin permissions if not already loaded
-      if (!req.user.adminPermissions) {
+      if (
+        !req.user.adminPermissions ||
+        Object.keys(req.user.adminPermissions).length === 0
+      ) {
         const user = await req.user.constructor
           .findById(req.user._id)
           .select("+adminPermissions +adminRoleId")
           .populate("adminRoleId", "permissions");
 
         if (user) {
-          req.user.adminPermissions = user.adminPermissions;
+          req.user.adminPermissions = user.adminPermissions || {};
           req.user.adminRoleId = user.adminRoleId;
         }
       }
@@ -68,7 +71,7 @@ export const populateAdminPermissions = async (req, res, next) => {
 };
 
 // Check multiple permissions (for routes that need multiple page access)
-export const checkMultiplePermissions = (permissions) => {
+export const checkMultiplePermissions = (permissions, requireAll = true) => {
   return async (req, res, next) => {
     try {
       if (!req.user || req.user.role !== "admin") {
@@ -82,10 +85,30 @@ export const checkMultiplePermissions = (permissions) => {
 
       const userPermissions = req.user.adminPermissions || {};
 
-      for (const { page, action = "canView" } of permissions) {
-        const pagePermission = userPermissions[page];
+      if (requireAll) {
+        // Require ALL permissions (AND logic)
+        for (const { page, action = "canView" } of permissions) {
+          const pagePermission = userPermissions[page];
 
-        if (!pagePermission || !pagePermission[action]) {
+          if (!pagePermission || !pagePermission[action]) {
+            return next(
+              new AppError(`You do not have required permissions`, 403),
+            );
+          }
+        }
+      } else {
+        // Require ANY permission (OR logic)
+        let hasAnyPermission = false;
+        for (const { page, action = "canView" } of permissions) {
+          const pagePermission = userPermissions[page];
+
+          if (pagePermission && pagePermission[action]) {
+            hasAnyPermission = true;
+            break;
+          }
+        }
+
+        if (!hasAnyPermission) {
           return next(
             new AppError(`You do not have required permissions`, 403),
           );

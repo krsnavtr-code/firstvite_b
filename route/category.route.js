@@ -10,6 +10,10 @@ import {
 } from "../controller/category.controller.js";
 import { isAdmin } from "../middleware/admin.js";
 import { protect } from "../middleware/auth.js";
+import {
+  populateAdminPermissions,
+  checkPermission,
+} from "../middleware/adminPermissionMiddleware.js";
 
 const router = express.Router();
 
@@ -89,6 +93,8 @@ const validateCategory = [
 router.post(
   "/",
   isAdmin,
+  populateAdminPermissions,
+  checkPermission("categories", "canCreate"),
   validateCategory,
   (req, res, next) => {
     const errors = validationResult(req);
@@ -117,6 +123,8 @@ router.post(
 router.put(
   "/:id",
   isAdmin,
+  populateAdminPermissions,
+  checkPermission("categories", "canEdit"),
   validateObjectId,
   validateCategory,
   (req, res, next) => {
@@ -143,7 +151,14 @@ router.put(
   updateCategory,
 );
 
-router.delete("/:id", isAdmin, validateObjectId, deleteCategory);
+router.delete(
+  "/:id",
+  isAdmin,
+  populateAdminPermissions,
+  checkPermission("categories", "canDelete"),
+  validateObjectId,
+  deleteCategory,
+);
 
 // Public routes
 router.get("/", getAllCategories);

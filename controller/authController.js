@@ -490,7 +490,7 @@ export const getUserProfile = catchAsync(async (req, res, next) => {
   try {
     // Get user from the database to ensure we have the latest data
     const user = await User.findById(req.user._id || req.user.id).select(
-      "-password",
+      "-password +adminPermissions +adminRoleId",
     );
 
     if (!user) {
@@ -508,7 +508,7 @@ export const getUserProfile = catchAsync(async (req, res, next) => {
         phone: user.phone || "",
         address: user.address || "",
         adminRoleId: user.adminRoleId,
-        adminPermissions: user.adminPermissions,
+        adminPermissions: user.adminPermissions || {},
         discount: user.discount || 0,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
@@ -617,7 +617,7 @@ export const refreshToken = catchAsync(async (req, res, next) => {
     const user = await User.findOne({
       _id: decoded.id,
       refreshToken: refreshToken,
-    });
+    }).select("+adminPermissions +adminRoleId");
 
     if (!user) {
       return next(new AppError("User not found or invalid refresh token", 401));
@@ -640,6 +640,8 @@ export const refreshToken = catchAsync(async (req, res, next) => {
         email: user.email,
         role: user.role,
         isApproved: user.isApproved,
+        adminRoleId: user.adminRoleId,
+        adminPermissions: user.adminPermissions || {},
       },
     });
   } catch (error) {
