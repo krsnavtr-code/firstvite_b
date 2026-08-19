@@ -19,7 +19,7 @@ const storage = multer.diskStorage({
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     cb(
       null,
-      file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname)
+      file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname),
     );
   },
 });
@@ -39,10 +39,12 @@ const upload = multer({
 // @route   POST /api/email/send
 // @access  Private (Admin only)
 export const sendCustomEmail = catchAsync(async (req, res, next) => {
-  const { recipients, subject, body } = req.body;
+  const { recipients, subject, body, isHtml } = req.body;
 
   if (!recipients || !subject || !body) {
-    return next(new AppError("Recipients, subject, and body are required", 400));
+    return next(
+      new AppError("Recipients, subject, and body are required", 400),
+    );
   }
 
   // Parse recipients (can be comma-separated or array)
@@ -83,7 +85,8 @@ export const sendCustomEmail = catchAsync(async (req, res, next) => {
       await sendEmail({
         to: recipient,
         subject,
-        html: body,
+        text: isHtml === "true" ? "" : body, // Send as text if not HTML
+        html: isHtml === "true" ? body : "", // Send as html if HTML mode
         attachments: emailAttachments,
       });
     }
@@ -142,7 +145,7 @@ export const getEmailHistory = catchAsync(async (req, res, next) => {
 export const getEmailById = catchAsync(async (req, res, next) => {
   const emailHistory = await EmailHistory.findById(req.params.id).populate(
     "sender",
-    "fullname email"
+    "fullname email",
   );
 
   if (!emailHistory) {

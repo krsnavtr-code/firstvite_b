@@ -90,7 +90,7 @@ export const sendEmail = async ({
       to: to,
       subject: subject,
       text: text,
-      html: html || text.replace(/\n/g, "<br>"),
+      html: html, // Don't auto-convert text to HTML, let the caller decide
       attachments: processedAttachments,
     };
 
