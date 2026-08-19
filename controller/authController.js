@@ -489,8 +489,9 @@ export const verifyAdminOTP = catchAsync(async (req, res, next) => {
 export const getUserProfile = catchAsync(async (req, res, next) => {
   try {
     // Get user from the database to ensure we have the latest data
+    // Use only inclusion to avoid MongoDB error with mixed inclusion/exclusion
     const user = await User.findById(req.user._id || req.user.id).select(
-      "-password +adminPermissions +adminRoleId",
+      "fullname email role isApproved phone address adminRoleId adminPermissions discount createdAt updatedAt isActive",
     );
 
     if (!user) {
@@ -505,6 +506,7 @@ export const getUserProfile = catchAsync(async (req, res, next) => {
         email: user.email,
         role: user.role,
         isApproved: user.isApproved,
+        isActive: user.isActive !== false,
         phone: user.phone || "",
         address: user.address || "",
         adminRoleId: user.adminRoleId,
