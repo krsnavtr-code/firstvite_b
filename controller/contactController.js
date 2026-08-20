@@ -77,6 +77,20 @@ export const submitContactForm = async (req, res) => {
     // Save to database
     const savedContact = await contact.save();
 
+    // Sync with CRM (blocking - wait for CRM response)
+    try {
+      await sendLeadToCRM({
+        name: savedContact.name,
+        email: savedContact.email,
+        phone: savedContact.phone,
+        course: savedContact.courseTitle || "",
+        message: savedContact.message,
+      });
+    } catch (crmError) {
+      console.error("Error pushing lead to CRM:", crmError.message);
+      // Continue with the request even if CRM fails
+    }
+
     // Send email notifications (to user and admin)
     try {
       await sendContactNotifications({
@@ -89,17 +103,6 @@ export const submitContactForm = async (req, res) => {
       // Don't fail the request if email sending fails
       // Just log the error and continue
     }
-
-    // Sync with CRM in the background (non-blocking)
-    sendLeadToCRM({
-      name: savedContact.name,
-      email: savedContact.email,
-      phone: savedContact.phone,
-      course: savedContact.courseTitle || "",
-      message: savedContact.message,
-    }).catch((err) => {
-      console.error("Error pushing lead to CRM:", err.message);
-    });
 
     // Prepare success response
     const responseData = {
@@ -334,15 +337,18 @@ async function sendLeadToCRM(leadData) {
       console.log(
         `[CRM] Lead successfully synced with CRM. Lead ID: ${response.data.lead_id}`,
       );
+      return response.data;
     } else {
       console.warn(
         `[CRM] Duplicate or warning from CRM: ${response.data.message}`,
       );
+      return response.data;
     }
   } catch (error) {
     console.error(
       `[CRM] Failed to send lead to CRM:`,
       error.response ? error.response.data : error.message,
     );
+    throw error; // Throw error so caller can handle it
   }
 }
