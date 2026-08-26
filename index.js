@@ -86,7 +86,7 @@ app.timeout = 300000;
 const allowedOrigins = [
   // "http://localhost:5173",
   // "http://localhost:3000",
-  "https://www.theeklavya.com"
+  "https://www.theeklavya.com",
   "https://eklabya.com",
   "https://www.eklabya.com",
 ];
@@ -103,7 +103,7 @@ const corsOptions = {
     const allowedOrigins = [
       // "http://localhost:5173",
       // "http://localhost:3000",
-      "https://www.theeklavya.com"
+      "https://www.theeklavya.com",
       "https://eklabya.com",
       "https://www.eklabya.com",
     ];
