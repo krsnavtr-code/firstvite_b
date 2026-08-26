@@ -84,9 +84,9 @@ app.timeout = 300000;
 
 // Middleware
 const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:5174",
-  "http://localhost:3000",
+  // "http://localhost:5173",
+  // "http://localhost:3000",
+  "https://www.theeklavya.com"
   "https://eklabya.com",
   "https://www.eklabya.com",
 ];
@@ -101,9 +101,9 @@ const corsOptions = {
 
     // Check if the origin is in the allowed list
     const allowedOrigins = [
-      "http://localhost:5173",
-      "http://localhost:5174",
-      "http://localhost:3000",
+      // "http://localhost:5173",
+      // "http://localhost:3000",
+      "https://www.theeklavya.com"
       "https://eklabya.com",
       "https://www.eklabya.com",
     ];
