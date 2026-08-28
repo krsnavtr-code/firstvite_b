@@ -35,6 +35,7 @@ import discussionRoutes from "./routes/discussionRoutes.js";
 import careerRoutes from "./routes/careerRoutes.js";
 import applicationRoutes from "./routes/applicationRoutes.js";
 import externalContactRoutes from "./routes/externalContactRoutes.js";
+import secretContactRoutes from "./routes/secretContactRoutes.js";
 import candidateRoutes from "./routes/candidateRoutes.js";
 import adminEmailRoutes from "./routes/adminEmailRoutes.js";
 import emailRecordRoutes from "./routes/emailRecordRoutes.js";
@@ -482,6 +483,9 @@ app.use("/api/admin/roles", adminRoleRoutes);
 
 // External API Routes
 app.use("/api/outcontact", externalContactRoutes);
+app.use("/api/contact-data", secretContactRoutes);
+app.use("/api/contacts-data", secretContactRoutes);
+app.use("/api/contacts/export", secretContactRoutes);
 
 // PDF routes
 // console.log('Mounting PDF routes at /api/pdfs');
