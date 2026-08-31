@@ -83,15 +83,6 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 // Increase the HTTP request timeout to 5 minutes (300000ms)
 app.timeout = 300000;
 
-// Middleware
-const allowedOrigins = [
-  // "http://localhost:5173",
-  // "http://localhost:3000",
-  "https://www.theeklavya.com",
-  "https://eklabya.com",
-  "https://www.eklabya.com",
-];
-
 // CORS configuration
 const corsOptions = {
   origin: function (origin, callback) {
@@ -102,8 +93,7 @@ const corsOptions = {
 
     // Check if the origin is in the allowed list
     const allowedOrigins = [
-      // "http://localhost:5173",
-      // "http://localhost:3000",
+      "https://theeklavya.com",
       "https://www.theeklavya.com",
       "https://eklabya.com",
       "https://www.eklabya.com",
@@ -112,14 +102,9 @@ const corsOptions = {
     // Allow exact matches or any subdomain of eklabya.com
     if (
       allowedOrigins.includes(origin) ||
-      origin === "https://eklabya.com" ||
-      origin === "https://www.eklabya.com" ||
-      (origin && origin.endsWith(".eklabya.com")) ||
-      (origin &&
-        (origin.startsWith("https://eklabya.com") ||
-          origin.startsWith("https://www.eklabya.com")))
+      (origin && origin.endsWith(".eklabya.com"))
     ) {
-      console.log("CORS allowed request from origin:", origin);
+      // console.log("CORS allowed request from origin:", origin); // Optional: Keep for debugging
       return callback(null, true);
     }
 
