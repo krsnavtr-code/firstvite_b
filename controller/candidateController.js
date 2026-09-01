@@ -190,7 +190,7 @@ export const createCandidate = async (req, res) => {
   let profilePhotoPath = null;
 
   // Default values for email template
-  const myCompanyName = "Eklabya center of excellence Pvt.Ltd.";
+  const myCompanyName = "Eklabya";
   const eventName = "Career Hiring Camp 2025";
   const eventDate = "November 9, 2025 - Sunday";
   const eventTime = "9:00 AM - 5:00 PM";
@@ -200,7 +200,7 @@ export const createCandidate = async (req, res) => {
   const supportEmail = "info@eklabya.com";
   const supportPhone = "9891030303";
   const website = "https://eklabya.com";
-  const yourName = "Eklabya center of excellence Pvt Ltd.";
+  const yourName = "Eklabya";
 
   try {
     const {
@@ -329,7 +329,7 @@ export const createCandidate = async (req, res) => {
     const welcomeMailOptions = {
       from: `Eklabya <${emailFrom}>`,
       to: email,
-      subject: `Registration Confirmed — JobFair 2025 | Eklabya center of excellence Pvt. Ltd.`,
+      subject: `Registration Confirmed — JobFair 2025 | Eklabya`,
       html: `
   <div style="font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f5f7fb; padding: 24px;">
     <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%; max-width:600px; margin:0 auto; background:#ffffff; border-radius:10px; overflow:hidden; box-shadow:0 6px 18px rgba(32,33,36,0.08);">
