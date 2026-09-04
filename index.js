@@ -144,6 +144,11 @@ app.use(cors(corsOptions));
 
 // Middleware for URL redirection from firstvite.com to eklabya.com and eklabya.com to www.eklabya.com
 app.use((req, res, next) => {
+  // Never redirect API routes or CORS preflight requests
+  if (req.method === "OPTIONS" || req.path.startsWith("/api")) {
+    return next();
+  }
+
   const host = req.headers.host;
 
   // Check if the request is coming from firstvite.com (including subdomains)
