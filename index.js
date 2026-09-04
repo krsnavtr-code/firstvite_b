@@ -98,6 +98,8 @@ const corsOptions = {
       "https://www.theeklavya.com",
       "https://eklabya.com",
       "https://www.eklabya.com",
+      "https://admin.eklabya.com",
+      "https://connect.eklabya.com",
     ];
 
     // Allow exact matches or any subdomain of eklabya.com
