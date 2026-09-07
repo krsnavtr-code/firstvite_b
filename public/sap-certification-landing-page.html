@@ -1,0 +1,812 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#10233F" />
+    <title>eKlabya | SAP Certification Training</title>
+    <meta
+      name="description"
+      content="Build job-ready SAP skills with eKlabya. Practical SAP S/4HANA training, hands-on projects, portfolio building and career support."
+    />
+
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Tailwind Configuration for Custom Animations -->
+    <script>
+      tailwind.config = {
+        theme: {
+          fontFamily: {
+            sans: ["Inter", "sans-serif"],
+          },
+          extend: {
+            animation: {
+              "orb-float": "orbFloat 6s ease-in-out infinite",
+            },
+            keyframes: {
+              orbFloat: {
+                "0%, 100%": {
+                  transform: "translate(-50%, -50%) translateY(0) rotate(0deg)",
+                },
+                "50%": {
+                  transform:
+                    "translate(-50%, -50%) translateY(-10px) rotate(2deg)",
+                },
+              },
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+
+  <body
+    class="bg-white text-slate-800 antialiased font-sans selection:bg-blue-200 selection:text-blue-900"
+  >
+    <!-- Header -->
+    <header
+      class="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200"
+    >
+      <div
+        class="max-w-6xl mx-auto px-4 h-[74px] flex items-center justify-between gap-6"
+      >
+        <a href="#top">
+          <img
+            src="http://www.eklabya.com/api/upload/file/eKlabya-fit-logo-8874-5790.png"
+            alt="eKlabya"
+            class="h-10 md:h-12 w-auto object-contain"
+          />
+        </a>
+        <nav
+          class="hidden md:flex items-center gap-6 text-sm font-bold text-slate-600"
+        >
+          <a href="#tracks" class="hover:text-blue-600 transition-colors"
+            >SAP Tracks</a
+          >
+          <a href="#learning" class="hover:text-blue-600 transition-colors"
+            >Learning</a
+          >
+          <a href="#career" class="hover:text-blue-600 transition-colors"
+            >Career</a
+          >
+          <a href="#faq" class="hover:text-blue-600 transition-colors">FAQs</a>
+        </nav>
+        <button
+          type="button"
+          class="bg-gradient-to-r from-[#165dff] to-[#0f4cd8] text-white px-4 py-2.5 rounded-xl text-sm font-extrabold shadow-[0_10px_25px_rgba(22,93,255,0.18)] hover:-translate-y-0.5 transition-transform"
+          onclick="openModal()"
+        >
+          Get Details
+        </button>
+      </div>
+    </header>
+
+    <main id="top">
+      <!-- Hero Section -->
+      <section
+        class="relative overflow-hidden pt-12 pb-16 md:pt-20 md:pb-24 bg-[linear-gradient(180deg,#fff,#f7faff)]"
+      >
+        <!-- Hero Background Grid -->
+        <div
+          class="absolute inset-0 bg-[linear-gradient(rgba(22,93,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(22,93,255,0.035)_1px,transparent_1px)] bg-[size:42px_42px] pointer-events-none"
+        ></div>
+        <div
+          class="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-500/5 rounded-full blur-3xl pointer-events-none"
+        ></div>
+
+        <div
+          class="relative z-10 max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-10 lg:gap-16 items-center"
+        >
+          <!-- Text Content -->
+          <div>
+            <span
+              class="inline-flex items-center gap-2 bg-blue-50 text-blue-600 border border-blue-100 px-3 py-1.5 rounded-full text-[13px] font-black mb-5 shadow-sm"
+            >
+              <i
+                class="w-2 h-2 bg-green-500 rounded-full shadow-[0_0_0_4px_rgba(34,197,94,0.15)] block"
+              ></i>
+              SAP Certification
+            </span>
+            <h1
+              class="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] mb-5"
+            >
+              Master SAP.<br />
+              <span
+                class="bg-gradient-to-r from-[#165dff] to-[#f47b20] bg-clip-text text-transparent"
+                >Build a Future-Ready Career.</span
+              >
+            </h1>
+            <p
+              class="text-base md:text-lg text-slate-600 leading-relaxed mb-6 max-w-xl"
+            >
+              Learn practical SAP S/4HANA skills with structured training,
+              hands-on practice, real-world projects and career-focused
+              guidance.
+            </p>
+
+            <div class="flex flex-wrap gap-2 mb-8">
+              <span
+                class="bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-extrabold shadow-sm"
+                >SAP S/4HANA</span
+              >
+              <span
+                class="bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-extrabold shadow-sm"
+                >Hands-on Projects</span
+              >
+              <span
+                class="bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-extrabold shadow-sm"
+                >Career Support</span
+              >
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 mb-6">
+              <button
+                type="button"
+                class="bg-gradient-to-r from-[#165dff] to-[#0f4cd8] text-white px-6 py-3.5 rounded-xl font-extrabold shadow-[0_10px_25px_rgba(22,93,255,0.18)] hover:-translate-y-1 transition-transform text-center"
+                onclick="openModal()"
+              >
+                Enquire Now
+              </button>
+              <a
+                href="#tracks"
+                class="bg-white border border-slate-200 text-slate-800 px-6 py-3.5 rounded-xl font-extrabold hover:-translate-y-1 transition-transform text-center shadow-sm"
+              >
+                Explore SAP Tracks
+              </a>
+            </div>
+
+            <div
+              class="flex flex-wrap gap-x-5 gap-y-2 text-xs font-extrabold text-slate-400 uppercase tracking-wide"
+            >
+              <span>&check; Practical Learning</span>
+              <span>&check; Industry Curriculum</span>
+            </div>
+          </div>
+
+          <!-- Form Card -->
+          <div class="relative z-10 w-full max-w-md mx-auto md:ml-auto">
+            <div
+              class="bg-white border border-slate-100 rounded-[24px] p-6 shadow-[0_24px_60px_rgba(16,35,63,0.08)] relative overflow-hidden"
+            >
+              <!-- Decorative gradient line -->
+              <div
+                class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-400 to-orange-400"
+              ></div>
+
+              <h3
+                class="text-2xl font-black text-slate-900 tracking-tight mb-1 mt-2"
+              >
+                Talk to an SAP Counsellor
+              </h3>
+              <p class="text-sm text-slate-500 mb-5">
+                Get programme details, fees and the right SAP track for your
+                profile.
+              </p>
+
+              <form onsubmit="submitLead(event)" class="space-y-3">
+                <input
+                  name="name"
+                  required
+                  placeholder="Full Name"
+                  class="w-full px-4 py-3.5 border border-slate-200 rounded-xl outline-none bg-slate-50 focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all text-sm"
+                />
+                <input
+                  name="phone"
+                  required
+                  inputmode="tel"
+                  pattern="[0-9 +()-]{10,}"
+                  placeholder="10-digit Mobile Number"
+                  class="w-full px-4 py-3.5 border border-slate-200 rounded-xl outline-none bg-slate-50 focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all text-sm"
+                />
+                <input
+                  name="email"
+                  type="email"
+                  required
+                  placeholder="Email Address"
+                  class="w-full px-4 py-3.5 border border-slate-200 rounded-xl outline-none bg-slate-50 focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all text-sm"
+                />
+
+                <select
+                  name="track"
+                  required
+                  class="w-full px-4 py-3.5 border border-slate-200 rounded-xl outline-none bg-slate-50 focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all text-sm appearance-none"
+                >
+                  <option value="">Select SAP Track</option>
+                  <option>SAP SD</option>
+                  <option>SAP FICO</option>
+                  <option>SAP MM</option>
+                  <option>SAP PP</option>
+                  <option>SAP ABAP</option>
+                  <option>Not Sure — Guide Me</option>
+                </select>
+
+                <button
+                  type="submit"
+                  class="w-full mt-2 bg-gradient-to-r from-[#165dff] to-[#0f4cd8] text-white px-4 py-3.5 rounded-xl font-extrabold shadow-lg hover:-translate-y-0.5 transition-transform text-sm"
+                >
+                  Get SAP Course Details &rarr;
+                </button>
+                <p class="text-[11px] text-slate-400 text-center mt-3">
+                  By submitting, you agree to be contacted by eKlabya.
+                </p>
+                <div
+                  class="form-success hidden p-3 rounded-lg bg-green-100 text-green-800 font-bold text-xs mt-2 text-center"
+                >
+                  Thanks! Your enquiry has been submitted.
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Stats / Features -->
+      <section class="py-16 bg-white">
+        <div class="max-w-6xl mx-auto px-4">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div
+              class="bg-slate-50 border border-slate-100 p-6 rounded-2xl text-center hover:-translate-y-1 transition-transform hover:shadow-lg"
+            >
+              <b
+                class="block text-2xl md:text-3xl font-black text-slate-900 mb-1"
+                >S/4HANA</b
+              >
+              <span
+                class="text-[11px] uppercase tracking-wider text-slate-500 font-extrabold"
+                >Next-Gen ERP</span
+              >
+            </div>
+            <div
+              class="bg-slate-50 border border-slate-100 p-6 rounded-2xl text-center hover:-translate-y-1 transition-transform hover:shadow-lg"
+            >
+              <b
+                class="block text-2xl md:text-3xl font-black text-slate-900 mb-1"
+                >Hands-on</b
+              >
+              <span
+                class="text-[11px] uppercase tracking-wider text-slate-500 font-extrabold"
+                >Practice Focus</span
+              >
+            </div>
+            <div
+              class="bg-slate-50 border border-slate-100 p-6 rounded-2xl text-center hover:-translate-y-1 transition-transform hover:shadow-lg"
+            >
+              <b
+                class="block text-2xl md:text-3xl font-black text-slate-900 mb-1"
+                >Projects</b
+              >
+              <span
+                class="text-[11px] uppercase tracking-wider text-slate-500 font-extrabold"
+                >Build Portfolio</span
+              >
+            </div>
+            <div
+              class="bg-slate-50 border border-slate-100 p-6 rounded-2xl text-center hover:-translate-y-1 transition-transform hover:shadow-lg"
+            >
+              <b
+                class="block text-2xl md:text-3xl font-black text-slate-900 mb-1"
+                >Career</b
+              >
+              <span
+                class="text-[11px] uppercase tracking-wider text-slate-500 font-extrabold"
+                >Interview Prep</span
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SAP Tracks -->
+      <section class="py-16 md:py-24 bg-slate-50" id="tracks">
+        <div class="max-w-6xl mx-auto px-4">
+          <div class="text-center mb-12 max-w-2xl mx-auto">
+            <div
+              class="text-[11px] font-black tracking-[0.15em] text-orange-500 uppercase mb-3"
+            >
+              SAP Career Tracks
+            </div>
+            <h2
+              class="text-3xl md:text-4xl font-black text-slate-900 tracking-tight mb-4"
+            >
+              Choose the SAP path that fits your career.
+            </h2>
+          </div>
+
+          <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <!-- Track Card -->
+            <div
+              class="bg-white border border-slate-200 rounded-2xl p-6 hover:-translate-y-1 hover:shadow-[0_15px_40px_rgba(0,0,0,0.06)] transition-all"
+            >
+              <div
+                class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-lg mb-4"
+              >
+                SD
+              </div>
+              <h3 class="text-lg font-black text-slate-900 mb-2">SAP SD</h3>
+              <p class="text-sm text-slate-500 leading-relaxed">
+                Sales & Distribution — sales processes, pricing, shipping,
+                billing and the end-to-end O2C cycle.
+              </p>
+            </div>
+
+            <div
+              class="bg-white border border-slate-200 rounded-2xl p-6 hover:-translate-y-1 hover:shadow-[0_15px_40px_rgba(0,0,0,0.06)] transition-all"
+            >
+              <div
+                class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-lg mb-4"
+              >
+                FI
+              </div>
+              <h3 class="text-lg font-black text-slate-900 mb-2">SAP FICO</h3>
+              <p class="text-sm text-slate-500 leading-relaxed">
+                Finance and controlling concepts for financial accounting,
+                reporting and management accounting.
+              </p>
+            </div>
+
+            <div
+              class="bg-white border border-slate-200 rounded-2xl p-6 hover:-translate-y-1 hover:shadow-[0_15px_40px_rgba(0,0,0,0.06)] transition-all"
+            >
+              <div
+                class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-lg mb-4"
+              >
+                MM
+              </div>
+              <h3 class="text-lg font-black text-slate-900 mb-2">SAP MM</h3>
+              <p class="text-sm text-slate-500 leading-relaxed">
+                Materials management and procurement workflows covering
+                purchasing and inventory-oriented processes.
+              </p>
+            </div>
+
+            <div
+              class="bg-white border border-slate-200 rounded-2xl p-6 hover:-translate-y-1 hover:shadow-[0_15px_40px_rgba(0,0,0,0.06)] transition-all"
+            >
+              <div
+                class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-lg mb-4"
+              >
+                PP
+              </div>
+              <h3 class="text-lg font-black text-slate-900 mb-2">SAP PP</h3>
+              <p class="text-sm text-slate-500 leading-relaxed">
+                Production planning and execution concepts for manufacturing
+                environments.
+              </p>
+            </div>
+
+            <div
+              class="bg-white border border-slate-200 rounded-2xl p-6 hover:-translate-y-1 hover:shadow-[0_15px_40px_rgba(0,0,0,0.06)] transition-all"
+            >
+              <div
+                class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-black text-lg mb-4"
+              >
+                AB
+              </div>
+              <h3 class="text-lg font-black text-slate-900 mb-2">SAP ABAP</h3>
+              <p class="text-sm text-slate-500 leading-relaxed">
+                Development skills for building and extending SAP applications
+                and business processes.
+              </p>
+            </div>
+
+            <div
+              class="bg-slate-900 border border-slate-800 rounded-2xl p-6 hover:-translate-y-1 hover:shadow-[0_15px_40px_rgba(0,0,0,0.2)] transition-all flex flex-col justify-center"
+            >
+              <h3 class="text-lg font-black text-white mb-2">
+                Not Sure Which Track?
+              </h3>
+              <p class="text-sm text-slate-400 leading-relaxed mb-4">
+                Our counsellor can help you identify a suitable path based on
+                your profile.
+              </p>
+              <button
+                onclick="openModal()"
+                class="self-start text-sm font-bold text-orange-400 hover:text-orange-300"
+              >
+                Get Free Guidance &rarr;
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Learning Path -->
+      <section class="py-16 md:py-24" id="learning">
+        <div class="max-w-6xl mx-auto px-4">
+          <div class="text-center mb-12 max-w-2xl mx-auto">
+            <div
+              class="text-[11px] font-black tracking-[0.15em] text-orange-500 uppercase mb-3"
+            >
+              Learning Experience
+            </div>
+            <h2
+              class="text-3xl md:text-4xl font-black text-slate-900 tracking-tight"
+            >
+              From concepts to hands-on SAP practice.
+            </h2>
+          </div>
+
+          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Learning Steps -->
+            <div
+              class="flex items-start gap-4 p-5 rounded-2xl border border-slate-100 bg-white hover:shadow-lg transition-shadow"
+            >
+              <div
+                class="px-3 py-1.5 rounded-lg bg-orange-50 text-orange-600 font-black text-xs"
+              >
+                01
+              </div>
+              <div>
+                <h3 class="text-base font-black text-slate-900 mb-1">
+                  SAP Fundamentals
+                </h3>
+                <p class="text-sm text-slate-500">
+                  Understand ERP, SAP S/4HANA, and how functional modules
+                  connect.
+                </p>
+              </div>
+            </div>
+            <div
+              class="flex items-start gap-4 p-5 rounded-2xl border border-slate-100 bg-white hover:shadow-lg transition-shadow"
+            >
+              <div
+                class="px-3 py-1.5 rounded-lg bg-orange-50 text-orange-600 font-black text-xs"
+              >
+                02
+              </div>
+              <div>
+                <h3 class="text-base font-black text-slate-900 mb-1">
+                  Module Training
+                </h3>
+                <p class="text-sm text-slate-500">
+                  Go deeper into your selected functional or technical SAP
+                  track.
+                </p>
+              </div>
+            </div>
+            <div
+              class="flex items-start gap-4 p-5 rounded-2xl border border-slate-100 bg-white hover:shadow-lg transition-shadow"
+            >
+              <div
+                class="px-3 py-1.5 rounded-lg bg-orange-50 text-orange-600 font-black text-xs"
+              >
+                03
+              </div>
+              <div>
+                <h3 class="text-base font-black text-slate-900 mb-1">
+                  Business Scenarios
+                </h3>
+                <p class="text-sm text-slate-500">
+                  Connect transactions and configuration to realistic workflows.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Banner Offer -->
+      <section class="py-10">
+        <div class="max-w-6xl mx-auto px-4">
+          <div
+            class="bg-gradient-to-br from-slate-900 to-blue-900 rounded-[24px] p-8 md:p-12 flex flex-col md:flex-row gap-8 items-center relative overflow-hidden shadow-2xl"
+          >
+            <!-- Background Text Decoration -->
+            <div
+              class="absolute -right-4 -bottom-10 text-[180px] font-black text-white/5 pointer-events-none leading-none"
+            >
+              SAP
+            </div>
+
+            <div class="flex-1 relative z-10">
+              <div
+                class="text-[11px] font-black tracking-widest text-blue-300 uppercase mb-3"
+              >
+                eKlabya SAP Training
+              </div>
+              <h2
+                class="text-3xl md:text-4xl font-black text-white tracking-tight mb-4"
+              >
+                Start your SAP journey with the right track.
+              </h2>
+              <p class="text-slate-300 text-sm leading-relaxed max-w-lg mb-6">
+                Combines on-demand learning, downloadable resources, portfolio
+                building, live industry projects, and practical exposure.
+              </p>
+              <ul
+                class="flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-200 font-bold"
+              >
+                <li class="flex items-center gap-2">
+                  <span class="text-orange-400">&check;</span> Practical
+                  Training
+                </li>
+                <li class="flex items-center gap-2">
+                  <span class="text-orange-400">&check;</span> Project Exposure
+                </li>
+              </ul>
+            </div>
+
+            <div
+              class="w-full md:w-auto relative z-10 bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-2xl text-center md:text-left shrink-0"
+            >
+              <div class="text-xl font-black text-white mb-2">
+                Get Programme Details
+              </div>
+              <p
+                class="text-xs text-slate-300 mb-5 max-w-[220px] mx-auto md:mx-0"
+              >
+                Get the latest curriculum, schedule, and fees.
+              </p>
+              <button
+                type="button"
+                class="w-full bg-white text-blue-900 px-6 py-3 rounded-xl font-extrabold hover:bg-slate-100 transition-colors shadow-lg"
+                onclick="openModal()"
+              >
+                Request Details
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQs -->
+      <section class="py-16 md:py-24 bg-slate-50" id="faq">
+        <div class="max-w-3xl mx-auto px-4">
+          <div class="text-center mb-10">
+            <h2
+              class="text-3xl md:text-4xl font-black text-slate-900 tracking-tight"
+            >
+              Questions before you start?
+            </h2>
+          </div>
+
+          <div class="space-y-3">
+            <details
+              class="bg-white border border-slate-200 rounded-xl p-5 group cursor-pointer [&_summary::-webkit-details-marker]:hidden"
+            >
+              <summary
+                class="font-extrabold text-slate-900 flex justify-between items-center outline-none"
+              >
+                What is SAP?
+                <span
+                  class="text-blue-500 group-open:rotate-180 transition-transform"
+                  >▼</span
+                >
+              </summary>
+              <p class="text-sm text-slate-500 mt-4 leading-relaxed">
+                SAP is an enterprise software ecosystem used to manage and
+                integrate business processes across areas such as finance,
+                sales, procurement and supply chain.
+              </p>
+            </details>
+
+            <details
+              class="bg-white border border-slate-200 rounded-xl p-5 group cursor-pointer [&_summary::-webkit-details-marker]:hidden"
+            >
+              <summary
+                class="font-extrabold text-slate-900 flex justify-between items-center outline-none"
+              >
+                Which SAP module should I choose?
+                <span
+                  class="text-blue-500 group-open:rotate-180 transition-transform"
+                  >▼</span
+                >
+              </summary>
+              <p class="text-sm text-slate-500 mt-4 leading-relaxed">
+                It depends on your education, work experience and target role.
+                Select "Not Sure — Guide Me" in the enquiry form if you want
+                counselling.
+              </p>
+            </details>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-16">
+      <div class="max-w-6xl mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+          <div>
+            <strong
+              class="block text-white text-2xl font-black tracking-tight mb-1"
+              >eKLABYA</strong
+            >
+            <span
+              class="block text-orange-400 text-[10px] font-black tracking-[0.15em] mb-4"
+              >CAREER-FOCUSED TRAINING</span
+            >
+            <p class="text-xs leading-relaxed max-w-xs">
+              Practical, career-oriented learning for students, graduates and
+              working professionals.
+            </p>
+          </div>
+          <div class="flex flex-col gap-2 text-xs font-bold">
+            <b class="text-white text-[10px] tracking-[0.15em] mb-2"
+              >CONTACT US</b
+            >
+            <span>G-25, BLOCK G, SECTOR 3, NOIDA 201301</span>
+            <a href="tel:+919891030303" class="text-white hover:text-blue-400"
+              >+91 9891030303</a
+            >
+            <a
+              href="mailto:info@eklabya.com"
+              class="text-white hover:text-blue-400"
+              >INFO@EKLABYA.COM</a
+            >
+          </div>
+        </div>
+        <div
+          class="border-t border-slate-800 mt-12 pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] font-extrabold tracking-wider"
+        >
+          <span>&copy; 2026 eKLABYA. ALL RIGHTS RESERVED.</span>
+          <span>LEARN. BUILD. GROW.</span>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Floating Actions (WhatsApp / Call) -->
+    <div class="fixed right-4 bottom-24 z-50 flex flex-col gap-3">
+      <a
+        href="https://wa.me/919891030303"
+        target="_blank"
+        aria-label="WhatsApp"
+        class="w-12 h-12 bg-[#25d366] text-white rounded-full flex items-center justify-center shadow-xl hover:-translate-y-1 hover:scale-105 transition-all"
+      >
+        <svg viewBox="0 0 32 32" width="22" height="22" fill="currentColor">
+          <path
+            d="M16 3.2A12.7 12.7 0 0 0 5.1 22.5L3.5 28.5l6.2-1.6A12.7 12.7 0 1 0 16 3.2Zm0 22.9c-2 0-3.9-.6-5.5-1.7l-.4-.3-3.7 1 1-3.6-.3-.4A10.4 10.4 0 1 1 16 26.1Zm5.8-7.7c-.3-.2-1.8-.9-2.1-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-1.6-.8-2.7-1.4-3.8-3.2-.3-.5.3-.5.9-1.7.1-.2.1-.4 0-.6-.1-.2-.7-1.7-.9-2.3-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.1 1.1-1.1 2.6s1.1 3 1.3 3.2c.2.2 2.2 3.4 5.4 4.7 2 .8 2.8.9 3.8.7.6-.1 1.8-.7 2-1.4.3-.7.3-1.3.2-1.4-.1-.2-.3-.3-.6-.4Z"
+          />
+        </svg>
+      </a>
+      <a
+        href="tel:+919891030303"
+        aria-label="Call"
+        class="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-xl hover:-translate-y-1 hover:scale-105 transition-all"
+      >
+        <svg viewBox="0 0 32 32" width="20" height="20" fill="currentColor">
+          <path
+            d="M25.4 20.1c-1.2 0-2.4-.2-3.5-.6-.5-.2-1.1 0-1.4.4l-2.2 2.6c-3.4-1.7-6.3-4.5-8-8l2.6-2.2c.4-.3.5-.9.4-1.4-.4-1.1-.6-2.3-.6-3.5 0-.8-.7-1.4-1.5-1.4H7.6c-.8 0-1.5.7-1.5 1.5C6.1 17.8 14.2 25.9 24.2 25.9c.8 0 1.5-.7 1.5-1.5v-3.6c0-.8-.5-1.4-1.3-1.4Z"
+          />
+        </svg>
+      </a>
+    </div>
+
+    <!-- Mobile Sticky CTA -->
+    <div
+      class="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200 p-3 flex gap-3 md:hidden"
+    >
+      <a
+        href="#tracks"
+        class="flex-1 text-center py-3 rounded-xl font-extrabold text-sm bg-blue-50 text-blue-600"
+        >Explore</a
+      >
+      <button
+        type="button"
+        class="flex-1 py-3 rounded-xl font-extrabold text-sm bg-blue-600 text-white shadow-lg"
+        onclick="openModal()"
+      >
+        Enquire Now
+      </button>
+    </div>
+
+    <!-- Modal Form -->
+    <div
+      id="modal"
+      class="fixed inset-0 z-[200] hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+    >
+      <div
+        class="bg-white border border-slate-100 rounded-[24px] p-6 w-full max-w-sm relative shadow-2xl animate-in fade-in zoom-in duration-200"
+      >
+        <button
+          type="button"
+          onclick="closeModal()"
+          class="absolute right-4 top-4 w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold hover:bg-slate-200"
+        >
+          &times;
+        </button>
+        <h3 class="text-2xl font-black text-slate-900 tracking-tight mb-1 pr-6">
+          Get Details
+        </h3>
+        <p class="text-sm text-slate-500 mb-5">
+          Tell us where you want to take your SAP career.
+        </p>
+
+        <form onsubmit="submitLead(event)" class="space-y-3">
+          <input
+            name="name"
+            required
+            placeholder="Full Name"
+            class="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none bg-slate-50 focus:border-blue-400 focus:bg-white text-sm"
+          />
+          <input
+            name="phone"
+            required
+            inputmode="tel"
+            pattern="[0-9 +()-]{10,}"
+            placeholder="Mobile Number"
+            class="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none bg-slate-50 focus:border-blue-400 focus:bg-white text-sm"
+          />
+          <input
+            name="email"
+            type="email"
+            required
+            placeholder="Email Address"
+            class="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none bg-slate-50 focus:border-blue-400 focus:bg-white text-sm"
+          />
+          <select
+            name="track"
+            required
+            class="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none bg-slate-50 focus:border-blue-400 focus:bg-white text-sm appearance-none"
+          >
+            <option value="">Select SAP Track</option>
+            <option>SAP SD</option>
+            <option>SAP FICO</option>
+            <option>SAP MM</option>
+            <option>Not Sure — Guide Me</option>
+          </select>
+          <button
+            type="submit"
+            class="w-full mt-2 bg-gradient-to-r from-[#165dff] to-[#0f4cd8] text-white px-4 py-3.5 rounded-xl font-extrabold shadow-lg hover:-translate-y-0.5 transition-transform text-sm"
+          >
+            Request a Callback &rarr;
+          </button>
+          <div
+            class="form-success hidden p-3 rounded-lg bg-green-100 text-green-800 font-bold text-xs mt-2 text-center"
+          >
+            Thanks! We'll contact you soon.
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      const modal = document.getElementById("modal");
+      function openModal() {
+        if (!modal) return;
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+        document.body.style.overflow = "hidden";
+      }
+      function closeModal() {
+        if (!modal) return;
+        modal.classList.remove("flex");
+        modal.classList.add("hidden");
+        document.body.style.overflow = "";
+      }
+      modal.addEventListener("click", function (e) {
+        if (e.target === modal) closeModal();
+      });
+
+      async function submitLead(e) {
+        e.preventDefault();
+        const form = e.target;
+        const btn = form.querySelector("button[type=submit]");
+        const data = Object.fromEntries(new FormData(form).entries());
+        const phone = data.phone.replace(/\D/g, "");
+        if (!data.name || !/^[6-9]\d{9}$/.test(phone)) {
+          alert("Please enter a valid 10-digit mobile number.");
+          return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = "Sending...";
+
+        setTimeout(() => {
+          form.querySelector(".form-success").style.display = "block";
+          form.reset();
+          btn.disabled = false;
+          btn.textContent = "Request a Callback \u2192";
+        }, 1000);
+      }
+    </script>
+  </body>
+</html>
+
