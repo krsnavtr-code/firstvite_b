@@ -55,6 +55,64 @@
       })();
     </script>
     <!--End of Tawk.to Script-->
+
+    <style>
+      /* Review card text clamp fallback */
+      .line-clamp-4 {
+        display: -webkit-box !important;
+        -webkit-line-clamp: 4 !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
+      }
+
+      /* Continuous sliding reviews marquee */
+      .marquee-container-reviews {
+        width: 100%;
+        overflow: hidden;
+        -webkit-mask-image: linear-gradient(
+          to right,
+          transparent,
+          black 3%,
+          black 97%,
+          transparent
+        );
+        mask-image: linear-gradient(
+          to right,
+          transparent,
+          black 3%,
+          black 97%,
+          transparent
+        );
+      }
+      .marquee-track-reviews {
+        display: flex;
+        width: max-content;
+        padding: 0 !important;
+        animation: marquee-reviews 50s linear infinite;
+        will-change: transform;
+      }
+      .marquee-container-reviews:hover .marquee-track-reviews {
+        animation-play-state: paused;
+      }
+      @keyframes marquee-reviews {
+        0% {
+          transform: translateX(0);
+        }
+        100% {
+          transform: translateX(calc(-50% - 0.5rem));
+        }
+      }
+
+      /* Review modal visible state */
+      #review-modal.show {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+      }
+      #review-modal.show #review-modal-card {
+        opacity: 1 !important;
+        transform: scale(1) !important;
+      }
+    </style>
   </head>
   <body class="bg-slate-50 text-slate-800 antialiased overflow-x-hidden">
     <!-- Top Announcement Bar -->
@@ -421,7 +479,8 @@
       </section>
 
       <!-- Bento Grid Section -->
-      <section id="programme" class="py-16 md:py-24 bg-slate-50">
+      <div id="curriculum" class="scroll-mt-20"></div>
+      <section id="programme" class="py-16 md:py-24 bg-slate-50 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4">
           <div
             class="text-xs font-black text-blue-600 tracking-widest uppercase mb-2"
@@ -515,6 +574,1675 @@
                   Small-batch learning
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+         COMPACT SLIDING REVIEWS SECTION
+    =========================================== -->
+      <section
+        id="reviews"
+        class="bg-white border-y border-slate-200 overflow-hidden relative"
+      >
+        <!-- Slider Wrapper -->
+        <div class="marquee-container-reviews py-4 relative z-10">
+          <div class="marquee-track-reviews gap-4 px-2 items-stretch">
+            <!-- ================== COPY 1 (Original 6 Cards) ================== -->
+
+            <!-- Review 1 -->
+            <div
+              onclick="openReviewPopup(this)"
+              data-name="Rahul Kumar"
+              data-role="Data Analyst @ TCS, Delhi"
+              data-badge="₹8.5 LPA + Freelance"
+              data-review="Maine yeh course join kiya bina koi coding knowledge ke. Sumit sir ne itna clearly samjhaya ki 3rd month mein hi ek freelance project mil gaya, ₹18,000 ka! Aur phir TCS ne hire kar liya. Best investment of my life."
+              data-color="emerald"
+              class="w-[320px] flex-shrink-0 cursor-pointer bg-slate-50 rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-300 transition-all duration-200 hover:-translate-y-1 relative flex flex-col group"
+            >
+              <div
+                class="mb-2 text-emerald-400 group-hover:scale-110 transition-transform origin-left"
+              >
+                <svg
+                  class="w-5 h-5 opacity-50"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"
+                  />
+                </svg>
+              </div>
+              <p
+                class="text-slate-600 text-xs leading-relaxed mb-4 italic flex-grow line-clamp-4"
+              >
+                "Maine yeh course join kiya bina koi coding knowledge ke. Sumit
+                sir ne itna clearly samjhaya ki 3rd month mein hi ek freelance
+                project mil gaya, ₹18,000 ka! Aur phir TCS ne hire kar liya.
+                Best investment of my life."
+              </p>
+              <div class="border-t border-slate-200 pt-3 mt-auto">
+                <div class="flex items-center justify-between mb-0.5">
+                  <h4 class="font-bold text-slate-900 text-sm">Rahul Kumar</h4>
+                  <span
+                    class="text-[9px] font-bold bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded uppercase"
+                    >₹8.5 LPA + Freelance</span
+                  >
+                </div>
+                <p class="text-[10px] text-slate-500">
+                  Data Analyst @ TCS, Delhi
+                </p>
+              </div>
+            </div>
+
+            <!-- Review 2 -->
+            <div
+              onclick="openReviewPopup(this)"
+              data-name="Aditya Mehta"
+              data-role="BI Analyst @ Deloitte, Gurgaon"
+              data-badge="₹9.2 LPA"
+              data-review="I was a BBA graduate with zero tech background. After this course, I got placed at Deloitte and completed 2 freelance data projects on Upwork while still studying. Sumit sir's real-world approach is absolutely game-changing!"
+              data-color="cyan"
+              class="w-[320px] flex-shrink-0 cursor-pointer bg-slate-50 rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md hover:border-cyan-300 transition-all duration-200 hover:-translate-y-1 relative flex flex-col group"
+            >
+              <div
+                class="mb-2 text-cyan-400 group-hover:scale-110 transition-transform origin-left"
+              >
+                <svg
+                  class="w-5 h-5 opacity-50"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"
+                  />
+                </svg>
+              </div>
+              <p
+                class="text-slate-600 text-xs leading-relaxed mb-4 italic flex-grow line-clamp-4"
+              >
+                "I was a BBA graduate with zero tech background. After this
+                course, I got placed at Deloitte and completed 2 freelance data
+                projects on Upwork while still studying. Sumit sir's real-world
+                approach is absolutely game-changing!"
+              </p>
+              <div class="border-t border-slate-200 pt-3 mt-auto">
+                <div class="flex items-center justify-between mb-0.5">
+                  <h4 class="font-bold text-slate-900 text-sm">Aditya Mehta</h4>
+                  <span
+                    class="text-[9px] font-bold bg-cyan-100 text-cyan-700 px-1.5 py-0.5 rounded uppercase"
+                    >₹9.2 LPA</span
+                  >
+                </div>
+                <p class="text-[10px] text-slate-500">
+                  BI Analyst @ Deloitte, Gurgaon
+                </p>
+              </div>
+            </div>
+
+            <!-- Review 3 -->
+            <div
+              onclick="openReviewPopup(this)"
+              data-name="Priya Sharma"
+              data-role="ML Engineer @ Infosys, Noida"
+              data-badge="₹10 LPA"
+              data-review="Mujhe lagta tha Data Science bahut mushkil hai. But Sumit sir ne step-by-step samjhaya. 6 months mein Python se lekar GenAI tak sab seekha. Mock interviews ki wajah se confidence bhi aa gaya!"
+              data-color="emerald"
+              class="w-[320px] flex-shrink-0 cursor-pointer bg-slate-50 rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-300 transition-all duration-200 hover:-translate-y-1 relative flex flex-col group"
+            >
+              <div
+                class="mb-2 text-emerald-400 group-hover:scale-110 transition-transform origin-left"
+              >
+                <svg
+                  class="w-5 h-5 opacity-50"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"
+                  />
+                </svg>
+              </div>
+              <p
+                class="text-slate-600 text-xs leading-relaxed mb-4 italic flex-grow line-clamp-4"
+              >
+                "Mujhe lagta tha Data Science bahut mushkil hai. But Sumit sir
+                ne step-by-step samjhaya. 6 months mein Python se lekar GenAI
+                tak sab seekha. Mock interviews ki wajah se confidence bhi aa
+                gaya!"
+              </p>
+              <div class="border-t border-slate-200 pt-3 mt-auto">
+                <div class="flex items-center justify-between mb-0.5">
+                  <h4 class="font-bold text-slate-900 text-sm">Priya Sharma</h4>
+                  <span
+                    class="text-[9px] font-bold bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded uppercase"
+                    >₹10 LPA</span
+                  >
+                </div>
+                <p class="text-[10px] text-slate-500">
+                  ML Engineer @ Infosys, Noida
+                </p>
+              </div>
+            </div>
+
+            <!-- Review 4 -->
+            <div
+              onclick="openReviewPopup(this)"
+              data-name="Devendra Trivedi"
+              data-role="Data Scientist @ Wipro, Pune"
+              data-badge="Earned ₹45k in course"
+              data-review="Eklabya ka course mere liye career-defining raha. Sumit sir ka freelancing module ekdum alag level ka tha, maine course ke beech hi Fiverr pe 3 projects complete kiye aur ₹45,000 kama liye! Ab Wipro mein job bhi hai."
+              data-color="amber"
+              class="w-[320px] flex-shrink-0 cursor-pointer bg-slate-50 rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-300 transition-all duration-200 hover:-translate-y-1 relative flex flex-col group"
+            >
+              <div
+                class="mb-2 text-cyan-400 group-hover:scale-110 transition-transform origin-left"
+              >
+                <svg
+                  class="w-5 h-5 opacity-50"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"
+                  />
+                </svg>
+              </div>
+              <p
+                class="text-slate-600 text-xs leading-relaxed mb-4 italic flex-grow line-clamp-4"
+              >
+                "Eklabya ka course mere liye career-defining raha. Sumit sir ka
+                freelancing module ekdum alag level ka tha, maine course ke
+                beech hi Fiverr pe 3 projects complete kiye aur ₹45,000 kama
+                liye! Ab Wipro mein job bhi hai."
+              </p>
+              <div class="border-t border-slate-200 pt-3 mt-auto">
+                <div class="flex items-center justify-between mb-0.5">
+                  <h4 class="font-bold text-slate-900 text-sm">
+                    Devendra Trivedi
+                  </h4>
+                  <span
+                    class="text-[9px] font-bold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded uppercase"
+                    >Earned ₹45k in course</span
+                  >
+                </div>
+                <p class="text-[10px] text-slate-500">
+                  Data Scientist @ Wipro, Pune
+                </p>
+              </div>
+            </div>
+
+            <!-- Review 5 -->
+            <div
+              onclick="openReviewPopup(this)"
+              data-name="Reetika Bhadani"
+              data-role="Sr. Data Analyst @ HCL, Noida"
+              data-badge="Promoted in 2 Months"
+              data-review="As a working professional, I was worried about managing time. But recorded backups and weekend batch made it easy. The Power BI + Python combo got me promoted within 2 months of completing."
+              data-color="blue"
+              class="w-[320px] flex-shrink-0 cursor-pointer bg-slate-50 rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-200 hover:-translate-y-1 relative flex flex-col group"
+            >
+              <div
+                class="mb-2 text-emerald-400 group-hover:scale-110 transition-transform origin-left"
+              >
+                <svg
+                  class="w-5 h-5 opacity-50"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"
+                  />
+                </svg>
+              </div>
+              <p
+                class="text-slate-600 text-xs leading-relaxed mb-4 italic flex-grow line-clamp-4"
+              >
+                "As a working professional, I was worried about managing time.
+                But recorded backups and weekend batch made it easy. The Power
+                BI + Python combo got me promoted within 2 months of
+                completing."
+              </p>
+              <div class="border-t border-slate-200 pt-3 mt-auto">
+                <div class="flex items-center justify-between mb-0.5">
+                  <h4 class="font-bold text-slate-900 text-sm">
+                    Reetika Bhadani
+                  </h4>
+                  <span
+                    class="text-[9px] font-bold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded uppercase"
+                    >Promoted in 2 Months</span
+                  >
+                </div>
+                <p class="text-[10px] text-slate-500">
+                  Sr. Data Analyst @ HCL, Noida
+                </p>
+              </div>
+            </div>
+
+            <!-- Review 6 -->
+            <div
+              onclick="openReviewPopup(this)"
+              data-name="Devansh Pandey"
+              data-role="ML Engineer @ Amazon, Hyderabad"
+              data-badge="₹25K-60K / Project"
+              data-review="Yaar, honestly bolun toh yeh course meri zindagi badal di. Fresher tha, koi experience nahi tha. Ek ek concept itne practically sikhaya ki ab main freelance ML projects le raha hoon. Amazon mein bhi interview clear ho gaya!"
+              data-color="cyan"
+              class="w-[320px] flex-shrink-0 cursor-pointer bg-slate-50 rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md hover:border-cyan-300 transition-all duration-200 hover:-translate-y-1 relative flex flex-col group"
+            >
+              <div
+                class="mb-2 text-cyan-400 group-hover:scale-110 transition-transform origin-left"
+              >
+                <svg
+                  class="w-5 h-5 opacity-50"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"
+                  />
+                </svg>
+              </div>
+              <p
+                class="text-slate-600 text-xs leading-relaxed mb-4 italic flex-grow line-clamp-4"
+              >
+                "Yaar, honestly bolun toh yeh course meri zindagi badal di.
+                Fresher tha, koi experience nahi tha. Ek ek concept itne
+                practically sikhaya ki ab main freelance ML projects le raha
+                hoon. Amazon mein bhi interview clear ho gaya!"
+              </p>
+              <div class="border-t border-slate-200 pt-3 mt-auto">
+                <div class="flex items-center justify-between mb-0.5">
+                  <h4 class="font-bold text-slate-900 text-sm">
+                    Devansh Pandey
+                  </h4>
+                  <span
+                    class="text-[9px] font-bold bg-cyan-100 text-cyan-700 px-1.5 py-0.5 rounded uppercase"
+                    >₹25K-60K / Project</span
+                  >
+                </div>
+                <p class="text-[10px] text-slate-500">
+                  ML Engineer @ Amazon, Hyderabad
+                </p>
+              </div>
+            </div>
+
+            <!-- ================== COPY 2 (For Infinite Loop) ================== -->
+            <!-- Duplicating exactly same cards -->
+            <div
+              class="w-[320px] flex-shrink-0 cursor-pointer bg-slate-50 rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-300 transition-all duration-200 hover:-translate-y-1 relative flex flex-col group"
+            >
+              <div
+                class="mb-2 text-emerald-400 group-hover:scale-110 transition-transform origin-left"
+              >
+                <svg
+                  class="w-5 h-5 opacity-50"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"
+                  />
+                </svg>
+              </div>
+              <p
+                class="text-slate-600 text-xs leading-relaxed mb-4 italic flex-grow line-clamp-4"
+              >
+                "Maine yeh course join kiya bina koi coding knowledge ke. Sumit
+                sir ne itna clearly samjhaya ki 3rd month mein hi ek freelance
+                project mil gaya, ₹18,000 ka! Aur phir TCS ne hire kar liya.
+                Best investment of my life."
+              </p>
+              <div class="border-t border-slate-200 pt-3 mt-auto">
+                <div class="flex items-center justify-between mb-0.5">
+                  <h4 class="font-bold text-slate-900 text-sm">Rahul Kumar</h4>
+                  <span
+                    class="text-[9px] font-bold bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded uppercase"
+                    >₹8.5 LPA + Freelance</span
+                  >
+                </div>
+                <p class="text-[10px] text-slate-500">
+                  Data Analyst @ TCS, Delhi
+                </p>
+              </div>
+            </div>
+
+            <div
+              class="w-[320px] flex-shrink-0 cursor-pointer bg-slate-50 rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md hover:border-cyan-300 transition-all duration-200 hover:-translate-y-1 relative flex flex-col group"
+            >
+              <div
+                class="mb-2 text-cyan-400 group-hover:scale-110 transition-transform origin-left"
+              >
+                <svg
+                  class="w-5 h-5 opacity-50"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"
+                  />
+                </svg>
+              </div>
+              <p
+                class="text-slate-600 text-xs leading-relaxed mb-4 italic flex-grow line-clamp-4"
+              >
+                "I was a BBA graduate with zero tech background. After this
+                course, I got placed at Deloitte and completed 2 freelance data
+                projects on Upwork while still studying. Sumit sir's real-world
+                approach is absolutely game-changing!"
+              </p>
+              <div class="border-t border-slate-200 pt-3 mt-auto">
+                <div class="flex items-center justify-between mb-0.5">
+                  <h4 class="font-bold text-slate-900 text-sm">Aditya Mehta</h4>
+                  <span
+                    class="text-[9px] font-bold bg-cyan-100 text-cyan-700 px-1.5 py-0.5 rounded uppercase"
+                    >₹9.2 LPA</span
+                  >
+                </div>
+                <p class="text-[10px] text-slate-500">
+                  BI Analyst @ Deloitte, Gurgaon
+                </p>
+              </div>
+            </div>
+
+            <div
+              class="w-[320px] flex-shrink-0 cursor-pointer bg-slate-50 rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-300 transition-all duration-200 hover:-translate-y-1 relative flex flex-col group"
+            >
+              <div
+                class="mb-2 text-emerald-400 group-hover:scale-110 transition-transform origin-left"
+              >
+                <svg
+                  class="w-5 h-5 opacity-50"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"
+                  />
+                </svg>
+              </div>
+              <p
+                class="text-slate-600 text-xs leading-relaxed mb-4 italic flex-grow line-clamp-4"
+              >
+                "Mujhe lagta tha Data Science bahut mushkil hai. But Sumit sir
+                ne step-by-step samjhaya. 6 months mein Python se lekar GenAI
+                tak sab seekha. Mock interviews ki wajah se confidence bhi aa
+                gaya!"
+              </p>
+              <div class="border-t border-slate-200 pt-3 mt-auto">
+                <div class="flex items-center justify-between mb-0.5">
+                  <h4 class="font-bold text-slate-900 text-sm">Priya Sharma</h4>
+                  <span
+                    class="text-[9px] font-bold bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded uppercase"
+                    >₹10 LPA</span
+                  >
+                </div>
+                <p class="text-[10px] text-slate-500">
+                  ML Engineer @ Infosys, Noida
+                </p>
+              </div>
+            </div>
+
+            <div
+              class="w-[320px] flex-shrink-0 cursor-pointer bg-slate-50 rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md hover:border-amber-300 transition-all duration-200 hover:-translate-y-1 relative flex flex-col group"
+            >
+              <div
+                class="mb-2 text-cyan-400 group-hover:scale-110 transition-transform origin-left"
+              >
+                <svg
+                  class="w-5 h-5 opacity-50"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"
+                  />
+                </svg>
+              </div>
+              <p
+                class="text-slate-600 text-xs leading-relaxed mb-4 italic flex-grow line-clamp-4"
+              >
+                "Eklabya ka course mere liye career-defining raha. Sumit sir ka
+                freelancing module ekdum alag level ka tha, maine course ke
+                beech hi Fiverr pe 3 projects complete kiye aur ₹45,000 kama
+                liye! Ab Wipro mein job bhi hai."
+              </p>
+              <div class="border-t border-slate-200 pt-3 mt-auto">
+                <div class="flex items-center justify-between mb-0.5">
+                  <h4 class="font-bold text-slate-900 text-sm">
+                    Devendra Trivedi
+                  </h4>
+                  <span
+                    class="text-[9px] font-bold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded uppercase"
+                    >Earned ₹45k in course</span
+                  >
+                </div>
+                <p class="text-[10px] text-slate-500">
+                  Data Scientist @ Wipro, Pune
+                </p>
+              </div>
+            </div>
+
+            <div
+              class="w-[320px] flex-shrink-0 cursor-pointer bg-slate-50 rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-200 hover:-translate-y-1 relative flex flex-col group"
+            >
+              <div
+                class="mb-2 text-emerald-400 group-hover:scale-110 transition-transform origin-left"
+              >
+                <svg
+                  class="w-5 h-5 opacity-50"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"
+                  />
+                </svg>
+              </div>
+              <p
+                class="text-slate-600 text-xs leading-relaxed mb-4 italic flex-grow line-clamp-4"
+              >
+                "As a working professional, I was worried about managing time.
+                But recorded backups and weekend batch made it easy. The Power
+                BI + Python combo got me promoted within 2 months of
+                completing."
+              </p>
+              <div class="border-t border-slate-200 pt-3 mt-auto">
+                <div class="flex items-center justify-between mb-0.5">
+                  <h4 class="font-bold text-slate-900 text-sm">
+                    Reetika Bhadani
+                  </h4>
+                  <span
+                    class="text-[9px] font-bold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded uppercase"
+                    >Promoted in 2 Months</span
+                  >
+                </div>
+                <p class="text-[10px] text-slate-500">
+                  Sr. Data Analyst @ HCL, Noida
+                </p>
+              </div>
+            </div>
+
+            <div
+              class="w-[320px] flex-shrink-0 cursor-pointer bg-slate-50 rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md hover:border-cyan-300 transition-all duration-200 hover:-translate-y-1 relative flex flex-col group"
+            >
+              <div
+                class="mb-2 text-cyan-400 group-hover:scale-110 transition-transform origin-left"
+              >
+                <svg
+                  class="w-5 h-5 opacity-50"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"
+                  />
+                </svg>
+              </div>
+              <p
+                class="text-slate-600 text-xs leading-relaxed mb-4 italic flex-grow line-clamp-4"
+              >
+                "Yaar, honestly bolun toh yeh course meri zindagi badal di.
+                Fresher tha, koi experience nahi tha. Ek ek concept itne
+                practically sikhaya ki ab main freelance ML projects le raha
+                hoon. Amazon mein bhi interview clear ho gaya!"
+              </p>
+              <div class="border-t border-slate-200 pt-3 mt-auto">
+                <div class="flex items-center justify-between mb-0.5">
+                  <h4 class="font-bold text-slate-900 text-sm">
+                    Devansh Pandey
+                  </h4>
+                  <span
+                    class="text-[9px] font-bold bg-cyan-100 text-cyan-700 px-1.5 py-0.5 rounded uppercase"
+                    >₹25K-60K / Project</span
+                  >
+                </div>
+                <p class="text-[10px] text-slate-500">
+                  ML Engineer @ Amazon, Hyderabad
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+         MODAL POPUP FOR REVIEWS
+    =========================================== -->
+      <div
+        id="review-modal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 opacity-0 pointer-events-none transition-opacity duration-300"
+      >
+        <div
+          id="review-modal-card"
+          class="modal-card bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 md:p-8 relative transform scale-95 opacity-0 transition-all duration-300 border-t-4 border-emerald-500"
+        >
+          <!-- Close Button -->
+          <button
+            onclick="closeReviewPopup()"
+            class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full p-2 transition-colors focus:outline-none"
+          >
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
+            </svg>
+          </button>
+
+          <!-- Quote Icon -->
+          <div id="modal-quote-icon" class="text-emerald-200 mb-4">
+            <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"
+              />
+            </svg>
+          </div>
+
+          <!-- Full Review Text -->
+          <p
+            id="modal-review-text"
+            class="text-slate-700 text-sm md:text-base leading-relaxed italic mb-8 font-medium"
+          >
+            Review text goes here...
+          </p>
+
+          <div class="flex items-center gap-4 pt-4 border-t border-slate-100">
+            <div
+              id="modal-avatar"
+              class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-lg shadow-inner"
+            >
+              RK
+            </div>
+            <div class="flex-grow">
+              <div class="flex items-center justify-between mb-0.5">
+                <h4
+                  id="modal-reviewer-name"
+                  class="font-black text-slate-900 text-base"
+                >
+                  Name
+                </h4>
+                <span
+                  id="modal-badge"
+                  class="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-1 rounded uppercase tracking-wide"
+                  >Badge</span
+                >
+              </div>
+              <p
+                id="modal-role-company"
+                class="text-xs text-slate-500 font-medium"
+              >
+                Role @ Company
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- JavaScript logic -->
+      <script>
+        const reviewModal = document.getElementById("review-modal");
+
+        function openReviewPopup(element) {
+          // Get data from data attributes of clicked element
+          const name = element.getAttribute("data-name");
+          const role = element.getAttribute("data-role");
+          const badge = element.getAttribute("data-badge");
+          const reviewText = element.getAttribute("data-review");
+          const colorTheme = element.getAttribute("data-color"); // 'emerald', 'cyan', 'amber', 'blue'
+
+          // Get initials (First letters of first and last name)
+          const initials = name
+            .split(" ")
+            .map((n) => n[0])
+            .join("")
+            .substring(0, 2)
+            .toUpperCase();
+
+          // Set data in modal
+          document.getElementById("modal-reviewer-name").innerText = name;
+          document.getElementById("modal-role-company").innerText = role;
+          document.getElementById("modal-badge").innerText = badge;
+          document.getElementById("modal-review-text").innerText =
+            '"' + reviewText + '"';
+          document.getElementById("modal-avatar").innerText = initials;
+
+          // Apply dynamic colors based on theme
+          const modalBox = document.getElementById("review-modal-card");
+          const badgeEl = document.getElementById("modal-badge");
+          const avatarEl = document.getElementById("modal-avatar");
+          const quoteIcon = document.getElementById("modal-quote-icon");
+
+          // Reset classes
+          modalBox.className =
+            "modal-card bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 md:p-8 relative transform scale-95 opacity-0 transition-all duration-300 border-t-4";
+
+          if (colorTheme === "cyan") {
+            modalBox.classList.add("border-cyan-500");
+            badgeEl.className =
+              "text-[10px] font-bold bg-cyan-100 text-cyan-700 px-2 py-1 rounded uppercase tracking-wide";
+            avatarEl.className =
+              "w-12 h-12 rounded-full bg-cyan-100 text-cyan-700 flex items-center justify-center font-bold text-lg shadow-inner";
+            quoteIcon.className = "text-cyan-200 mb-4";
+          } else if (colorTheme === "amber") {
+            modalBox.classList.add("border-amber-500");
+            badgeEl.className =
+              "text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-1 rounded uppercase tracking-wide";
+            avatarEl.className =
+              "w-12 h-12 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-lg shadow-inner";
+            quoteIcon.className = "text-amber-200 mb-4";
+          } else if (colorTheme === "blue") {
+            modalBox.classList.add("border-blue-500");
+            badgeEl.className =
+              "text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-1 rounded uppercase tracking-wide";
+            avatarEl.className =
+              "w-12 h-12 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-lg shadow-inner";
+            quoteIcon.className = "text-blue-200 mb-4";
+          } else {
+            // Default to emerald
+            modalBox.classList.add("border-emerald-500");
+            badgeEl.className =
+              "text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-1 rounded uppercase tracking-wide";
+            avatarEl.className =
+              "w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-lg shadow-inner";
+            quoteIcon.className = "text-emerald-200 mb-4";
+          }
+
+          // Show Modal
+          reviewModal.classList.add("show");
+        }
+
+        function closeReviewPopup() {
+          reviewModal.classList.remove("show");
+        }
+
+        // Close on clicking outside the modal content
+        reviewModal.addEventListener("click", function (e) {
+          if (e.target === reviewModal) {
+            closeReviewPopup();
+          }
+        });
+      </script>
+
+      <!-- ==========================================
+         COMPACT CALL TO ACTION (Below Slider)
+    =========================================== -->
+      <div
+        class="mb-8 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 rounded px-6 py-1 max-w-fit mx-auto shadow-sm hover:shadow-md transition-shadow relative z-10"
+      >
+        <!-- Text -->
+        <p
+          class="text-lg md:text-xl font-extrabold text-slate-800 tracking-tight"
+        >
+          I Want to Be
+          <span
+            class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-cyan-500"
+            >Next</span
+          >
+        </p>
+
+        <!-- Small Glowing Button -->
+        <div class="relative group">
+          <!-- Glow Effect -->
+          <div
+            class="absolute inset-0 bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-full blur opacity-40 group-hover:opacity-70 transition-opacity duration-300"
+          ></div>
+
+          <button
+            type="button"
+            class="open-modal relative flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white font-bold text-sm rounded-full hover:-translate-y-0.5 transition-transform duration-300 border border-white/20"
+          >
+            Apply Now
+            <svg
+              class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2.5"
+                d="M14 5l7 7m0 0l-7 7m7-7H3"
+              ></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- ==========================================
+         COMPACT PRICING & ENROLLMENT SECTION
+    =========================================== -->
+      <section id="pricing" class="py-6 bg-slate-50">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="text-center mb-8">
+            <h2 class="text-2xl md:text-3xl font-black text-slate-900 mb-2">
+              Data Science & AI Programme
+            </h2>
+            <p class="text-slate-600 text-sm max-w-xl mx-auto">
+              Everything you need to go from beginner to job-ready and
+              freelance-ready in 6 months.
+            </p>
+          </div>
+
+          <!-- Compact Checkout Card -->
+          <div
+            class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden flex flex-col md:flex-row relative"
+          >
+            <!-- Scholarship Badge (Smaller) -->
+            <div
+              class="absolute top-3 right-3 md:top-4 md:right-4 bg-amber-100 border border-amber-200 text-amber-800 text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm z-10"
+            >
+              <span>✨</span> Scholarship: ₹10,000 for eligible students
+            </div>
+
+            <!-- Left Column: Pricing & CTA -->
+            <div
+              class="p-6 md:p-8 md:w-5/12 bg-slate-50 border-b md:border-b-0 md:border-r border-slate-200 flex flex-col justify-center"
+            >
+              <p
+                class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-1"
+              >
+                Total Fee
+              </p>
+
+              <div
+                class="bg-white border border-slate-200 rounded-lg p-3 mb-5 flex items-start gap-2 shadow-sm"
+              >
+                <svg
+                  class="w-4 h-4 text-cyan-500 mt-0.5 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  ></path>
+                </svg>
+                <div>
+                  <p class="text-xs font-bold text-slate-800">
+                    Zero Cost EMI Available
+                  </p>
+                  <p class="text-[10px] text-slate-500 mt-0.5">
+                    ₹7,350/month for 6 months
+                  </p>
+                </div>
+              </div>
+
+              <div class="mb-5">
+                <p class="text-xs font-bold text-slate-700 mb-0.5">
+                  Lock your seat today:
+                </p>
+                <p class="text-[10px] text-slate-500 leading-tight">
+                  Pay only
+                  <strong class="text-slate-800"
+                    >₹2,000 registration fee</strong
+                  >
+                  now. Balance due before the batch starts.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                class="open-modal w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white font-bold text-sm rounded-lg hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
+              >
+                Enroll Now
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2.5"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Right Column: What's Included (Checklist) -->
+            <div class="p-6 md:p-8 md:w-7/12">
+              <h3 class="text-sm font-bold text-slate-900 mb-4 mt-4 md:mt-0">
+                What's included in the programme:
+              </h3>
+
+              <ul class="space-y-3">
+                <li class="flex items-start gap-2">
+                  <div
+                    class="w-4 h-4 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5"
+                  >
+                    <svg
+                      class="w-2.5 h-2.5 text-emerald-600"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="3"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M5 13l4 4L19 7"
+                      ></path>
+                    </svg>
+                  </div>
+                  <span class="text-xs text-slate-700 font-medium"
+                    >Live instructor-led classes</span
+                  >
+                </li>
+                <li class="flex items-start gap-2">
+                  <div
+                    class="w-4 h-4 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5"
+                  >
+                    <svg
+                      class="w-2.5 h-2.5 text-emerald-600"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="3"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M5 13l4 4L19 7"
+                      ></path>
+                    </svg>
+                  </div>
+                  <span class="text-xs text-slate-700 font-medium"
+                    >Direct mentorship from
+                    <strong class="text-slate-900">Sumit Choudhary</strong> (10+
+                    yr expert)</span
+                  >
+                </li>
+                <li class="flex items-start gap-2">
+                  <div
+                    class="w-4 h-4 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5"
+                  >
+                    <svg
+                      class="w-2.5 h-2.5 text-emerald-600"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="3"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M5 13l4 4L19 7"
+                      ></path>
+                    </svg>
+                  </div>
+                  <span class="text-xs text-slate-700 font-medium"
+                    >8 real industry projects for your portfolio</span
+                  >
+                </li>
+                <li class="flex items-start gap-2">
+                  <div
+                    class="w-4 h-4 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5"
+                  >
+                    <svg
+                      class="w-2.5 h-2.5 text-emerald-600"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="3"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M5 13l4 4L19 7"
+                      ></path>
+                    </svg>
+                  </div>
+                  <span class="text-xs text-slate-700 font-medium"
+                    ><strong class="text-slate-900"
+                      >100% Placement Assistance</strong
+                    >
+                    (Mock interviews & resume help)</span
+                  >
+                </li>
+                <li class="flex items-start gap-2">
+                  <div
+                    class="w-4 h-4 rounded-full bg-cyan-100 flex items-center justify-center flex-shrink-0 mt-0.5"
+                  >
+                    <svg
+                      class="w-2.5 h-2.5 text-cyan-600"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="3"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M5 13l4 4L19 7"
+                      ></path>
+                    </svg>
+                  </div>
+                  <span class="text-xs text-slate-700 font-medium"
+                    >Dedicated
+                    <strong class="text-slate-900"
+                      >Freelancing project training</strong
+                    ></span
+                  >
+                </li>
+                <li class="flex items-start gap-2">
+                  <div
+                    class="w-4 h-4 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5"
+                  >
+                    <svg
+                      class="w-2.5 h-2.5 text-emerald-600"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="3"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M5 13l4 4L19 7"
+                      ></path>
+                    </svg>
+                  </div>
+                  <span class="text-xs text-slate-700 font-medium"
+                    >Industry-recognized, ISO-certified certificate</span
+                  >
+                </li>
+                <li class="flex items-start gap-2">
+                  <div
+                    class="w-4 h-4 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5"
+                  >
+                    <svg
+                      class="w-2.5 h-2.5 text-emerald-600"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="3"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M5 13l4 4L19 7"
+                      ></path>
+                    </svg>
+                  </div>
+                  <span class="text-xs text-slate-700 font-medium"
+                    >Recorded session backup for every single class</span
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+         FAQ SECTION
+    =========================================== -->
+      <section id="faq" class="relative py-20 overflow-hidden bg-slate-50">
+        <!-- Soft Ambient Backgrounds -->
+        <div
+          class="absolute top-0 left-0 w-96 h-96 bg-emerald-200/30 rounded-full blur-[100px] pointer-events-none"
+        ></div>
+        <div
+          class="absolute bottom-0 right-0 w-96 h-96 bg-cyan-200/30 rounded-full blur-[100px] pointer-events-none"
+        ></div>
+
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <!-- Section Header -->
+          <div class="text-center mb-14 max-w-2xl mx-auto">
+            <h3
+              class="text-cyan-600 font-bold tracking-[0.15em] uppercase text-xs mb-2"
+            >
+              Got Questions?
+            </h3>
+            <h2 class="text-3xl md:text-4xl font-black text-slate-900 mb-4">
+              Frequently Asked
+              <span
+                class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-cyan-500"
+                >Questions</span
+              >
+            </h2>
+            <p class="text-slate-600 text-sm">
+              Everything you need to know about the programme, placements, and
+              your learning journey.
+            </p>
+          </div>
+
+          <!-- FAQ Grid Container (2 Columns on Desktop) -->
+          <div
+            class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 items-start"
+          >
+            <!-- COLUMN 1 -->
+            <div class="space-y-4 lg:space-y-6">
+              <!-- FAQ 1 -->
+              <details
+                class="group bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-cyan-300 transition-all duration-300"
+              >
+                <summary
+                  class="flex items-center justify-between p-5 cursor-pointer font-bold text-slate-800 focus:outline-none"
+                >
+                  <div class="flex items-center gap-3 pr-4">
+                    <div
+                      class="w-8 h-8 rounded-full bg-cyan-50 text-cyan-600 flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2.5"
+                          d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+                        ></path>
+                      </svg>
+                    </div>
+                    <span
+                      class="text-sm md:text-base leading-snug group-hover:text-cyan-600 transition-colors"
+                      >Do I need coding experience to join?</span
+                    >
+                  </div>
+                  <span
+                    class="text-slate-400 group-open:rotate-180 transition-transform duration-300 flex-shrink-0"
+                  >
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 9l-7 7-7-7"
+                      ></path>
+                    </svg>
+                  </span>
+                </summary>
+                <div
+                  class="px-5 pb-5 pt-1 border-t border-slate-100 text-sm text-slate-600 leading-relaxed mt-2"
+                >
+                  Not at all. This course is designed for beginners. We teach
+                  <strong class="text-slate-800">Python from scratch</strong>,
+                  right along with all the tools you'll be using. Students with
+                  degrees in BBA, BCom, BSc or engineering have all done this
+                  and come out the other side.
+                </div>
+              </details>
+
+              <!-- FAQ 3 -->
+              <details
+                class="group bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-300 transition-all duration-300"
+              >
+                <summary
+                  class="flex items-center justify-between p-5 cursor-pointer font-bold text-slate-800 focus:outline-none"
+                >
+                  <div class="flex items-center gap-3 pr-4">
+                    <div
+                      class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2.5"
+                          d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                        ></path>
+                      </svg>
+                    </div>
+                    <span
+                      class="text-sm md:text-base leading-snug group-hover:text-emerald-600 transition-colors"
+                      >How does the EMI work?</span
+                    >
+                  </div>
+                  <span
+                    class="text-slate-400 group-open:rotate-180 transition-transform duration-300 flex-shrink-0"
+                  >
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 9l-7 7-7-7"
+                      ></path>
+                    </svg>
+                  </span>
+                </summary>
+                <div
+                  class="px-5 pb-5 pt-1 border-t border-slate-100 text-sm text-slate-600 leading-relaxed mt-2"
+                >
+                  After the discount of 10% off the fee, which brings it down to
+                  ₹44,100, you can split it into
+                  <strong class="text-emerald-600"
+                    >6 monthly payments of ₹7,350 each</strong
+                  >, no extra costs whatsoever. You pay
+                  <strong class="text-slate-800">₹2,000 upfront</strong> to
+                  secure your place.
+                </div>
+              </details>
+
+              <!-- FAQ 5 -->
+              <details
+                class="group bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-cyan-300 transition-all duration-300"
+              >
+                <summary
+                  class="flex items-center justify-between p-5 cursor-pointer font-bold text-slate-800 focus:outline-none"
+                >
+                  <div class="flex items-center gap-3 pr-4">
+                    <div
+                      class="w-8 h-8 rounded-full bg-cyan-50 text-cyan-600 flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2.5"
+                          d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                        ></path>
+                      </svg>
+                    </div>
+                    <span
+                      class="text-sm md:text-base leading-snug group-hover:text-cyan-600 transition-colors"
+                      >Can I earn through freelancing during the course?</span
+                    >
+                  </div>
+                  <span
+                    class="text-slate-400 group-open:rotate-180 transition-transform duration-300 flex-shrink-0"
+                  >
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 9l-7 7-7-7"
+                      ></path>
+                    </svg>
+                  </span>
+                </summary>
+                <div
+                  class="px-5 pb-5 pt-1 border-t border-slate-100 text-sm text-slate-600 leading-relaxed mt-2"
+                >
+                  Yes, freelancing is actually part of what we cover on the
+                  course. We show you how to find clients on
+                  <strong class="text-cyan-600">Fiverr and Upwork</strong>, what
+                  to charge, and how to do a good job. A load of our students
+                  have actually
+                  <strong class="text-slate-800">earned up to ₹60,000</strong>
+                  while still doing the course.
+                </div>
+              </details>
+
+              <!-- FAQ 7 -->
+              <details
+                class="group bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all duration-300"
+              >
+                <summary
+                  class="flex items-center justify-between p-5 cursor-pointer font-bold text-slate-800 focus:outline-none"
+                >
+                  <div class="flex items-center gap-3 pr-4">
+                    <div
+                      class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2.5"
+                          d="M13 10V3L4 14h7v7l9-11h-7z"
+                        ></path>
+                      </svg>
+                    </div>
+                    <span
+                      class="text-sm md:text-base leading-snug group-hover:text-indigo-600 transition-colors"
+                      >Will AI make data science jobs redundant?</span
+                    >
+                  </div>
+                  <span
+                    class="text-slate-400 group-open:rotate-180 transition-transform duration-300 flex-shrink-0"
+                  >
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 9l-7 7-7-7"
+                      ></path>
+                    </svg>
+                  </span>
+                </summary>
+                <div
+                  class="px-5 pb-5 pt-1 border-t border-slate-100 text-sm text-slate-600 leading-relaxed mt-2"
+                >
+                  Not quite the opposite actually: it's making the menial bits
+                  redundant, but making the job a lot more interesting because
+                  people will be needed to design the right questions to ask an
+                  AI tool and validate it. That's why we dedicated
+                  <strong class="text-indigo-600"
+                    >Module 6 entirely to Generative AI and LLM tools</strong
+                  >.
+                </div>
+              </details>
+
+              <!-- FAQ 9 -->
+              <details
+                class="group bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-300 transition-all duration-300"
+              >
+                <summary
+                  class="flex items-center justify-between p-5 cursor-pointer font-bold text-slate-800 focus:outline-none"
+                >
+                  <div class="flex items-center gap-3 pr-4">
+                    <div
+                      class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2.5"
+                          d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
+                        ></path>
+                      </svg>
+                    </div>
+                    <span
+                      class="text-sm md:text-base leading-snug group-hover:text-emerald-600 transition-colors"
+                      >Is the certificate recognized by employers?</span
+                    >
+                  </div>
+                  <span
+                    class="text-slate-400 group-open:rotate-180 transition-transform duration-300 flex-shrink-0"
+                  >
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 9l-7 7-7-7"
+                      ></path>
+                    </svg>
+                  </span>
+                </summary>
+                <div
+                  class="px-5 pb-5 pt-1 border-t border-slate-100 text-sm text-slate-600 leading-relaxed mt-2"
+                >
+                  Yeah, the certificate is actually
+                  <strong class="text-emerald-600"
+                    >ISO-certified and issued through our partnership with
+                    eklabya, NSDC and NIELIT</strong
+                  >. That's on top of the project portfolio you'll have built up
+                  and your GitHub profile, which is what hiring managers really
+                  look at.
+                </div>
+              </details>
+            </div>
+
+            <!-- COLUMN 2 -->
+            <div class="space-y-4 lg:space-y-6">
+              <!-- FAQ 2 -->
+              <details
+                class="group bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-300 transition-all duration-300"
+              >
+                <summary
+                  class="flex items-center justify-between p-5 cursor-pointer font-bold text-slate-800 focus:outline-none"
+                >
+                  <div class="flex items-center gap-3 pr-4">
+                    <div
+                      class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2.5"
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        ></path>
+                      </svg>
+                    </div>
+                    <span
+                      class="text-sm md:text-base leading-snug group-hover:text-emerald-600 transition-colors"
+                      >How long is the course?</span
+                    >
+                  </div>
+                  <span
+                    class="text-slate-400 group-open:rotate-180 transition-transform duration-300 flex-shrink-0"
+                  >
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 9l-7 7-7-7"
+                      ></path>
+                    </svg>
+                  </span>
+                </summary>
+                <div
+                  class="px-5 pb-5 pt-1 border-t border-slate-100 text-sm text-slate-600 leading-relaxed mt-2"
+                >
+                  <strong class="text-slate-800">Six months</strong>, but don't
+                  worry we spread it out with live classes and practical project
+                  work along the way. You can choose a weekday or weekend group
+                  based on your schedule, and if you miss a session the
+                  recording is always there.
+                </div>
+              </details>
+
+              <!-- FAQ 4 -->
+              <details
+                class="group bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-cyan-300 transition-all duration-300"
+              >
+                <summary
+                  class="flex items-center justify-between p-5 cursor-pointer font-bold text-slate-800 focus:outline-none"
+                >
+                  <div class="flex items-center gap-3 pr-4">
+                    <div
+                      class="w-8 h-8 rounded-full bg-cyan-50 text-cyan-600 flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2.5"
+                          d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                        ></path>
+                      </svg>
+                    </div>
+                    <span
+                      class="text-sm md:text-base leading-snug group-hover:text-cyan-600 transition-colors"
+                      >Is placement guaranteed?</span
+                    >
+                  </div>
+                  <span
+                    class="text-slate-400 group-open:rotate-180 transition-transform duration-300 flex-shrink-0"
+                  >
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 9l-7 7-7-7"
+                      ></path>
+                    </svg>
+                  </span>
+                </summary>
+                <div
+                  class="px-5 pb-5 pt-1 border-t border-slate-100 text-sm text-slate-600 leading-relaxed mt-2"
+                >
+                  No program can give you that. What we do promise is that we'll
+                  give you <strong class="text-cyan-600">100% support</strong>:
+                  building your resume, optimizing your LinkedIn, doing mock
+                  interviews, and introducing you to our hiring network. 10
+                  students landed jobs in
+                  <strong class="text-slate-800"
+                    >Accenture, IBM, TCS and EY</strong
+                  >
+                  last December thanks to this support.
+                </div>
+              </details>
+
+              <!-- FAQ 6 -->
+              <details
+                class="group bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-300 transition-all duration-300"
+              >
+                <summary
+                  class="flex items-center justify-between p-5 cursor-pointer font-bold text-slate-800 focus:outline-none"
+                >
+                  <div class="flex items-center gap-3 pr-4">
+                    <div
+                      class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2.5"
+                          d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                        ></path>
+                      </svg>
+                    </div>
+                    <span
+                      class="text-sm md:text-base leading-snug group-hover:text-emerald-600 transition-colors"
+                      >Are classes online or offline?</span
+                    >
+                  </div>
+                  <span
+                    class="text-slate-400 group-open:rotate-180 transition-transform duration-300 flex-shrink-0"
+                  >
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 9l-7 7-7-7"
+                      ></path>
+                    </svg>
+                  </span>
+                </summary>
+                <div
+                  class="px-5 pb-5 pt-1 border-t border-slate-100 text-sm text-slate-600 leading-relaxed mt-2"
+                >
+                  They're <strong class="text-emerald-600">live online</strong>,
+                  via Zoom or Google Meet, so you don't need to worry about
+                  commuting. And we always record the sessions so you can go
+                  back and watch them if you miss one.
+                </div>
+              </details>
+
+              <!-- FAQ 8 -->
+              <details
+                class="group bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-cyan-300 transition-all duration-300"
+              >
+                <summary
+                  class="flex items-center justify-between p-5 cursor-pointer font-bold text-slate-800 focus:outline-none"
+                >
+                  <div class="flex items-center gap-3 pr-4">
+                    <div
+                      class="w-8 h-8 rounded-full bg-cyan-50 text-cyan-600 flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2.5"
+                          d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                        ></path>
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2.5"
+                          d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        ></path>
+                      </svg>
+                    </div>
+                    <span
+                      class="text-sm md:text-base leading-snug group-hover:text-cyan-600 transition-colors"
+                      >What's the real difference between this and free YouTube
+                      tutorials?</span
+                    >
+                  </div>
+                  <span
+                    class="text-slate-400 group-open:rotate-180 transition-transform duration-300 flex-shrink-0"
+                  >
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 9l-7 7-7-7"
+                      ></path>
+                    </svg>
+                  </span>
+                </summary>
+                <div
+                  class="px-5 pb-5 pt-1 border-t border-slate-100 text-sm text-slate-600 leading-relaxed mt-2"
+                >
+                  Well, for a start, if you're paying for a course you get to
+                  have some <strong class="text-slate-800">structure</strong>,
+                  you get some
+                  <strong class="text-slate-800">feedback</strong> from your
+                  tutors, and you've got some
+                  <strong class="text-slate-800">accountability</strong>, a
+                  deadline to finish your project by and all that. You can't get
+                  that from just watching free videos.
+                </div>
+              </details>
+
+              <!-- FAQ 10 -->
+              <details
+                class="group bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-red-300 transition-all duration-300"
+              >
+                <summary
+                  class="flex items-center justify-between p-5 cursor-pointer font-bold text-slate-800 focus:outline-none"
+                >
+                  <div class="flex items-center gap-3 pr-4">
+                    <div
+                      class="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center flex-shrink-0"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2.5"
+                          d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
+                        ></path>
+                      </svg>
+                    </div>
+                    <span
+                      class="text-sm md:text-base leading-snug group-hover:text-red-500 transition-colors"
+                      >Who is this programme not a good fit for?</span
+                    >
+                  </div>
+                  <span
+                    class="text-slate-400 group-open:rotate-180 transition-transform duration-300 flex-shrink-0"
+                  >
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 9l-7 7-7-7"
+                      ></path>
+                    </svg>
+                  </span>
+                </summary>
+                <div
+                  class="px-5 pb-5 pt-1 border-t border-slate-100 text-sm text-slate-600 leading-relaxed mt-2"
+                >
+                  If you're after a course that's just purely
+                  <strong class="text-red-500">self-paced</strong>—you know,
+                  something you can just do at your own speed with no real live
+                  stuff—then this isn't the course for you. This thing is a
+                  <strong class="text-slate-800"
+                    >live, cohort-based course</strong
+                  >
+                  and that's part of what makes it work.
+                </div>
+              </details>
             </div>
           </div>
         </div>
@@ -778,6 +2506,98 @@
           btn.innerHTML = originalText;
         }
       }
+    </script>
+
+    <script>
+      (function () {
+        const reviewModal = document.getElementById("review-modal");
+
+        // Fix review card icon colors, clone data attributes, and make clones clickable
+        const track = document.querySelector(".marquee-track-reviews");
+        if (track) {
+          const cards = Array.from(track.children);
+          const originals = cards.filter((c) => c.hasAttribute("data-name"));
+          const clones = cards.filter((c) => !c.hasAttribute("data-name"));
+
+          const setCardTheme = (card, color) => {
+            const safeColor = color || "emerald";
+            const iconDiv = card.querySelector("div > svg")?.parentElement;
+            if (iconDiv) {
+              iconDiv.classList.remove(
+                "text-emerald-400",
+                "text-cyan-400",
+                "text-amber-400",
+                "text-blue-400",
+              );
+              iconDiv.classList.add(`text-${safeColor}-400`);
+            }
+            card.classList.remove(
+              "hover:border-emerald-300",
+              "hover:border-cyan-300",
+              "hover:border-amber-300",
+              "hover:border-blue-300",
+            );
+            card.classList.add(`hover:border-${safeColor}-300`);
+          };
+
+          originals.forEach((card) => {
+            const color = card.getAttribute("data-color");
+            setCardTheme(card, color);
+          });
+
+          clones.forEach((clone, i) => {
+            const original = originals[i % originals.length];
+            if (!original) return;
+            [
+              "data-name",
+              "data-role",
+              "data-badge",
+              "data-review",
+              "data-color",
+            ].forEach((attr) => {
+              clone.setAttribute(attr, original.getAttribute(attr));
+            });
+            clone.setAttribute("onclick", "openReviewPopup(this)");
+            setCardTheme(clone, original.getAttribute("data-color"));
+          });
+        }
+
+        // Wire up .open-modal buttons to the lead modal
+        document.querySelectorAll(".open-modal").forEach((btn) => {
+          btn.addEventListener("click", openModal);
+        });
+
+        // Lock body scroll when review popup is open
+        if (
+          typeof openReviewPopup === "function" &&
+          typeof closeReviewPopup === "function"
+        ) {
+          const originalOpen = openReviewPopup;
+          const originalClose = closeReviewPopup;
+          const leadModalEl = document.getElementById("leadModal");
+          openReviewPopup = function (el) {
+            document.body.style.overflow = "hidden";
+            originalOpen(el);
+          };
+          closeReviewPopup = function () {
+            originalClose();
+            if (!leadModalEl || leadModalEl.classList.contains("hidden")) {
+              document.body.style.overflow = "";
+            }
+          };
+        }
+
+        // Close review modal with Escape
+        document.addEventListener("keydown", function (e) {
+          if (
+            e.key === "Escape" &&
+            reviewModal &&
+            reviewModal.classList.contains("show")
+          ) {
+            closeReviewPopup();
+          }
+        });
+      })();
     </script>
   </body>
 </html>
