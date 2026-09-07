@@ -2697,8 +2697,8 @@
           const result = await res.json();
 
           if (res.ok && result.success) {
-            if (success) success.classList.remove("hidden");
-            form.reset();
+            window.location.href = "/thank-you.html";
+            return;
           } else {
             const msg =
               result.message ||
